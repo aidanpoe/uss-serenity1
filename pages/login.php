@@ -10,24 +10,39 @@ if ($_POST) {
     if ($username && $password) {
         try {
             $pdo = getConnection();
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+            $stmt = $pdo->prepare("SELECT u.*, r.first_name as roster_first_name, r.last_name as roster_last_name, r.rank, r.position 
+                                  FROM users u 
+                                  LEFT JOIN roster r ON u.roster_id = r.id 
+                                  WHERE u.username = ? AND u.active = 1");
             $stmt->execute([$username]);
             $user = $stmt->fetch();
             
             if ($user && password_verify($password, $user['password'])) {
+                // Update last login
+                $update_stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+                $update_stmt->execute([$user['id']]);
+                
+                // Set session variables
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['department'] = $user['department'];
-                $_SESSION['first_name'] = $user['first_name'];
-                $_SESSION['last_name'] = $user['last_name'];
+                $_SESSION['first_name'] = $user['roster_first_name'] ?: $user['first_name'];
+                $_SESSION['last_name'] = $user['roster_last_name'] ?: $user['last_name'];
                 $_SESSION['rank'] = $user['rank'] ?? '';
                 $_SESSION['position'] = $user['position'] ?? '';
                 $_SESSION['roster_id'] = $user['roster_id'] ?? null;
+                $_SESSION['role'] = $user['department']; // For permission checking
                 
-                header('Location: ../index.php');
-                exit();
+                // Check if password change is required
+                if ($user['force_password_change']) {
+                    header('Location: profile.php');
+                    exit();
+                } else {
+                    header('Location: ../index.php');
+                    exit();
+                }
             } else {
-                $error = 'Invalid credentials. Access denied.';
+                $error = 'Invalid credentials or account is deactivated. Access denied.';
             }
         } catch (Exception $e) {
             $error = 'System error. Please contact system administrator.';

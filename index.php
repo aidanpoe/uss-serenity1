@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/config.php';
+require_once 'steamauth/steamauth.php';
 ?>
 <!DOCTYPE html>
 <html>
@@ -115,7 +116,17 @@ require_once 'includes/config.php';
 								<?php if (!empty($_SESSION['position'])): ?>
 								<p>Position: <?php echo htmlspecialchars($_SESSION['position']); ?></p>
 								<?php endif; ?>
-								<p><a href="pages/logout.php" style="color: var(--red);">Logout</a></p>
+								<div style="margin-top: 1rem;">
+									<a href="pages/profile.php" style="color: var(--blue); margin-right: 1rem;">Edit Profile</a>
+									<?php if (isset($_SESSION['position']) && $_SESSION['position'] === 'Captain'): ?>
+									<a href="pages/user_management.php" style="color: var(--yellow); margin-right: 1rem;">User Management</a>
+									<?php endif; ?>
+									<?php if (isset($_SESSION['steamid'])): ?>
+									<a href="steamauth/steamauth.php?logout" style="color: var(--red);">Logout</a>
+									<?php else: ?>
+									<a href="pages/logout.php" style="color: var(--red);">Logout</a>
+									<?php endif; ?>
+								</div>
 							</div>
 						<?php endif; ?>
 						
@@ -148,15 +159,18 @@ require_once 'includes/config.php';
 							</div>
 						</div>
 						
-						<?php if (!isLoggedIn()): ?>
+						<?php if (!isLoggedIn() && !isset($_SESSION['steamid'])): ?>
 						<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 10px; margin: 2rem 0; border: 2px solid var(--african-violet);">
 							<h4>Staff Access</h4>
 							<p>Access to administrative functions requires authentication.</p>
-							<div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+							<div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
 								<button onclick="playSoundAndRedirect('audio2', 'pages/login.php')" style="background-color: var(--african-violet); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.2rem;">LOGIN</button>
 								<button onclick="playSoundAndRedirect('audio2', 'pages/register.php')" style="background-color: var(--blue); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.2rem;">CREATE ACCOUNT</button>
+								<div style="margin-left: 1rem;">
+									<?php loginbutton("rectangle"); ?>
+								</div>
 							</div>
-							<p style="margin-top: 1rem; font-size: 0.9rem; color: var(--bluey);">New crew members can create an account to access department systems.</p>
+							<p style="margin-top: 1rem; font-size: 0.9rem; color: var(--bluey);">New crew members can create an account to access department systems or login with Steam.</p>
 						</div>
 						<?php endif; ?>
 						
