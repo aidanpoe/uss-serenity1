@@ -42,6 +42,11 @@ try {
         $params[] = $filter_department;
     }
     
+    if (!empty($filter_status)) {
+        $where_conditions[] = "r.status = ?";
+        $params[] = $filter_status;
+    }
+    
     // Build the main query
     $where_clause = !empty($where_conditions) ? "WHERE " . implode(" AND ", $where_conditions) : "";
     
@@ -49,13 +54,13 @@ try {
     $stmt = $pdo->prepare("
         SELECT r.*, 
                COUNT(mr.id) as total_medical_records,
-               COUNT(CASE WHEN mr.status != 'Resolved' THEN 1 END) as open_medical_records,
+               COUNT(CASE WHEN mr.status != 'Resolved' AND mr.status != 'Deceased' THEN 1 END) as open_medical_records,
                MAX(mr.created_at) as last_medical_record
         FROM roster r 
         LEFT JOIN medical_records mr ON r.id = mr.roster_id 
         $where_clause
         GROUP BY r.id
-        ORDER BY r.last_name, r.first_name
+        ORDER BY r.status, r.last_name, r.first_name
     ");
     $stmt->execute($params);
     $patients = $stmt->fetchAll();
@@ -72,6 +77,9 @@ try {
     $stmt = $pdo->prepare("SELECT DISTINCT department FROM roster ORDER BY department");
     $stmt->execute();
     $department_options = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // Get status options
+    $status_options = ['Active', 'Deceased', 'Missing', 'Transferred'];
     
 } catch (Exception $e) {
     $error = "Database error: " . $e->getMessage();
@@ -111,6 +119,18 @@ try {
 			background: rgba(85, 102, 255, 0.1);
 			border-left-color: var(--green);
 		}
+		.patient-card.deceased {
+			border-left-color: var(--red);
+			background: rgba(204, 68, 68, 0.1);
+		}
+		.patient-card.missing {
+			border-left-color: var(--orange);
+			background: rgba(255, 165, 0, 0.1);
+		}
+		.patient-card.transferred {
+			border-left-color: var(--bluey);
+			background: rgba(102, 153, 255, 0.1);
+		}
 		.patient-grid {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -127,6 +147,10 @@ try {
 		.status-green { background: var(--green); color: black; }
 		.status-yellow { background: var(--orange); color: black; }
 		.status-red { background: var(--red); color: black; }
+		.status-active { background: var(--green); color: black; }
+		.status-deceased { background: var(--red); color: white; }
+		.status-missing { background: var(--orange); color: black; }
+		.status-transferred { background: var(--blue); color: black; }
 		.search-stats {
 			background: rgba(0,0,0,0.5);
 			padding: 1rem;
@@ -252,6 +276,19 @@ try {
 										<?php endforeach; ?>
 									</select>
 								</div>
+								
+								<!-- Status Filter -->
+								<div>
+									<label style="color: var(--blue); font-weight: bold;">Status:</label>
+									<select name="filter_status" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue); border-radius: 5px;">
+										<option value="">All Status</option>
+										<?php foreach ($status_options as $status): ?>
+										<option value="<?php echo htmlspecialchars($status); ?>" <?php echo ($filter_status === $status) ? 'selected' : ''; ?>>
+											<?php echo htmlspecialchars($status); ?>
+										</option>
+										<?php endforeach; ?>
+									</select>
+								</div>
 							</div>
 							
 							<div style="text-align: center; margin: 1.5rem 0;">
@@ -268,13 +305,14 @@ try {
 					<!-- Search Results -->
 					<div class="search-stats">
 						<h4>Search Results: <?php echo count($patients); ?> patients found</h4>
-						<?php if (!empty($search_name) || !empty($filter_species) || !empty($filter_rank) || !empty($filter_department)): ?>
+						<?php if (!empty($search_name) || !empty($filter_species) || !empty($filter_rank) || !empty($filter_department) || !empty($filter_status)): ?>
 						<p style="color: var(--orange);">
 							Active filters: 
 							<?php if (!empty($search_name)): ?>Name: "<?php echo htmlspecialchars($search_name); ?>" <?php endif; ?>
 							<?php if (!empty($filter_species)): ?>Species: <?php echo htmlspecialchars($filter_species); ?> <?php endif; ?>
 							<?php if (!empty($filter_rank)): ?>Rank: <?php echo htmlspecialchars($filter_rank); ?> <?php endif; ?>
 							<?php if (!empty($filter_department)): ?>Department: <?php echo htmlspecialchars($filter_department); ?> <?php endif; ?>
+							<?php if (!empty($filter_status)): ?>Status: <?php echo htmlspecialchars($filter_status); ?> <?php endif; ?>
 						</p>
 						<?php endif; ?>
 					</div>
@@ -288,15 +326,18 @@ try {
 					<?php else: ?>
 					<div class="patient-grid">
 						<?php foreach ($patients as $patient): ?>
-						<div class="patient-card">
+						<div class="patient-card <?php echo strtolower($patient['status'] ?? 'active'); ?>">
 							<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
 								<div>
 									<?php if ($patient['image_path'] && file_exists('../' . $patient['image_path'])): ?>
-									<img src="../<?php echo htmlspecialchars($patient['image_path']); ?>" alt="<?php echo htmlspecialchars($patient['first_name'] . ' ' . $patient['last_name']); ?>" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; float: left; margin-right: 1rem; border: 2px solid var(--blue);">
+									<img src="../<?php echo htmlspecialchars($patient['image_path']); ?>" alt="<?php echo htmlspecialchars($patient['first_name'] . ' ' . $patient['last_name']); ?>" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; float: left; margin-right: 1rem; border: 2px solid <?php echo ($patient['status'] === 'Deceased') ? 'var(--red)' : 'var(--blue)'; ?>;">
 									<?php endif; ?>
 									<div>
-										<h4 style="color: var(--blue); margin: 0;">
+										<h4 style="color: <?php echo ($patient['status'] === 'Deceased') ? 'var(--red)' : 'var(--blue)'; ?>; margin: 0;">
 											<?php echo htmlspecialchars($patient['rank'] . ' ' . $patient['first_name'] . ' ' . $patient['last_name']); ?>
+											<?php if ($patient['status'] === 'Deceased'): ?>
+											<span style="color: var(--red); font-size: 0.8rem;">💀</span>
+											<?php endif; ?>
 										</h4>
 										<p style="margin: 0.25rem 0; color: var(--orange);">
 											<?php echo htmlspecialchars($patient['species']); ?> - <?php echo htmlspecialchars($patient['department']); ?>
@@ -309,16 +350,24 @@ try {
 									</div>
 								</div>
 								
-								<!-- Medical Status Indicators -->
+								<!-- Status and Medical Indicators -->
 								<div style="text-align: right;">
-									<?php if ($patient['total_medical_records'] == 0): ?>
-									<span class="medical-status status-green">Clean Record</span>
-									<?php elseif ($patient['open_medical_records'] == 0): ?>
-									<span class="medical-status status-green">All Resolved</span>
-									<?php elseif ($patient['open_medical_records'] <= 2): ?>
-									<span class="medical-status status-yellow"><?php echo $patient['open_medical_records']; ?> Open</span>
+									<span class="medical-status status-<?php echo strtolower($patient['status'] ?? 'active'); ?>">
+										<?php echo $patient['status'] ?? 'Active'; ?>
+									</span>
+									<br>
+									<?php if ($patient['status'] !== 'Deceased'): ?>
+										<?php if ($patient['total_medical_records'] == 0): ?>
+										<span class="medical-status status-green">Clean Record</span>
+										<?php elseif ($patient['open_medical_records'] == 0): ?>
+										<span class="medical-status status-green">All Resolved</span>
+										<?php elseif ($patient['open_medical_records'] <= 2): ?>
+										<span class="medical-status status-yellow"><?php echo $patient['open_medical_records']; ?> Open</span>
+										<?php else: ?>
+										<span class="medical-status status-red"><?php echo $patient['open_medical_records']; ?> Open</span>
+										<?php endif; ?>
 									<?php else: ?>
-									<span class="medical-status status-red"><?php echo $patient['open_medical_records']; ?> Open</span>
+										<span class="medical-status status-deceased">Final Record</span>
 									<?php endif; ?>
 								</div>
 							</div>
@@ -344,13 +393,18 @@ try {
 								</div>
 								
 								<div style="text-align: center;">
-									<a href="medical_history.php?crew_id=<?php echo $patient['id']; ?>" style="background-color: var(--blue); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; text-decoration: none; margin: 0.25rem; display: inline-block; font-size: 0.9rem;">
-										📋 View Medical History
+									<a href="medical_history.php?crew_id=<?php echo $patient['id']; ?>" style="background-color: <?php echo ($patient['status'] === 'Deceased') ? 'var(--red)' : 'var(--blue)'; ?>; color: <?php echo ($patient['status'] === 'Deceased') ? 'white' : 'black'; ?>; border: none; padding: 0.5rem 1rem; border-radius: 5px; text-decoration: none; margin: 0.25rem; display: inline-block; font-size: 0.9rem;">
+										<?php echo ($patient['status'] === 'Deceased') ? '💀 Final Medical Record' : '📋 View Medical History'; ?>
 									</a>
-									<?php if ($patient['open_medical_records'] > 0): ?>
+									<?php if ($patient['status'] !== 'Deceased' && $patient['open_medical_records'] > 0): ?>
 									<a href="med_sci.php#patient-<?php echo $patient['id']; ?>" style="background-color: var(--red); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; text-decoration: none; margin: 0.25rem; display: inline-block; font-size: 0.9rem;">
 										⚠️ View Open Cases
 									</a>
+									<?php endif; ?>
+									<?php if ($patient['status'] === 'Deceased' && $patient['date_of_death']): ?>
+									<div style="margin-top: 0.5rem; color: var(--red); font-size: 0.8rem;">
+										Deceased: <?php echo date('M j, Y', strtotime($patient['date_of_death'])); ?>
+									</div>
 									<?php endif; ?>
 								</div>
 							</div>
