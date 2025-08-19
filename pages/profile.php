@@ -14,6 +14,17 @@ if (!isLoggedIn()) {
 $success = '';
 $error = '';
 
+// Handle character switching
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'switch_character') {
+    if (isset($_POST['character_id'])) {
+        if (switchCharacter($_POST['character_id'])) {
+            $success = "Switched to character successfully!";
+        } else {
+            $error = "Failed to switch character. Please try again.";
+        }
+    }
+}
+
 try {
     $pdo = getConnection();
     
@@ -23,16 +34,14 @@ try {
     }
     
     // Get current user data with roster information
-    $stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.species, r.department as roster_department, r.position, r.image_path 
-                          FROM users u 
-                          LEFT JOIN roster r ON u.id = r.user_id 
-                          WHERE u.id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $current_user = $stmt->fetch();
+    $current_user = getCurrentCharacter();
     
     if (!$current_user) {
-        throw new Exception("User not found with ID: " . $_SESSION['user_id']);
+        throw new Exception("No active character found. Please create a character first.");
     }
+    
+    // Get all characters for this user
+    $user_characters = getUserCharacters();
     
     // Handle image upload
     if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_image') {
@@ -74,12 +83,7 @@ try {
                     
                     $success = "Profile image updated successfully!";
                     // Refresh user data
-                    $stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.species, r.department as roster_department, r.position, r.image_path 
-                                          FROM users u 
-                                          LEFT JOIN roster r ON u.id = r.user_id 
-                                          WHERE u.id = ?");
-                    $stmt->execute([$_SESSION['user_id']]);
-                    $current_user = $stmt->fetch();
+                    $current_user = getCurrentCharacter();
                 } else {
                     throw new Exception("Failed to save uploaded file");
                 }
@@ -310,6 +314,64 @@ try {
 
 					<h1>Personnel Profile Settings</h1>
 					<h2><?php echo htmlspecialchars(($current_user['rank'] ? $current_user['rank'] . ' ' : '') . ($current_user['first_name'] ? $current_user['first_name'] . ' ' . $current_user['last_name'] : $current_user['username'])); ?></h2>
+					
+					<!-- Character Selection and Management -->
+					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+						<h3>Character Management</h3>
+						<p style="color: var(--bluey); margin-bottom: 1rem;">
+							You have <?php echo count($user_characters); ?>/5 characters. You can create multiple crew roster profiles and switch between them.
+						</p>
+						
+						<?php if (count($user_characters) > 1): ?>
+						<div style="margin-bottom: 2rem;">
+							<h4>Switch Character:</h4>
+							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+								<?php foreach ($user_characters as $character): ?>
+								<div style="padding: 1rem; border-radius: 10px; border: 2px solid <?php echo $character['is_current_character'] ? 'var(--gold)' : 'var(--bluey)'; ?>; background: rgba(0,0,0,0.3);">
+									<div style="display: flex; gap: 1rem; align-items: center;">
+										<?php if ($character['image_path'] && file_exists('../' . $character['image_path'])): ?>
+										<img src="../<?php echo htmlspecialchars($character['image_path']); ?>" style="width: 60px; height: 60px; border-radius: 5px; object-fit: cover;">
+										<?php else: ?>
+										<div style="width: 60px; height: 60px; background: #333; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: #666; font-size: 0.8rem;">No Photo</div>
+										<?php endif; ?>
+										<div style="flex: 1;">
+											<h5 style="margin: 0; color: <?php echo $character['is_current_character'] ? 'var(--gold)' : 'white'; ?>;">
+												<?php echo htmlspecialchars($character['character_name']); ?>
+												<?php if ($character['is_current_character']): ?>
+												<span style="color: var(--gold); font-size: 0.8rem;">(Current)</span>
+												<?php endif; ?>
+											</h5>
+											<p style="margin: 0.25rem 0; color: var(--bluey); font-size: 0.9rem;">
+												<?php echo htmlspecialchars($character['rank'] . ' ' . $character['first_name'] . ' ' . $character['last_name']); ?>
+											</p>
+											<p style="margin: 0; color: #ccc; font-size: 0.8rem;">
+												<?php echo htmlspecialchars($character['department'] . ' - ' . $character['position']); ?>
+											</p>
+										</div>
+										<?php if (!$character['is_current_character']): ?>
+										<form method="POST" style="margin: 0;">
+											<input type="hidden" name="action" value="switch_character">
+											<input type="hidden" name="character_id" value="<?php echo $character['id']; ?>">
+											<button type="submit" style="background-color: var(--blue); color: white; border: none; padding: 0.5rem 1rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">Switch</button>
+										</form>
+										<?php endif; ?>
+									</div>
+								</div>
+								<?php endforeach; ?>
+							</div>
+						</div>
+						<?php endif; ?>
+						
+						<?php if (canCreateCharacter()): ?>
+						<div style="margin-top: 1rem;">
+							<a href="create_character.php" style="background-color: var(--green); color: black; padding: 0.75rem 1.5rem; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block;">
+								+ Create New Character (<?php echo count($user_characters); ?>/5)
+							</a>
+						</div>
+						<?php else: ?>
+						<p style="color: var(--orange); font-style: italic;">You have reached the maximum of 5 characters per Steam account.</p>
+						<?php endif; ?>
+					</div>
 					
 					<!-- Current Profile Display -->
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">

@@ -18,6 +18,8 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 ### 3. Update Database
 1. Run the database update script by visiting: `http://yourdomain.com/setup_steam.php`
 2. This adds the necessary columns to support Steam IDs and user management
+3. **NEW:** Run the multi-character setup: `http://yourdomain.com/setup_multi_character.php`
+4. This enables the multi-character system (up to 5 characters per Steam account)
 
 ### 4. How It Works
 
@@ -46,6 +48,8 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 ✅ **Steam-Only Authentication** - Secure login exclusively via Steam  
 ✅ **Integrated Roster Creation** - Crew roster profile created during Steam registration  
 ✅ **Mandatory Character Creation** - All users must create their character during signup  
+✅ **Multi-Character System** - Up to 5 different crew profiles per Steam account  
+✅ **Character Switching** - Switch between characters from profile page  
 ✅ **Department-Based Permissions** - Access groups automatically assigned based on department selection  
 ✅ **Rank Restrictions** - Command ranks (Captain, Commander) restricted to admin assignment  
 ✅ **User Profile Management** - View Steam account info and roster details  
@@ -62,7 +66,8 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 
 **New Pages:**
 - `pages/steam_register.php` - Steam user registration with mandatory roster creation
-- `pages/profile.php` - User profile management (Steam-focused)
+- `pages/profile.php` - User profile management (Steam-focused) with character switching
+- `pages/create_character.php` - Create additional crew roster profiles
 - `pages/user_management.php` - Captain admin interface
 
 **Removed Pages:**
@@ -74,6 +79,8 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 - `department` column in users table (stores permission groups: MED/SCI, ENG/OPS, SEC/TAC)
 - `active`, `last_login` columns for user management
 - `user_id` column in roster table (links Steam accounts to crew profiles)
+- `active_character_id` column in users table (tracks current active character)
+- `character_name`, `is_active`, `created_at` columns in roster table (multi-character support)
 - Password column optional (Steam authentication only)
 
 ### 7. File Structure
@@ -88,10 +95,12 @@ steamauth/
 pages/
 ├── steam_register.php   # Steam user registration
 ├── profile.php         # User profile management
+├── create_character.php # Create additional characters
 └── user_management.php  # Captain admin interface
 
 Database Scripts:
 ├── update_steam_integration.php    # Database update script
+├── setup_multi_character.php       # Multi-character system setup
 └── update_user_management.php      # User management setup
 ```
 

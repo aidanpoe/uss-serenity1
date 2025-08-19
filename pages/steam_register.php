@@ -91,8 +91,14 @@ if ($_POST) {
             $user_id = $pdo->lastInsertId();
             
             // Create roster entry and link to user
-            $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$rank, $first_name, $last_name, $species, $department, $position, $user_id]);
+            $character_name = $first_name . ' ' . $last_name;
+            $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, user_id, character_name, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())");
+            $stmt->execute([$rank, $first_name, $last_name, $species, $department, $position, $user_id, $character_name]);
+            $character_id = $pdo->lastInsertId();
+            
+            // Set this as the user's active character
+            $stmt = $pdo->prepare("UPDATE users SET active_character_id = ? WHERE id = ?");
+            $stmt->execute([$character_id, $user_id]);
             
             $pdo->commit();
             

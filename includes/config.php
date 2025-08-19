@@ -38,9 +38,105 @@ function isLoggedIn() {
     return isset($_SESSION['user_id']) && isset($_SESSION['steamid']);
 }
 
-// Check user department
+// Get current active character data
+function getCurrentCharacter() {
+    if (!isLoggedIn()) return null;
+    
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->prepare("
+            SELECT u.*, r.id as character_id, r.rank, r.first_name, r.last_name, r.species, 
+                   r.department as roster_department, r.position, r.image_path, r.character_name,
+                   r.is_active, r.created_at
+            FROM users u 
+            LEFT JOIN roster r ON u.active_character_id = r.id 
+            WHERE u.id = ?
+        ");
+        $stmt->execute([$_SESSION['user_id']]);
+        return $stmt->fetch();
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+// Get all characters for a user
+function getUserCharacters($user_id = null) {
+    if (!$user_id) {
+        if (!isLoggedIn()) return [];
+        $user_id = $_SESSION['user_id'];
+    }
+    
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->prepare("
+            SELECT r.*, 
+                   CASE WHEN u.active_character_id = r.id THEN 1 ELSE 0 END as is_current_character
+            FROM roster r 
+            JOIN users u ON r.user_id = u.id
+            WHERE r.user_id = ? AND r.is_active = 1
+            ORDER BY r.created_at ASC
+        ");
+        $stmt->execute([$user_id]);
+        return $stmt->fetchAll();
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+// Switch active character
+function switchCharacter($character_id) {
+    if (!isLoggedIn()) return false;
+    
+    try {
+        $pdo = getConnection();
+        
+        // Verify the character belongs to the current user
+        $stmt = $pdo->prepare("SELECT r.*, r.department as roster_department FROM roster r WHERE r.id = ? AND r.user_id = ? AND r.is_active = 1");
+        $stmt->execute([$character_id, $_SESSION['user_id']]);
+        $character = $stmt->fetch();
+        
+        if (!$character) return false;
+        
+        // Update active character
+        $stmt = $pdo->prepare("UPDATE users SET active_character_id = ? WHERE id = ?");
+        $stmt->execute([$character_id, $_SESSION['user_id']]);
+        
+        // Update session variables with new character data
+        $_SESSION['first_name'] = $character['first_name'];
+        $_SESSION['last_name'] = $character['last_name'];
+        $_SESSION['rank'] = $character['rank'];
+        $_SESSION['position'] = $character['position'];
+        $_SESSION['department'] = $character['roster_department'];
+        
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+// Check if user can create more characters (max 5)
+function canCreateCharacter($user_id = null) {
+    if (!$user_id) {
+        if (!isLoggedIn()) return false;
+        $user_id = $_SESSION['user_id'];
+    }
+    
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->prepare("SELECT COUNT(*) as character_count FROM roster WHERE user_id = ? AND is_active = 1");
+        $stmt->execute([$user_id]);
+        $result = $stmt->fetch();
+        
+        return ($result['character_count'] < 5);
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+// Check user department (from current active character)
 function getUserDepartment() {
-    return $_SESSION['department'] ?? null;
+    $character = getCurrentCharacter();
+    return $character['roster_department'] ?? $_SESSION['department'] ?? null;
 }
 
 // Check if user has specific permission
