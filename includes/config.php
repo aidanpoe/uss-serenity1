@@ -224,33 +224,160 @@ function requirePermission($required_department) {
 
 // Garry's Mod Server Query Functions
 function queryGmodServer($ip, $port, $timeout = 5) {
+    // First try: Standard Source Engine player query
+    $result = querySourceEngine($ip, $port, $timeout);
+    if ($result !== false) {
+        return $result;
+    }
+    
+    // Second try: Basic server info query
+    $result = queryServerInfo($ip, $port, $timeout);
+    if ($result !== false) {
+        return $result;
+    }
+    
+    // Third try: Simple socket connection test
+    $result = testServerConnection($ip, $port, $timeout);
+    return $result;
+}
+
+function querySourceEngine($ip, $port, $timeout) {
     try {
-        // Create socket
         $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
         if (!$socket) {
             return false;
         }
         
-        // Set timeout
         socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => $timeout, 'usec' => 0));
         socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, array('sec' => $timeout, 'usec' => 0));
         
-        // Source Engine query packet for player info
-        $packet = "\xFF\xFF\xFF\xFF\x55\xFF\xFF\xFF\xFF";
+        // A2S_PLAYER query
+        $challenge = "\xFF\xFF\xFF\xFF\x55\xFF\xFF\xFF\xFF";
+        socket_sendto($socket, $challenge, strlen($challenge), 0, $ip, $port);
         
-        // Send packet
-        socket_sendto($socket, $packet, strlen($packet), 0, $ip, $port);
-        
-        // Read response
         $response = '';
         $from = '';
         $fromPort = 0;
-        socket_recvfrom($socket, $response, 4096, 0, $from, $fromPort);
+        $bytes = socket_recvfrom($socket, $response, 4096, 0, $from, $fromPort);
         
         socket_close($socket);
         
-        if (strlen($response) > 4) {
+        if ($bytes > 4) {
             return parseGmodResponse($response);
+        }
+        
+        return false;
+        
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function queryServerInfo($ip, $port, $timeout) {
+    try {
+        $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if (!$socket) {
+            return false;
+        }
+        
+        socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => $timeout, 'usec' => 0));
+        socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, array('sec' => $timeout, 'usec' => 0));
+        
+        // A2S_INFO query
+        $infoQuery = "\xFF\xFF\xFF\xFF\x54Source Engine Query\x00";
+        socket_sendto($socket, $infoQuery, strlen($infoQuery), 0, $ip, $port);
+        
+        $response = '';
+        $from = '';
+        $fromPort = 0;
+        $bytes = socket_recvfrom($socket, $response, 4096, 0, $from, $fromPort);
+        
+        socket_close($socket);
+        
+        if ($bytes > 4) {
+            return parseServerInfo($response);
+        }
+        
+        return false;
+        
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function testServerConnection($ip, $port, $timeout) {
+    try {
+        $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if (!$socket) {
+            return false;
+        }
+        
+        socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => $timeout, 'usec' => 0));
+        socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, array('sec' => $timeout, 'usec' => 0));
+        
+        // Simple ping
+        $ping = "ping";
+        $result = socket_sendto($socket, $ping, strlen($ping), 0, $ip, $port);
+        
+        socket_close($socket);
+        
+        if ($result !== false) {
+            // Server is reachable but doesn't respond to queries
+            return ['server_online' => true, 'query_supported' => false];
+        }
+        
+        return false;
+        
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function parseServerInfo($response) {
+    // Parse A2S_INFO response to get player count
+    if (strlen($response) < 6) {
+        return false;
+    }
+    
+    // Skip header and check response type
+    if (ord($response[4]) !== 0x49) { // 'I' for info
+        return false;
+    }
+    
+    try {
+        $offset = 6; // Skip header and protocol
+        
+        // Skip server name (null-terminated string)
+        while ($offset < strlen($response) && ord($response[$offset]) !== 0) {
+            $offset++;
+        }
+        $offset++; // Skip null terminator
+        
+        // Skip map name (null-terminated string)
+        while ($offset < strlen($response) && ord($response[$offset]) !== 0) {
+            $offset++;
+        }
+        $offset++; // Skip null terminator
+        
+        // Skip folder name (null-terminated string)
+        while ($offset < strlen($response) && ord($response[$offset]) !== 0) {
+            $offset++;
+        }
+        $offset++; // Skip null terminator
+        
+        // Skip game name (null-terminated string)
+        while ($offset < strlen($response) && ord($response[$offset]) !== 0) {
+            $offset++;
+        }
+        $offset++; // Skip null terminator
+        
+        // Skip app ID (2 bytes)
+        $offset += 2;
+        
+        // Get player count (1 byte)
+        if ($offset < strlen($response)) {
+            $playerCount = ord($response[$offset]);
+            return ['count' => $playerCount, 'players' => [], 'info_only' => true];
         }
         
         return false;
@@ -313,16 +440,75 @@ function getGmodPlayersOnline() {
     $serverIP = '46.4.12.78';
     $serverPort = 27015;
     
-    $players = queryGmodServer($serverIP, $serverPort);
+    $result = queryGmodServer($serverIP, $serverPort);
     
-    if ($players === false) {
-        return ['error' => 'Unable to connect to server'];
+    if ($result === false) {
+        return ['error' => 'Server unreachable or not responding to queries'];
     }
     
-    return [
-        'players' => $players,
-        'count' => count($players),
-        'server' => $serverIP . ':' . $serverPort
-    ];
+    // Handle different response types
+    if (isset($result['server_online']) && $result['server_online'] && !$result['query_supported']) {
+        return [
+            'error' => 'Server online but queries disabled',
+            'server_reachable' => true
+        ];
+    }
+    
+    if (isset($result['info_only']) && $result['info_only']) {
+        return [
+            'players' => [],
+            'count' => $result['count'],
+            'server' => $serverIP . ':' . $serverPort,
+            'info_only' => true
+        ];
+    }
+    
+    if (isset($result['count'])) {
+        return [
+            'players' => $result['players'] ?? [],
+            'count' => $result['count'],
+            'server' => $serverIP . ':' . $serverPort
+        ];
+    }
+    
+    return ['error' => 'Invalid server response'];
+}
+
+// Alternative function using cURL for HTTP-based server APIs (if available)
+function getGmodPlayersViaCurl() {
+    $serverIP = '46.4.12.78';
+    $serverPort = 27015;
+    
+    // Some servers provide HTTP APIs on different ports
+    $httpPorts = [80, 8080, 27016, 27017];
+    
+    foreach ($httpPorts as $port) {
+        $url = "http://{$serverIP}:{$port}/api/players";
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        if ($httpCode === 200 && $response) {
+            $data = json_decode($response, true);
+            if ($data && isset($data['players'])) {
+                return [
+                    'players' => $data['players'],
+                    'count' => count($data['players']),
+                    'server' => $serverIP . ':' . $serverPort,
+                    'method' => 'http_api'
+                ];
+            }
+        }
+    }
+    
+    return false;
 }
 ?>
