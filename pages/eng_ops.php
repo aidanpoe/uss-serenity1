@@ -52,12 +52,13 @@ try {
     $stmt->execute();
     $dept_heads = $stmt->fetchAll();
     
-    // Get fault reports for backend
+    // Get fault reports for backend (excluding resolved cases)
     if (hasPermission('ENG/OPS')) {
         $stmt = $pdo->prepare("
             SELECT fr.*, r.first_name, r.last_name, r.rank 
             FROM fault_reports fr 
             LEFT JOIN roster r ON fr.reported_by_roster_id = r.id 
+            WHERE fr.status != 'Resolved'
             ORDER BY fr.status ASC, fr.created_at DESC
         ");
         $stmt->execute();
@@ -219,8 +220,15 @@ try {
 					<?php if (hasPermission('ENG/OPS')): ?>
 					<!-- Engineering Staff Backend -->
 					<div style="background: rgba(0,0,0,0.7); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--orange);">
-						<h3>Engineering Work Orders</h3>
-						<p style="color: var(--orange);"><em>Engineering/Operations Staff Access Only</em></p>
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+							<div>
+								<h3>Engineering Work Orders</h3>
+								<p style="color: var(--orange);"><em>Engineering/Operations Staff Access Only</em></p>
+							</div>
+							<button onclick="playSoundAndRedirect('audio2', 'engineering_resolved.php')" style="background-color: var(--orange); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-size: 0.9rem;">
+								View Resolved Faults
+							</button>
+						</div>
 						
 						<div style="max-height: 600px; overflow-y: auto; border: 1px solid var(--orange); border-radius: 5px; padding: 1rem; margin: 1rem 0; background: rgba(0,0,0,0.3);">
 							<?php foreach ($fault_reports as $fault): ?>

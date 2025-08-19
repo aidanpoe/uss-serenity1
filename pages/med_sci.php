@@ -64,12 +64,13 @@ try {
     $stmt->execute();
     $dept_heads = $stmt->fetchAll();
     
-    // Get medical records for backend
+    // Get medical records for backend (excluding resolved cases)
     if (hasPermission('MED/SCI')) {
         $stmt = $pdo->prepare("
             SELECT mr.*, r.first_name, r.last_name, r.rank 
             FROM medical_records mr 
             JOIN roster r ON mr.roster_id = r.id 
+            WHERE mr.status != 'Resolved'
             ORDER BY mr.created_at DESC
         ");
         $stmt->execute();
@@ -230,7 +231,12 @@ try {
 						<h3>Medical Records Management</h3>
 						<p style="color: var(--blue);"><em>Medical/Science Staff Access Only</em></p>
 						
-						<h4>Open Medical Cases</h4>
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+							<h4>Open Medical Cases</h4>
+							<button onclick="playSoundAndRedirect('audio2', 'medical_resolved.php')" style="background-color: var(--blue); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-size: 0.9rem;">
+								View Resolved Cases
+							</button>
+						</div>
 						<div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--blue); border-radius: 5px; padding: 1rem; margin: 1rem 0; background: rgba(0,0,0,0.3);">
 							<?php foreach ($medical_records as $record): ?>
 							<div style="border-bottom: 1px solid var(--gray); padding: 1rem 0;">

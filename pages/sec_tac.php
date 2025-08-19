@@ -70,12 +70,13 @@ try {
     $stmt->execute();
     $dept_heads = $stmt->fetchAll();
     
-    // Get security reports for backend
+    // Get security reports for backend (excluding resolved cases)
     if (hasPermission('SEC/TAC')) {
         $stmt = $pdo->prepare("
             SELECT sr.*, r.first_name, r.last_name, r.rank 
             FROM security_reports sr 
             LEFT JOIN roster r ON sr.involved_roster_id = r.id 
+            WHERE sr.status != 'Resolved'
             ORDER BY sr.status ASC, sr.created_at DESC
         ");
         $stmt->execute();
@@ -250,7 +251,12 @@ try {
 						</div>
 						
 						<!-- Security Incident Management -->
-						<h4>Security Incident Reports</h4>
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+							<h4>Security Incident Reports</h4>
+							<button onclick="playSoundAndRedirect('audio2', 'security_resolved.php')" style="background-color: var(--gold); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-size: 0.9rem;">
+								View Resolved Cases
+							</button>
+						</div>
 						<div style="max-height: 600px; overflow-y: auto; border: 1px solid var(--gold); border-radius: 5px; padding: 1rem; margin: 1rem 0; background: rgba(0,0,0,0.3);">
 							<?php foreach ($security_reports as $report): ?>
 							<div style="border-bottom: 1px solid var(--gray); padding: 1rem 0; <?php echo $report['status'] === 'Resolved' ? 'opacity: 0.7;' : ''; ?>">
