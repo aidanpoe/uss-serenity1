@@ -194,6 +194,9 @@ try {
 									<?php if (canEditPersonnelFiles()): ?>
 									<button onclick="playSoundAndRedirect('audio2', 'personnel_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.75rem; border-radius: 5px;">Personnel File Editor</button>
 									<?php endif; ?>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--purple); color: black; border: none; padding: 0.75rem; border-radius: 5px;">Command Structure Editor</button>
+									<?php endif; ?>
 								</div>
 							</div>
 							<div>
