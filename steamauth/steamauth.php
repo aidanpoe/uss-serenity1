@@ -76,10 +76,40 @@ if (isset($_GET['login'])){
 						$_SESSION['position'] = $user['position'];
 						$_SESSION['image_path'] = $user['image_path'];
 						$_SESSION['roster_department'] = $user['roster_department'];
+						
+						// Map roster department to proper permission group
+						$permission_dept = $user['department']; // Start with user's stored department
+						
+						// Override with mapped department based on character's roster department
+						switch($user['roster_department']) {
+							case 'Medical':
+							case 'Science':
+								$permission_dept = 'MED/SCI';
+								break;
+							case 'Engineering':
+							case 'Operations':
+								$permission_dept = 'ENG/OPS';
+								break;
+							case 'Security':
+							case 'Tactical':
+								$permission_dept = 'SEC/TAC';
+								break;
+							case 'Command':
+								$permission_dept = 'Command';
+								break;
+						}
+						
+						// Update user's permission group in database if needed
+						if ($permission_dept !== $user['department']) {
+							$updateDeptStmt = $pdo->prepare("UPDATE users SET department = ? WHERE id = ?");
+							$updateDeptStmt->execute([$permission_dept, $user['id']]);
+						}
+						
+						$_SESSION['department'] = $permission_dept;
+					} else {
+						// No active character, just set the stored department
+						$_SESSION['department'] = $user['department'];
 					}
-					
-					// Set user permission department (from users table)
-					$_SESSION['department'] = $user['department'];
 					
 					// Update last login
 					$updateStmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
