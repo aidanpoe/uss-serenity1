@@ -1,0 +1,5 @@
+data/*.json
+uploads/
+vendor/
+.DS_Store
+.env
