@@ -3,11 +3,7 @@ require_once 'includes/config.php';
 
 // Steam login functions
 function loginbutton($buttonstyle = "square") {
-	$button['rectangle'] = "01";
-	$button['square'] = "02";
-	$button = "<a href='steamauth/steamauth.php?login'><img src='https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_".$button[$buttonstyle].".png'></a>";
-	
-	echo $button;
+	echo "<a href='steamauth/steamauth.php?login' class='lcars-steam-button' onclick='playSoundAndRedirect(\"audio2\", \"steamauth/steamauth.php?login\")'>Sign in through Steam</a>";
 }
 ?>
 <!DOCTYPE html>
@@ -18,6 +14,33 @@ function loginbutton($buttonstyle = "square") {
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
 	<link rel="stylesheet" type="text/css" href="assets/classic.css">
+	<style>
+		.lcars-steam-button {
+			background-color: var(--gold);
+			color: black;
+			border: none;
+			padding: 1rem 2rem;
+			border-radius: 10px;
+			font-weight: bold;
+			font-size: 1.1rem;
+			text-decoration: none;
+			display: inline-block;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			transition: background-color 0.3s ease;
+			cursor: pointer;
+			border: 2px solid var(--gold);
+		}
+		.lcars-steam-button:hover {
+			background-color: var(--orange);
+			border-color: var(--orange);
+			color: black;
+		}
+		.lcars-steam-button:active {
+			background-color: var(--red);
+			border-color: var(--red);
+		}
+	</style>
 </head>
 <body>
 	<audio id="audio1" src="assets/beep1.mp3" preload="auto"></audio>
