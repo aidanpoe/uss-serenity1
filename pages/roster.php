@@ -541,6 +541,14 @@ $ranks = [
 								</a>
 							</div>
 							<?php endif; ?>
+							
+							<?php if (hasPermission(['SEC/TAC', 'COMMAND', 'CAPTAIN'])): ?>
+							<div style="margin-top: 0.5rem;">
+								<a href="criminal_history.php?crew_id=<?php echo $crew_member['id']; ?>" style="background-color: var(--red); color: black; border: none; padding: 0.3rem 0.8rem; border-radius: 3px; font-size: 0.8rem; text-decoration: none; display: inline-block;">
+									Criminal Records
+								</a>
+							</div>
+							<?php endif; ?>
 						</div>
 						<?php endforeach; ?>
 					</div>

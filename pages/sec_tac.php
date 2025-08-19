@@ -114,6 +114,8 @@ try {
 						<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>
 						<button onclick="playSoundAndRedirect('audio2', 'roster.php')">ROSTER</button>
 						<button onclick="playSoundAndRedirect('audio2', '#')" style="background-color: var(--gold);">SEC/TAC</button>
+						<button onclick="playSoundAndRedirect('audio2', 'criminal_records.php')">CRIMINAL</button>
+						<button onclick="playSoundAndRedirect('audio2', 'security_resolved.php')">RESOLVED</button>
 						<button onclick="playSoundAndRedirect('audio2', 'training.php')">TRAINING</button>
 					</nav>
 				</div>
@@ -165,6 +167,22 @@ try {
 						<p style="color: var(--red);"><?php echo htmlspecialchars($error); ?></p>
 					</div>
 					<?php endif; ?>
+					
+					<!-- Security Tools Quick Access -->
+					<div style="background: rgba(255, 165, 0, 0.1); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--gold);">
+						<h3 style="color: var(--gold); text-align: center; margin-bottom: 1.5rem;">🛡️ Security Department Tools</h3>
+						<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+							<button onclick="playSoundAndRedirect('audio2', 'criminal_records.php')" style="background-color: var(--red); color: white; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold;">
+								🗂️ Criminal Records<br><small style="font-weight: normal;">Search personnel criminal history</small>
+							</button>
+							<button onclick="playSoundAndRedirect('audio2', 'security_resolved.php')" style="background-color: var(--green); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold;">
+								✅ Resolved Cases<br><small style="font-weight: normal;">View completed security cases</small>
+							</button>
+							<button onclick="playSoundAndRedirect('audio2', 'roster.php')" style="background-color: var(--orange); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold;">
+								👥 Full Roster<br><small style="font-weight: normal;">Complete crew manifest</small>
+							</button>
+						</div>
+					</div>
 					
 					<h3>Department Leadership</h3>
 					<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 2rem 0;">
