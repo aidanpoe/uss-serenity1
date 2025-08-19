@@ -64,6 +64,15 @@
                     echo "<p>user_id column in roster already exists.</p>";
                 }
                 
+                // Check if department column exists in users table (for permissions)
+                $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'department'");
+                if (!$stmt->fetch()) {
+                    echo "<p>Adding department column to users table...</p>";
+                    $pdo->exec("ALTER TABLE users ADD COLUMN department VARCHAR(50) NULL");
+                } else {
+                    echo "<p>department column in users table already exists.</p>";
+                }
+                
                 echo "<h3 style='color: green;'>✅ Steam Integration Setup Complete!</h3>";
                 echo "<p>Your database is now ready for Steam authentication.</p>";
                 echo "<p><a href='index.php' style='color: var(--bluey);'>Return to Homepage</a></p>";
@@ -91,6 +100,7 @@
             <ul>
                 <li>Add <code>steam_id</code> column to users table</li>
                 <li>Add <code>roster_id</code> column to users table</li>
+                <li>Add <code>department</code> column to users table (for permission groups)</li>
                 <li>Add <code>force_password_change</code>, <code>active</code>, and <code>last_login</code> columns</li>
                 <li>Add <code>user_id</code> column to roster table</li>
             </ul>

@@ -25,7 +25,11 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 1. Click "Sign in through Steam" on the homepage
 2. Steam authentication redirects to registration page
 3. User creates username and **must create their crew roster profile** (name, species, department, position, etc.)
-4. Account and roster entry are created simultaneously and user is logged in (no password needed)
+4. **Department selection determines system access permissions:**
+   - **Medical/Science** → MED/SCI access group
+   - **Engineering/Operations** → ENG/OPS access group  
+   - **Security/Tactical** → SEC/TAC access group
+5. Account and roster entry are created simultaneously and user is logged in (no password needed)
 
 #### For Existing Users:
 - All users must now use Steam authentication
@@ -42,6 +46,8 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 ✅ **Steam-Only Authentication** - Secure login exclusively via Steam  
 ✅ **Integrated Roster Creation** - Crew roster profile created during Steam registration  
 ✅ **Mandatory Character Creation** - All users must create their character during signup  
+✅ **Department-Based Permissions** - Access groups automatically assigned based on department selection  
+✅ **Rank Restrictions** - Command ranks (Captain, Commander) restricted to admin assignment  
 ✅ **User Profile Management** - View Steam account info and roster details  
 ✅ **Captain Admin Controls** - Account management and status control  
 ✅ **Enhanced Security** - Steam handles all authentication securely  
@@ -65,6 +71,7 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 
 **Database Enhancements:**
 - `steam_id` column in users table (required for all users)
+- `department` column in users table (stores permission groups: MED/SCI, ENG/OPS, SEC/TAC)
 - `active`, `last_login` columns for user management
 - `user_id` column in roster table (links Steam accounts to crew profiles)
 - Password column optional (Steam authentication only)

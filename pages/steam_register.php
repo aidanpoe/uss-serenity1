@@ -65,9 +65,29 @@ if ($_POST) {
         try {
             $pdo->beginTransaction();
             
-            // Create user account (Steam authentication only, no password needed)
-            $stmt = $pdo->prepare("INSERT INTO users (username, steam_id, active, created_at) VALUES (?, ?, 1, NOW())");
-            $stmt->execute([$username, $_SESSION['pending_steam_id']]);
+            // Map roster department to user department permissions
+            $user_department = '';
+            switch($department) {
+                case 'Medical':
+                case 'Science':
+                    $user_department = 'MED/SCI';
+                    break;
+                case 'Engineering':
+                case 'Operations':
+                    $user_department = 'ENG/OPS';
+                    break;
+                case 'Security':
+                case 'Tactical':
+                    $user_department = 'SEC/TAC';
+                    break;
+                default:
+                    $user_department = 'SEC/TAC'; // Default fallback
+                    break;
+            }
+            
+            // Create user account with proper department permissions
+            $stmt = $pdo->prepare("INSERT INTO users (username, steam_id, department, active, created_at) VALUES (?, ?, ?, 1, NOW())");
+            $stmt->execute([$username, $_SESSION['pending_steam_id'], $user_department]);
             $user_id = $pdo->lastInsertId();
             
             // Create roster entry and link to user
@@ -77,7 +97,7 @@ if ($_POST) {
             $pdo->commit();
             
             // Log the user in
-            $stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.department, r.position, r.image_path 
+            $stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.department as roster_department, r.position, r.image_path 
                 FROM users u 
                 LEFT JOIN roster r ON u.id = r.user_id 
                 WHERE u.id = ?");
@@ -89,7 +109,8 @@ if ($_POST) {
             $_SESSION['rank'] = $user['rank'];
             $_SESSION['first_name'] = $user['first_name'];
             $_SESSION['last_name'] = $user['last_name'];
-            $_SESSION['department'] = $user['department'];
+            $_SESSION['department'] = $user['department']; // User permission department (MED/SCI, ENG/OPS, SEC/TAC)
+            $_SESSION['roster_department'] = $user['roster_department']; // Roster display department
             $_SESSION['position'] = $user['position'];
             $_SESSION['image_path'] = $user['image_path'];
             
@@ -203,7 +224,50 @@ if ($_POST) {
             border-radius: 5px;
             margin-bottom: 1rem;
         }
+        
+        .department-info {
+            background: rgba(85, 102, 255, 0.1);
+            border: 1px solid var(--blue);
+            color: var(--blue);
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
     </style>
+    <script>
+        function updateDepartmentInfo() {
+            const dept = document.getElementById('department').value;
+            const infoDiv = document.getElementById('department-info');
+            
+            let message = '';
+            switch(dept) {
+                case 'Medical':
+                case 'Science':
+                    message = 'Access Group: <strong>MED/SCI</strong> - Medical and Science systems access';
+                    break;
+                case 'Engineering':
+                case 'Operations':
+                    message = 'Access Group: <strong>ENG/OPS</strong> - Engineering and Operations systems access';
+                    break;
+                case 'Security':
+                case 'Tactical':
+                    message = 'Access Group: <strong>SEC/TAC</strong> - Security and Tactical systems access';
+                    break;
+                default:
+                    message = '';
+                    break;
+            }
+            
+            if (message) {
+                infoDiv.innerHTML = message;
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="registration-container">
@@ -244,8 +308,22 @@ if ($_POST) {
             
             <div class="form-group">
                 <label for="rank">Rank</label>
-                <input type="text" id="rank" name="rank" value="<?php echo htmlspecialchars($_POST['rank'] ?? ''); ?>" placeholder="e.g., Lieutenant, Commander">
-                <small style="color: var(--blue);">Your Starfleet rank (optional).</small>
+                <select id="rank" name="rank">
+                    <option value="">-- Select Rank --</option>
+                    <option value="Crewman 3rd Class" <?php echo ($_POST['rank'] ?? '') == 'Crewman 3rd Class' ? 'selected' : ''; ?>>Crewman 3rd Class</option>
+                    <option value="Crewman 2nd Class" <?php echo ($_POST['rank'] ?? '') == 'Crewman 2nd Class' ? 'selected' : ''; ?>>Crewman 2nd Class</option>
+                    <option value="Crewman 1st Class" <?php echo ($_POST['rank'] ?? '') == 'Crewman 1st Class' ? 'selected' : ''; ?>>Crewman 1st Class</option>
+                    <option value="Petty Officer 3rd Class" <?php echo ($_POST['rank'] ?? '') == 'Petty Officer 3rd Class' ? 'selected' : ''; ?>>Petty Officer 3rd Class</option>
+                    <option value="Petty Officer 1st Class" <?php echo ($_POST['rank'] ?? '') == 'Petty Officer 1st Class' ? 'selected' : ''; ?>>Petty Officer 1st Class</option>
+                    <option value="Chief Petty Officer" <?php echo ($_POST['rank'] ?? '') == 'Chief Petty Officer' ? 'selected' : ''; ?>>Chief Petty Officer</option>
+                    <option value="Senior Chief Petty Officer" <?php echo ($_POST['rank'] ?? '') == 'Senior Chief Petty Officer' ? 'selected' : ''; ?>>Senior Chief Petty Officer</option>
+                    <option value="Master Chief Petty Officer" <?php echo ($_POST['rank'] ?? '') == 'Master Chief Petty Officer' ? 'selected' : ''; ?>>Master Chief Petty Officer</option>
+                    <option value="Command Master Chief Petty Officer" <?php echo ($_POST['rank'] ?? '') == 'Command Master Chief Petty Officer' ? 'selected' : ''; ?>>Command Master Chief Petty Officer</option>
+                    <option value="Warrant Officer" <?php echo ($_POST['rank'] ?? '') == 'Warrant Officer' ? 'selected' : ''; ?>>Warrant Officer</option>
+                    <option value="Ensign" <?php echo ($_POST['rank'] ?? '') == 'Ensign' ? 'selected' : ''; ?>>Ensign</option>
+                    <option value="Lieutenant Junior Grade" <?php echo ($_POST['rank'] ?? '') == 'Lieutenant Junior Grade' ? 'selected' : ''; ?>>Lieutenant Junior Grade</option>
+                </select>
+                <small style="color: var(--blue);">Your Starfleet rank (optional). Command ranks are restricted.</small>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -268,18 +346,17 @@ if ($_POST) {
             
             <div class="form-group">
                 <label for="department">Department *</label>
-                <select id="department" name="department" required>
+                <select id="department" name="department" required onchange="updateDepartmentInfo()">
                     <option value="">-- Select Department --</option>
-                    <option value="Command" <?php echo ($_POST['department'] ?? '') == 'Command' ? 'selected' : ''; ?>>Command</option>
-                    <option value="Engineering" <?php echo ($_POST['department'] ?? '') == 'Engineering' ? 'selected' : ''; ?>>Engineering</option>
-                    <option value="Operations" <?php echo ($_POST['department'] ?? '') == 'Operations' ? 'selected' : ''; ?>>Operations</option>
                     <option value="Medical" <?php echo ($_POST['department'] ?? '') == 'Medical' ? 'selected' : ''; ?>>Medical</option>
                     <option value="Science" <?php echo ($_POST['department'] ?? '') == 'Science' ? 'selected' : ''; ?>>Science</option>
+                    <option value="Engineering" <?php echo ($_POST['department'] ?? '') == 'Engineering' ? 'selected' : ''; ?>>Engineering</option>
+                    <option value="Operations" <?php echo ($_POST['department'] ?? '') == 'Operations' ? 'selected' : ''; ?>>Operations</option>
                     <option value="Security" <?php echo ($_POST['department'] ?? '') == 'Security' ? 'selected' : ''; ?>>Security</option>
                     <option value="Tactical" <?php echo ($_POST['department'] ?? '') == 'Tactical' ? 'selected' : ''; ?>>Tactical</option>
-                    <option value="Marine" <?php echo ($_POST['department'] ?? '') == 'Marine' ? 'selected' : ''; ?>>Marine</option>
-                    <option value="Civilian" <?php echo ($_POST['department'] ?? '') == 'Civilian' ? 'selected' : ''; ?>>Civilian</option>
                 </select>
+                <div id="department-info" class="department-info"></div>
+                <small style="color: var(--blue);">Your department assignment determines your system access permissions.</small>
             </div>
             
             <div class="form-group">
@@ -298,5 +375,10 @@ if ($_POST) {
             </div>
         </form>
     </div>
+    
+    <script>
+        // Initialize department info on page load
+        updateDepartmentInfo();
+    </script>
 </body>
 </html>
