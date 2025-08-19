@@ -192,13 +192,14 @@ $ranks = [
 			max-width: 1000px;
 		}
 		.officer-box {
-			padding: 1rem;
+			padding: 1.5rem;
 			border-radius: 10px;
 			border: 2px solid;
 			text-align: center;
-			min-height: 100px;
-			min-width: 200px;
+			min-height: 120px;
+			min-width: 250px;
 			flex: 0 0 auto;
+			position: relative;
 		}
 		.command-box { border-color: var(--red); background: rgba(204, 68, 68, 0.2); }
 		.eng-ops-box { border-color: var(--orange); background: rgba(255, 136, 0, 0.2); }
@@ -296,16 +297,20 @@ $ranks = [
 					<?php endif; ?>
 					
 					<h3>Command Structure</h3>
+					<?php if (hasPermission('Captain')): ?>
+					<div style="text-align: center; margin: 1rem 0;">
+						<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.75rem 1.5rem; border-radius: 5px;">✏️ Edit Command Structure</button>
+					</div>
+					<?php endif; ?>
 					<div class="command-structure">
 						<!-- Captain (Top Level) -->
 						<div class="command-row single">
 							<div class="officer-box command-box">
+								<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">Commanding Officer</div>
 								<?php if ($command_positions['Commanding Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Commanding Officer']['rank'] . ' ' . $command_positions['Commanding Officer']['first_name'] . ' ' . $command_positions['Commanding Officer']['last_name']); ?></strong><br>
-									<small>Commanding Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Commanding Officer']['rank'] . ' ' . $command_positions['Commanding Officer']['first_name'] . ' ' . $command_positions['Commanding Officer']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Commanding Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 						</div>
@@ -313,12 +318,11 @@ $ranks = [
 						<!-- First Officer (Second Level) -->
 						<div class="command-row single">
 							<div class="officer-box command-box">
+								<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">First Officer</div>
 								<?php if ($command_positions['First Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['First Officer']['rank'] . ' ' . $command_positions['First Officer']['first_name'] . ' ' . $command_positions['First Officer']['last_name']); ?></strong><br>
-									<small>First Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['First Officer']['rank'] . ' ' . $command_positions['First Officer']['first_name'] . ' ' . $command_positions['First Officer']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>First Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 						</div>
@@ -326,12 +330,11 @@ $ranks = [
 						<!-- Second Officer (Third Level) -->
 						<div class="command-row single">
 							<div class="officer-box command-box">
+								<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">Second Officer</div>
 								<?php if ($command_positions['Second Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Second Officer']['rank'] . ' ' . $command_positions['Second Officer']['first_name'] . ' ' . $command_positions['Second Officer']['last_name']); ?></strong><br>
-									<small>Second Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Second Officer']['rank'] . ' ' . $command_positions['Second Officer']['first_name'] . ' ' . $command_positions['Second Officer']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Second Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 						</div>
@@ -339,12 +342,11 @@ $ranks = [
 						<!-- Third Officer (Fourth Level) -->
 						<div class="command-row single">
 							<div class="officer-box command-box">
+								<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">Third Officer</div>
 								<?php if ($command_positions['Third Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Third Officer']['rank'] . ' ' . $command_positions['Third Officer']['first_name'] . ' ' . $command_positions['Third Officer']['last_name']); ?></strong><br>
-									<small>Third Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Third Officer']['rank'] . ' ' . $command_positions['Third Officer']['first_name'] . ' ' . $command_positions['Third Officer']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Third Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 						</div>
@@ -352,32 +354,29 @@ $ranks = [
 						<!-- Department Heads (Fifth Level - Three boxes) -->
 						<div class="command-row triple">
 							<div class="officer-box eng-ops-box">
+								<div style="color: var(--orange); font-size: 0.9rem; margin-bottom: 0.5rem;">Head of ENG/OPS</div>
 								<?php if ($command_positions['Head of ENG/OPS']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Head of ENG/OPS']['rank'] . ' ' . $command_positions['Head of ENG/OPS']['first_name'] . ' ' . $command_positions['Head of ENG/OPS']['last_name']); ?></strong><br>
-									<small>Head of ENG/OPS</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Head of ENG/OPS']['rank'] . ' ' . $command_positions['Head of ENG/OPS']['first_name'] . ' ' . $command_positions['Head of ENG/OPS']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Head of ENG/OPS</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 							
 							<div class="officer-box med-sci-box">
+								<div style="color: var(--blue); font-size: 0.9rem; margin-bottom: 0.5rem;">Head of MED/SCI</div>
 								<?php if ($command_positions['Head of MED/SCI']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Head of MED/SCI']['rank'] . ' ' . $command_positions['Head of MED/SCI']['first_name'] . ' ' . $command_positions['Head of MED/SCI']['last_name']); ?></strong><br>
-									<small>Head of MED/SCI</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Head of MED/SCI']['rank'] . ' ' . $command_positions['Head of MED/SCI']['first_name'] . ' ' . $command_positions['Head of MED/SCI']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Head of MED/SCI</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 							
 							<div class="officer-box sec-tac-box">
+								<div style="color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem;">Head of SEC/TAC</div>
 								<?php if ($command_positions['Head of SEC/TAC']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Head of SEC/TAC']['rank'] . ' ' . $command_positions['Head of SEC/TAC']['first_name'] . ' ' . $command_positions['Head of SEC/TAC']['last_name']); ?></strong><br>
-									<small>Head of SEC/TAC</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Head of SEC/TAC']['rank'] . ' ' . $command_positions['Head of SEC/TAC']['first_name'] . ' ' . $command_positions['Head of SEC/TAC']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Head of SEC/TAC</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 						</div>
@@ -385,9 +384,32 @@ $ranks = [
 						<!-- Department Chiefs (Sixth Level - Three boxes) -->
 						<div class="command-row triple">
 							<div class="officer-box eng-ops-box">
+								<div style="color: var(--orange); font-size: 0.9rem; margin-bottom: 0.5rem;">Chief Engineer</div>
 								<?php if ($command_positions['Chief Engineer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Chief Engineer']['rank'] . ' ' . $command_positions['Chief Engineer']['first_name'] . ' ' . $command_positions['Chief Engineer']['last_name']); ?></strong><br>
-									<small>Chief Engineer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Chief Engineer']['rank'] . ' ' . $command_positions['Chief Engineer']['first_name'] . ' ' . $command_positions['Chief Engineer']['last_name']); ?></div>
+								<?php else: ?>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
+								<?php endif; ?>
+							</div>
+							
+							<div class="officer-box med-sci-box">
+								<div style="color: var(--blue); font-size: 0.9rem; margin-bottom: 0.5rem;">Chief Medical Officer</div>
+								<?php if ($command_positions['Chief Medical Officer']): ?>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Chief Medical Officer']['rank'] . ' ' . $command_positions['Chief Medical Officer']['first_name'] . ' ' . $command_positions['Chief Medical Officer']['last_name']); ?></div>
+								<?php else: ?>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
+								<?php endif; ?>
+							</div>
+							
+							<div class="officer-box sec-tac-box">
+								<div style="color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem;">Security Chief</div>
+								<?php if ($command_positions['Security Chief']): ?>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Security Chief']['rank'] . ' ' . $command_positions['Security Chief']['first_name'] . ' ' . $command_positions['Security Chief']['last_name']); ?></div>
+								<?php else: ?>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
+								<?php endif; ?>
+							</div>
+						</div>
 								<?php else: ?>
 									<em>Position Vacant</em><br>
 									<small>Chief Engineer</small>
@@ -418,32 +440,29 @@ $ranks = [
 						<!-- Lower Department Heads (Seventh Level - Three boxes) -->
 						<div class="command-row triple">
 							<div class="officer-box eng-ops-box">
+								<div style="color: var(--orange); font-size: 0.9rem; margin-bottom: 0.5rem;">Operations Officer</div>
 								<?php if ($command_positions['Operations Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Operations Officer']['rank'] . ' ' . $command_positions['Operations Officer']['first_name'] . ' ' . $command_positions['Operations Officer']['last_name']); ?></strong><br>
-									<small>Operations Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Operations Officer']['rank'] . ' ' . $command_positions['Operations Officer']['first_name'] . ' ' . $command_positions['Operations Officer']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Operations Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 							
 							<div class="officer-box med-sci-box">
+								<div style="color: var(--blue); font-size: 0.9rem; margin-bottom: 0.5rem;">Chief Science Officer</div>
 								<?php if ($command_positions['Chief Science Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Chief Science Officer']['rank'] . ' ' . $command_positions['Chief Science Officer']['first_name'] . ' ' . $command_positions['Chief Science Officer']['last_name']); ?></strong><br>
-									<small>Chief Science Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Chief Science Officer']['rank'] . ' ' . $command_positions['Chief Science Officer']['first_name'] . ' ' . $command_positions['Chief Science Officer']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Chief Science Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 							
 							<div class="officer-box sec-tac-box">
+								<div style="color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem;">Tactical Officer</div>
 								<?php if ($command_positions['Tactical Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Tactical Officer']['rank'] . ' ' . $command_positions['Tactical Officer']['first_name'] . ' ' . $command_positions['Tactical Officer']['last_name']); ?></strong><br>
-									<small>Tactical Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Tactical Officer']['rank'] . ' ' . $command_positions['Tactical Officer']['first_name'] . ' ' . $command_positions['Tactical Officer']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Tactical Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 						</div>
@@ -451,32 +470,29 @@ $ranks = [
 						<!-- Bottom Level (Eighth Level - Helm, Intel, S.R.T.) -->
 						<div class="command-row lower">
 							<div class="officer-box eng-ops-box">
+								<div style="color: var(--orange); font-size: 0.9rem; margin-bottom: 0.5rem;">Helm Officer</div>
 								<?php if ($command_positions['Helm Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Helm Officer']['rank'] . ' ' . $command_positions['Helm Officer']['first_name'] . ' ' . $command_positions['Helm Officer']['last_name']); ?></strong><br>
-									<small>Helm Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Helm Officer']['rank'] . ' ' . $command_positions['Helm Officer']['first_name'] . ' ' . $command_positions['Helm Officer']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Helm Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 							
 							<div class="officer-box sec-tac-box">
+								<div style="color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem;">Intelligence Officer</div>
 								<?php if ($command_positions['Intelligence Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Intelligence Officer']['rank'] . ' ' . $command_positions['Intelligence Officer']['first_name'] . ' ' . $command_positions['Intelligence Officer']['last_name']); ?></strong><br>
-									<small>Intelligence Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['Intelligence Officer']['rank'] . ' ' . $command_positions['Intelligence Officer']['first_name'] . ' ' . $command_positions['Intelligence Officer']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Intelligence Officer</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 							
 							<div class="officer-box sec-tac-box">
+								<div style="color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem;">S.R.T. Leader</div>
 								<?php if ($command_positions['S.R.T. Leader']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['S.R.T. Leader']['rank'] . ' ' . $command_positions['S.R.T. Leader']['first_name'] . ' ' . $command_positions['S.R.T. Leader']['last_name']); ?></strong><br>
-									<small>S.R.T. Leader</small>
+									<div style="color: var(--bluey); font-weight: bold;"><?php echo htmlspecialchars($command_positions['S.R.T. Leader']['rank'] . ' ' . $command_positions['S.R.T. Leader']['first_name'] . ' ' . $command_positions['S.R.T. Leader']['last_name']); ?></div>
 								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>S.R.T. Leader</small>
+									<div style="color: var(--bluey); font-weight: bold;">Position Vacant</div>
 								<?php endif; ?>
 							</div>
 						</div>
