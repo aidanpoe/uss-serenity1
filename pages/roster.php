@@ -1,34 +1,34 @@
 <?php
 require_once '../includes/config.php';
 
-// Handle admin update for Captain's name
-if (isset($_GET['update_captain_name']) && hasPermission('Captain')) {
-    try {
-        // Update the users table
-        $stmt = $pdo->prepare("UPDATE users SET first_name = 'Aidan' WHERE username = 'Poe' AND department = 'Captain'");
-        $stmt->execute();
-        $affected1 = $stmt->rowCount();
-        
-        // Update the roster table
-        $stmt = $pdo->prepare("UPDATE roster SET first_name = 'Aidan' WHERE last_name = 'Poe' AND rank = 'Captain'");
-        $stmt->execute();
-        $affected2 = $stmt->rowCount();
-        
-        // Update session if this is the current user
-        if ($_SESSION['username'] === 'Poe') {
-            $_SESSION['first_name'] = 'Aidan';
-        }
-        
-        $update_message = "Captain's name updated successfully. Users table: $affected1 rows, Roster table: $affected2 rows affected.";
-        
-    } catch (PDOException $e) {
-        $update_message = "Error updating Captain's name: " . $e->getMessage();
-    }
-}
-
 // Handle image upload
 function handleImageUpload($file) {
     if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+        return '';
+    }
+    
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!in_array($file['type'], $allowed_types)) {
+        throw new Exception("Only JPEG, PNG, and GIF images are allowed.");
+    }
+    
+    $max_size = 5 * 1024 * 1024; // 5MB
+    if ($file['size'] > $max_size) {
+        throw new Exception("Image file size must be less than 5MB.");
+    }
+    
+    $upload_dir = '../assets/crew_photos/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+    
+    $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = uniqid('crew_') . '.' . $file_extension;
+    $upload_path = $upload_dir . $filename;
+    
+    if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+        return 'assets/crew_photos/' . $filename;
+    } else {
         return '';
     }
     
@@ -136,6 +136,31 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'self_register') {
 // Get roster data
 try {
     $pdo = getConnection();
+    
+    // Handle admin update for Captain's name
+    if (isset($_GET['update_captain_name']) && hasPermission('Captain')) {
+        try {
+            // Update the users table
+            $stmt = $pdo->prepare("UPDATE users SET first_name = 'Aidan' WHERE username = 'Poe' AND department = 'Captain'");
+            $stmt->execute();
+            $affected1 = $stmt->rowCount();
+            
+            // Update the roster table
+            $stmt = $pdo->prepare("UPDATE roster SET first_name = 'Aidan' WHERE last_name = 'Poe' AND rank = 'Captain'");
+            $stmt->execute();
+            $affected2 = $stmt->rowCount();
+            
+            // Update session if this is the current user
+            if (isset($_SESSION['username']) && $_SESSION['username'] === 'Poe') {
+                $_SESSION['first_name'] = 'Aidan';
+            }
+            
+            $update_message = "Captain's name updated successfully. Users table: $affected1 rows, Roster table: $affected2 rows affected.";
+            
+        } catch (PDOException $e) {
+            $update_message = "Error updating Captain's name: " . $e->getMessage();
+        }
+    }
     
     // Get command structure
     $command_positions = [
