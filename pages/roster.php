@@ -171,13 +171,13 @@ $ranks = [
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			gap: 1.5rem;
-			margin: 2rem 0;
+			gap: 2.5rem;
+			margin: 3rem 0;
 		}
 		.command-row {
 			display: flex;
 			justify-content: center;
-			gap: 1rem;
+			gap: 1.5rem;
 			width: 100%;
 		}
 		.command-row.single {
@@ -185,21 +185,22 @@ $ranks = [
 		}
 		.command-row.triple {
 			justify-content: space-evenly;
-			max-width: 800px;
+			max-width: 900px;
 		}
 		.command-row.lower {
 			justify-content: space-between;
-			max-width: 1000px;
+			max-width: 1100px;
 		}
 		.officer-box {
-			padding: 1.5rem;
-			border-radius: 10px;
-			border: 2px solid;
+			padding: 2rem 1.5rem;
+			border-radius: 12px;
+			border: 3px solid;
 			text-align: center;
-			min-height: 120px;
-			min-width: 250px;
+			min-height: 140px;
+			min-width: 280px;
 			flex: 0 0 auto;
 			position: relative;
+			box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 		}
 		.command-box { border-color: var(--red); background: rgba(204, 68, 68, 0.2); }
 		.eng-ops-box { border-color: var(--orange); background: rgba(255, 136, 0, 0.2); }

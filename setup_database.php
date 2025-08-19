@@ -112,7 +112,7 @@ try {
     
     // Insert default users
     $default_users = [
-        ['Poe', 'Class390', 'Captain', 'James', 'Poe'],
+        ['Poe', 'Class390', 'Captain', 'Aidan', 'Poe'],
         ['torres', 'engineering123', 'ENG/OPS', 'B\'Elanna', 'Torres'],
         ['mccoy', 'medical456', 'MED/SCI', 'Leonard', 'McCoy'],
         ['worf', 'security789', 'SEC/TAC', 'Worf', 'Son of Mogh'],
@@ -129,7 +129,7 @@ try {
     
     // Insert default roster positions
     $default_roster = [
-        ['Captain', 'James', 'Poe', 'Human', 'Command', 'Commanding Officer'],
+        ['Captain', 'Aidan', 'Poe', 'Human', 'Command', 'Commanding Officer'],
         ['Commander', 'William', 'Riker', 'Human', 'Command', 'First Officer'],
         ['Lieutenant Commander', 'Data', 'Soong', 'Android', 'ENG/OPS', 'Operations Officer'],
         ['Lieutenant Commander', 'Geordi', 'La Forge', 'Human', 'ENG/OPS', 'Chief Engineer'],
