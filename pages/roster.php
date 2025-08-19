@@ -32,14 +32,6 @@ function handleImageUpload($file) {
         throw new Exception("Failed to upload image file.");
     }
 }
-    $upload_path = $upload_dir . $filename;
-    
-    if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-        return 'assets/crew_photos/' . $filename;
-    } else {
-        throw new Exception("Failed to upload image.");
-    }
-}
 
 // Handle adding new personnel (Captain only - full command positions)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
