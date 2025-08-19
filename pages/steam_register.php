@@ -80,6 +80,9 @@ if ($_POST) {
                 case 'Tactical':
                     $user_department = 'SEC/TAC';
                     break;
+                case 'Command':
+                    $user_department = 'Command';
+                    break;
                 default:
                     $user_department = 'SEC/TAC'; // Default fallback
                     break;

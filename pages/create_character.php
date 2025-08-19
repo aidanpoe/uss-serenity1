@@ -23,7 +23,8 @@ $department_permissions = [
     'Engineering' => 'ENG/OPS',
     'Operations' => 'ENG/OPS',
     'Security' => 'SEC/TAC',
-    'Tactical' => 'SEC/TAC'
+    'Tactical' => 'SEC/TAC',
+    'Command' => 'Command'
 ];
 
 // Available ranks (excluding command ranks)

@@ -112,6 +112,9 @@ function switchCharacter($character_id) {
             case 'Tactical':
                 $user_department = 'SEC/TAC';
                 break;
+            case 'Command':
+                $user_department = 'Command';
+                break;
             default:
                 $user_department = 'SEC/TAC'; // Default fallback
                 break;
@@ -165,9 +168,11 @@ function hasPermission($required_department) {
     if (!isLoggedIn()) return false;
     
     $user_dept = getUserDepartment();
+    $user_rank = $_SESSION['rank'] ?? '';
+    $roster_dept = $_SESSION['roster_department'] ?? '';
     
-    // Captain and Command have access to everything
-    if ($user_dept === 'Command' || $user_dept === 'Captain') {
+    // Captain and Command ranks have access to everything
+    if ($user_rank === 'Captain' || $user_rank === 'Commander' || $user_dept === 'Command' || $roster_dept === 'Command') {
         return true;
     }
     

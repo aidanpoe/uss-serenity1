@@ -35,12 +35,22 @@ if (isLoggedIn()) {
     
     // Test department access
     $userDept = $_SESSION['department'] ?? '';
+    $userRank = $_SESSION['rank'] ?? '';
+    $rosterDept = $_SESSION['roster_department'] ?? '';
     echo "<h3>Access Rights:</h3>";
     echo "<p>User Department: " . htmlspecialchars($userDept) . "</p>";
+    echo "<p>User Rank: " . htmlspecialchars($userRank) . "</p>";
+    echo "<p>Roster Department: " . htmlspecialchars($rosterDept) . "</p>";
+    echo "<p><strong>Permission Results:</strong></p>";
     echo "<p>MED/SCI Access: " . (hasPermission('MED/SCI') ? 'YES' : 'NO') . "</p>";
     echo "<p>ENG/OPS Access: " . (hasPermission('ENG/OPS') ? 'YES' : 'NO') . "</p>";
     echo "<p>SEC/TAC Access: " . (hasPermission('SEC/TAC') ? 'YES' : 'NO') . "</p>";
     echo "<p>Command Access: " . (hasPermission('Command') ? 'YES' : 'NO') . "</p>";
+    
+    // Show command override logic
+    if ($userRank === 'Captain' || $userRank === 'Commander' || $userDept === 'Command' || $rosterDept === 'Command') {
+        echo "<p style='color: gold;'><strong>✅ COMMAND OVERRIDE: Full access granted due to rank/department</strong></p>";
+    }
 }
 
 echo '<p><a href="index.php">Back to Homepage</a></p>';
