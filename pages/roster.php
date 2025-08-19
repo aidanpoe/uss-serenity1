@@ -78,14 +78,17 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'self_register') {
                 $image_path = handleImageUpload($_FILES['crew_image']);
             }
             
-            // Self-registration limited to lower ranks only
+            // Self-registration limited to ranks below Commander
             $allowed_self_ranks = [
                 'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class', 
-                'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petter Officer'
+                'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petter Officer',
+                'Senior Chief Petty Officer', 'Master Chief Petty Officer', 
+                'Command Master Chief Petty Officer', 'Warrant officer', 'Ensign',
+                'Lieutenant Junior Grade', 'Lieutenant', 'Lieutenant Commander'
             ];
             
             if (!in_array($_POST['rank'], $allowed_self_ranks)) {
-                $error = "Self-registration is limited to enlisted ranks only.";
+                $error = "Self-registration is limited to ranks below Commander.";
             } else {
                 $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 $stmt->execute([
@@ -382,7 +385,7 @@ $ranks = [
 					
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
 						<h4>Not in the Roster? Register for Reporting</h4>
-						<p style="color: var(--orange);">If you need to submit reports but aren't in the roster, you can add yourself here. Limited to enlisted ranks only.</p>
+						<p style="color: var(--orange);">If you need to submit reports but aren't in the roster, you can add yourself here. Available for all ranks below Commander.</p>
 						<form method="POST" action="" enctype="multipart/form-data">
 							<input type="hidden" name="action" value="self_register">
 							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
@@ -395,6 +398,14 @@ $ranks = [
 										<option value="Petty Officer 3rd class">Petty Officer 3rd class</option>
 										<option value="Petty Officer 1st class">Petty Officer 1st class</option>
 										<option value="Chief Petter Officer">Chief Petter Officer</option>
+										<option value="Senior Chief Petty Officer">Senior Chief Petty Officer</option>
+										<option value="Master Chief Petty Officer">Master Chief Petty Officer</option>
+										<option value="Command Master Chief Petty Officer">Command Master Chief Petty Officer</option>
+										<option value="Warrant officer">Warrant officer</option>
+										<option value="Ensign">Ensign</option>
+										<option value="Lieutenant Junior Grade">Lieutenant Junior Grade</option>
+										<option value="Lieutenant">Lieutenant</option>
+										<option value="Lieutenant Commander">Lieutenant Commander</option>
 									</select>
 								</div>
 								<div>
