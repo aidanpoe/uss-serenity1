@@ -7,9 +7,12 @@ if (!hasPermission('MED/SCI') && !hasPermission('Captain')) {
     exit();
 }
 
-$crew_id = $_GET['id'] ?? null;
+$crew_id = $_GET['crew_id'] ?? $_GET['id'] ?? null;
+
+// Debug: Let's see what we're getting
 if (!$crew_id) {
-    header('Location: roster.php');
+    // If no crew_id provided, redirect to roster with error message
+    header('Location: roster.php?error=no_crew_id');
     exit();
 }
 
@@ -28,11 +31,8 @@ try {
     
     // Get all medical records for this crew member
     $stmt = $pdo->prepare("
-        SELECT mr.*, 
-               u.first_name as reported_by_first, 
-               u.last_name as reported_by_last
+        SELECT mr.*
         FROM medical_records mr 
-        LEFT JOIN users u ON mr.reported_by = u.id
         WHERE mr.roster_id = ? 
         ORDER BY mr.created_at DESC
     ");
@@ -187,10 +187,10 @@ try {
 										</div>
 										<?php endif; ?>
 										
-										<?php if ($record['reported_by_first']): ?>
+										<?php if ($record['reported_by']): ?>
 										<div style="margin-bottom: 0.5rem;">
 											<strong style="color: var(--orange);">Reported by:</strong>
-											<?php echo htmlspecialchars($record['reported_by_first'] . ' ' . $record['reported_by_last']); ?>
+											<?php echo htmlspecialchars($record['reported_by']); ?>
 										</div>
 										<?php endif; ?>
 										

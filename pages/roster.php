@@ -577,9 +577,9 @@ $ranks = [
 							
 							<?php if (hasPermission('MED/SCI')): ?>
 							<div style="margin-top: 0.5rem;">
-								<button onclick="playSoundAndRedirect('audio2', 'medical_history.php?crew_id=<?php echo $crew_member['id']; ?>')" style="background-color: var(--blue); color: black; border: none; padding: 0.3rem 0.8rem; border-radius: 3px; font-size: 0.8rem;">
+								<a href="medical_history.php?crew_id=<?php echo $crew_member['id']; ?>" style="background-color: var(--blue); color: black; border: none; padding: 0.3rem 0.8rem; border-radius: 3px; font-size: 0.8rem; text-decoration: none; display: inline-block;">
 									Medical History
-								</button>
+								</a>
 							</div>
 							<?php endif; ?>
 						</div>
