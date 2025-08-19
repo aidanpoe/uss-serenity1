@@ -29,10 +29,10 @@ $department_permissions = [
 
 // Available ranks (excluding command ranks)
 $available_ranks = [
-    'Crewman Recruit', 'Crewman Apprentice', 'Crewman', 'Petty Officer 3rd Class',
-    'Petty Officer 2nd Class', 'Petty Officer 1st Class', 'Chief Petty Officer',
-    'Senior Chief Petty Officer', 'Master Chief Petty Officer', 'Ensign',
-    'Lieutenant Junior Grade', 'Lieutenant'
+    'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class',
+    'Petty Officer 3rd Class', 'Petty Officer 1st Class', 'Chief Petty Officer',
+    'Senior Chief Petty Officer', 'Master Chief Petty Officer', 'Command Master Chief Petty Officer',
+    'Warrant Officer', 'Ensign', 'Lieutenant Junior Grade'
 ];
 
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character') {
