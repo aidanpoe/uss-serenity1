@@ -20,6 +20,9 @@ if ($_POST) {
                 $_SESSION['department'] = $user['department'];
                 $_SESSION['first_name'] = $user['first_name'];
                 $_SESSION['last_name'] = $user['last_name'];
+                $_SESSION['rank'] = $user['rank'] ?? '';
+                $_SESSION['position'] = $user['position'] ?? '';
+                $_SESSION['roster_id'] = $user['roster_id'] ?? null;
                 
                 header('Location: ../index.php');
                 exit();

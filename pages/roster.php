@@ -492,58 +492,17 @@ $ranks = [
 					<?php endif; ?>
 					
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
-						<h4>Not in the Roster? Register for Reporting</h4>
-						<p style="color: var(--orange);">If you need to submit reports but aren't in the roster, you can add yourself here. Available for all ranks below Commander.</p>
-						<form method="POST" action="" enctype="multipart/form-data">
-							<input type="hidden" name="action" value="self_register">
-							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-								<div>
-									<label style="color: var(--bluey);">Rank:</label>
-									<select name="rank" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
-										<option value="Crewman 3rd Class">Crewman 3rd Class</option>
-										<option value="Crewman 2nd Class">Crewman 2nd Class</option>
-										<option value="Crewman 1st Class">Crewman 1st Class</option>
-										<option value="Petty Officer 3rd class">Petty Officer 3rd class</option>
-										<option value="Petty Officer 1st class">Petty Officer 1st class</option>
-										<option value="Chief Petter Officer">Chief Petter Officer</option>
-										<option value="Senior Chief Petty Officer">Senior Chief Petty Officer</option>
-										<option value="Master Chief Petty Officer">Master Chief Petty Officer</option>
-										<option value="Command Master Chief Petty Officer">Command Master Chief Petty Officer</option>
-										<option value="Warrant officer">Warrant officer</option>
-										<option value="Ensign">Ensign</option>
-										<option value="Lieutenant Junior Grade">Lieutenant Junior Grade</option>
-										<option value="Lieutenant">Lieutenant</option>
-										<option value="Lieutenant Commander">Lieutenant Commander</option>
-									</select>
-								</div>
-								<div>
-									<label style="color: var(--bluey);">First Name:</label>
-									<input type="text" name="first_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
-								</div>
-								<div>
-									<label style="color: var(--bluey);">Last Name:</label>
-									<input type="text" name="last_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
-								</div>
-								<div>
-									<label style="color: var(--bluey);">Species:</label>
-									<input type="text" name="species" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
-								</div>
-								<div>
-									<label style="color: var(--bluey);">Department:</label>
-									<select name="department" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
-										<option value="MED/SCI">MED/SCI</option>
-										<option value="ENG/OPS">ENG/OPS</option>
-										<option value="SEC/TAC">SEC/TAC</option>
-									</select>
-								</div>
-								<div>
-									<label style="color: var(--bluey);">Crew Photo:</label>
-									<input type="file" name="crew_image" accept="image/*" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
-									<small style="color: var(--orange);">Optional. JPEG, PNG, or GIF. Max 5MB.</small>
-								</div>
-							</div>
-							<button type="submit" style="background-color: var(--orange); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem;">Register for Reporting</button>
-						</form>
+						<h4>Need Access to Ship Systems?</h4>
+						<p style="color: var(--orange);">All new crew members should create a personal account to access department systems.</p>
+						<div style="text-align: center; margin: 1rem 0;">
+							<button onclick="playSoundAndRedirect('audio2', 'register.php')" style="background-color: var(--blue); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.1rem; margin: 0.5rem;">
+								Create Account & Join Crew
+							</button>
+							<button onclick="playSoundAndRedirect('audio2', 'login.php')" style="background-color: var(--african-violet); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.1rem; margin: 0.5rem;">
+								Login to Existing Account
+							</button>
+						</div>
+						<p style="color: var(--bluey); font-size: 0.9rem; text-align: center;">Account creation automatically adds you to the ship's roster.</p>
 					</div>
 					
 					<h3>All Personnel</h3>

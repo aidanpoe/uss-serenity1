@@ -110,8 +110,11 @@ require_once 'includes/config.php';
 						
 						<?php if (isLoggedIn()): ?>
 							<div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
-								<h4>Welcome, <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></h4>
+								<h4>Welcome, <?php echo htmlspecialchars(($_SESSION['rank'] ?? '') . ' ' . $_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></h4>
 								<p>Department: <?php echo htmlspecialchars($_SESSION['department']); ?></p>
+								<?php if (!empty($_SESSION['position'])): ?>
+								<p>Position: <?php echo htmlspecialchars($_SESSION['position']); ?></p>
+								<?php endif; ?>
 								<p><a href="pages/logout.php" style="color: var(--red);">Logout</a></p>
 							</div>
 						<?php endif; ?>
@@ -147,9 +150,13 @@ require_once 'includes/config.php';
 						
 						<?php if (!isLoggedIn()): ?>
 						<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 10px; margin: 2rem 0; border: 2px solid var(--african-violet);">
-							<h4>Staff Login Required</h4>
+							<h4>Staff Access</h4>
 							<p>Access to administrative functions requires authentication.</p>
-							<button onclick="playSoundAndRedirect('audio2', 'pages/login.php')" style="background-color: var(--african-violet); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.2rem;">LOGIN</button>
+							<div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+								<button onclick="playSoundAndRedirect('audio2', 'pages/login.php')" style="background-color: var(--african-violet); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.2rem;">LOGIN</button>
+								<button onclick="playSoundAndRedirect('audio2', 'pages/register.php')" style="background-color: var(--blue); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.2rem;">CREATE ACCOUNT</button>
+							</div>
+							<p style="margin-top: 1rem; font-size: 0.9rem; color: var(--bluey);">New crew members can create an account to access department systems.</p>
 						</div>
 						<?php endif; ?>
 						
