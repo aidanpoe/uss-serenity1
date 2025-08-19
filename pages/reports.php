@@ -1,64 +1,110 @@
 <?php
 require_once '../includes/config.php';
 
+// Check if user is logged in
+if (!isLoggedIn()) {
+    header('Location: login.php');
+    exit();
+}
+
+// Get user's department and check permissions
+$user_department = getUserDepartment();
+$is_captain = hasPermission('Captain');
+$is_command = hasPermission('Command');
+
 try {
     $pdo = getConnection();
     
-    // Get recent reports from all departments
-    $stmt = $pdo->prepare("
-        SELECT 'Medical' as type, mr.id, mr.condition_description as description, mr.created_at, mr.status, 
-               CONCAT(r.rank, ' ', r.first_name, ' ', r.last_name) as person
-        FROM medical_records mr 
-        JOIN roster r ON mr.roster_id = r.id 
-        ORDER BY mr.created_at DESC LIMIT 5
-    ");
-    $stmt->execute();
-    $medical_reports = $stmt->fetchAll();
+    // Initialize arrays
+    $medical_reports = [];
+    $engineering_reports = [];
+    $security_reports = [];
+    $command_suggestions = [];
     
-    $stmt = $pdo->prepare("
-        SELECT 'Engineering' as type, fr.id, fr.fault_description as description, fr.created_at, fr.status,
-               CASE 
-                   WHEN fr.location_type = 'Deck' THEN CONCAT('Deck ', fr.deck_number, ' - ', fr.room)
-                   WHEN fr.location_type = 'Hull' THEN 'Hull'
-                   WHEN fr.location_type = 'Jefferies Tube' THEN CONCAT('Tube ', fr.jefferies_tube_number)
-               END as location
-        FROM fault_reports fr 
-        ORDER BY fr.created_at DESC LIMIT 5
-    ");
-    $stmt->execute();
-    $engineering_reports = $stmt->fetchAll();
+    // Captain and Command can see everything, others only their department
+    if ($is_captain || $is_command || $user_department === 'MED/SCI') {
+        // Get recent medical reports
+        $stmt = $pdo->prepare("
+            SELECT 'Medical' as type, mr.id, mr.condition_description as description, mr.created_at, mr.status, 
+                   CONCAT(r.rank, ' ', r.first_name, ' ', r.last_name) as person
+            FROM medical_records mr 
+            JOIN roster r ON mr.roster_id = r.id 
+            ORDER BY mr.created_at DESC LIMIT 5
+        ");
+        $stmt->execute();
+        $medical_reports = $stmt->fetchAll();
+    }
     
-    $stmt = $pdo->prepare("
-        SELECT 'Security' as type, sr.id, sr.description, sr.created_at, sr.status, sr.incident_type,
-               CASE 
-                   WHEN r.first_name IS NOT NULL THEN CONCAT(r.rank, ' ', r.first_name, ' ', r.last_name)
-                   ELSE 'N/A'
-               END as person
-        FROM security_reports sr 
-        LEFT JOIN roster r ON sr.involved_roster_id = r.id 
-        ORDER BY sr.created_at DESC LIMIT 5
-    ");
-    $stmt->execute();
-    $security_reports = $stmt->fetchAll();
+    if ($is_captain || $is_command || $user_department === 'ENG/OPS') {
+        // Get recent engineering reports
+        $stmt = $pdo->prepare("
+            SELECT 'Engineering' as type, fr.id, fr.fault_description as description, fr.created_at, fr.status,
+                   CASE 
+                       WHEN fr.location_type = 'Deck' THEN CONCAT('Deck ', fr.deck_number, ' - ', fr.room)
+                       WHEN fr.location_type = 'Hull' THEN 'Hull'
+                       WHEN fr.location_type = 'Jefferies Tube' THEN CONCAT('Tube ', fr.jefferies_tube_number)
+                   END as location
+            FROM fault_reports fr 
+            ORDER BY fr.created_at DESC LIMIT 5
+        ");
+        $stmt->execute();
+        $engineering_reports = $stmt->fetchAll();
+    }
     
-    $stmt = $pdo->prepare("
-        SELECT 'Command' as type, cs.id, cs.suggestion_description as description, cs.created_at, cs.status, cs.suggestion_title
-        FROM command_suggestions cs 
-        ORDER BY cs.created_at DESC LIMIT 5
-    ");
-    $stmt->execute();
-    $command_suggestions = $stmt->fetchAll();
+    if ($is_captain || $is_command || $user_department === 'SEC/TAC') {
+        // Get recent security reports
+        $stmt = $pdo->prepare("
+            SELECT 'Security' as type, sr.id, sr.description, sr.created_at, sr.status, sr.incident_type,
+                   CASE 
+                       WHEN r.first_name IS NOT NULL THEN CONCAT(r.rank, ' ', r.first_name, ' ', r.last_name)
+                       ELSE 'N/A'
+                   END as person
+            FROM security_reports sr 
+            LEFT JOIN roster r ON sr.involved_roster_id = r.id 
+            ORDER BY sr.created_at DESC LIMIT 5
+        ");
+        $stmt->execute();
+        $security_reports = $stmt->fetchAll();
+    }
     
-    // Get summary statistics
-    $stmt = $pdo->prepare("
-        SELECT 
-            (SELECT COUNT(*) FROM medical_records WHERE status != 'Resolved') as open_medical,
-            (SELECT COUNT(*) FROM fault_reports WHERE status != 'Resolved') as open_engineering,
-            (SELECT COUNT(*) FROM security_reports WHERE status != 'Resolved') as open_security,
-            (SELECT COUNT(*) FROM command_suggestions WHERE status IN ('Open', 'Under Review')) as open_suggestions
-    ");
-    $stmt->execute();
-    $stats = $stmt->fetch();
+    if ($is_captain || $is_command) {
+        // Get command suggestions (only for Captain/Command)
+        $stmt = $pdo->prepare("
+            SELECT 'Command' as type, cs.id, cs.suggestion_description as description, cs.created_at, cs.status, cs.suggestion_title
+            FROM command_suggestions cs 
+            ORDER BY cs.created_at DESC LIMIT 5
+        ");
+        $stmt->execute();
+        $command_suggestions = $stmt->fetchAll();
+    }
+    
+    // Get statistics based on permissions
+    $stats = [];
+    if ($is_captain || $is_command || $user_department === 'MED/SCI') {
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM medical_records WHERE status != 'Resolved'");
+        $stmt->execute();
+        $stats['open_medical'] = $stmt->fetch()['count'];
+    }
+    
+    if ($is_captain || $is_command || $user_department === 'ENG/OPS') {
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM fault_reports WHERE status != 'Resolved'");
+        $stmt->execute();
+        $stats['open_engineering'] = $stmt->fetch()['count'];
+    }
+    
+    if ($is_captain || $is_command || $user_department === 'SEC/TAC') {
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM security_reports WHERE status != 'Resolved'");
+        $stmt->execute();
+        $stats['open_security'] = $stmt->fetch()['count'];
+    }
+    
+    if ($is_captain || $is_command) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM command_suggestions WHERE status = 'Pending'");
+        $stmt->execute();
+        $stats['pending_suggestions'] = $stmt->fetch()['count'];
+    }
+    
+    // Get summary statistics (removed duplicate)
     
 } catch (Exception $e) {
     $error = "Database error: " . $e->getMessage();
@@ -147,11 +193,19 @@ try {
 			<div class="left-frame">
 				<button onclick="topFunction(); playSoundAndRedirect('audio4', '#')" id="topBtn"><span class="hop">screen</span> top</button>
 				<div>
-					<div class="panel-3">MED<span class="hop">-<?php echo $stats['open_medical']; ?></span></div>
-					<div class="panel-4">ENG<span class="hop">-<?php echo $stats['open_engineering']; ?></span></div>
-					<div class="panel-5">SEC<span class="hop">-<?php echo $stats['open_security']; ?></span></div>
-					<div class="panel-6">CMD<span class="hop">-<?php echo $stats['open_suggestions']; ?></span></div>
-					<div class="panel-7">TOTAL<span class="hop">-<?php echo array_sum($stats); ?></span></div>
+					<?php if ($is_captain || $is_command || $user_department === 'MED/SCI'): ?>
+					<div class="panel-3">MED<span class="hop">-<?php echo isset($stats['open_medical']) ? $stats['open_medical'] : 0; ?></span></div>
+					<?php endif; ?>
+					<?php if ($is_captain || $is_command || $user_department === 'ENG/OPS'): ?>
+					<div class="panel-4">ENG<span class="hop">-<?php echo isset($stats['open_engineering']) ? $stats['open_engineering'] : 0; ?></span></div>
+					<?php endif; ?>
+					<?php if ($is_captain || $is_command || $user_department === 'SEC/TAC'): ?>
+					<div class="panel-5">SEC<span class="hop">-<?php echo isset($stats['open_security']) ? $stats['open_security'] : 0; ?></span></div>
+					<?php endif; ?>
+					<?php if ($is_captain || $is_command): ?>
+					<div class="panel-6">CMD<span class="hop">-<?php echo isset($stats['pending_suggestions']) ? $stats['pending_suggestions'] : 0; ?></span></div>
+					<?php endif; ?>
+					<div class="panel-7">DEPT<span class="hop">-<?php echo $user_department; ?></span></div>
 					<div class="panel-8">ACTV<span class="hop">-MON</span></div>
 					<div class="panel-9">REAL<span class="hop">-TIME</span></div>
 				</div>
@@ -179,51 +233,68 @@ try {
 					
 					<!-- Summary Statistics -->
 					<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+						<?php if ($is_captain || $is_command || $user_department === 'MED/SCI'): ?>
 						<div style="background: rgba(85, 102, 255, 0.2); padding: 1rem; border-radius: 10px; text-align: center; border: 2px solid var(--blue);">
 							<h4 style="color: var(--blue);">Medical Issues</h4>
-							<div style="font-size: 2rem; color: var(--blue);"><?php echo $stats['open_medical']; ?></div>
+							<div style="font-size: 2rem; color: var(--blue);"><?php echo isset($stats['open_medical']) ? $stats['open_medical'] : 0; ?></div>
 							<small>Open Cases</small>
 						</div>
+						<?php endif; ?>
+						<?php if ($is_captain || $is_command || $user_department === 'ENG/OPS'): ?>
 						<div style="background: rgba(255, 136, 0, 0.2); padding: 1rem; border-radius: 10px; text-align: center; border: 2px solid var(--orange);">
 							<h4 style="color: var(--orange);">Engineering Faults</h4>
-							<div style="font-size: 2rem; color: var(--orange);"><?php echo $stats['open_engineering']; ?></div>
+							<div style="font-size: 2rem; color: var(--orange);"><?php echo isset($stats['open_engineering']) ? $stats['open_engineering'] : 0; ?></div>
 							<small>Open Reports</small>
 						</div>
+						<?php endif; ?>
+						<?php if ($is_captain || $is_command || $user_department === 'SEC/TAC'): ?>
 						<div style="background: rgba(255, 170, 0, 0.2); padding: 1rem; border-radius: 10px; text-align: center; border: 2px solid var(--gold);">
 							<h4 style="color: var(--gold);">Security Incidents</h4>
-							<div style="font-size: 2rem; color: var(--gold);"><?php echo $stats['open_security']; ?></div>
+							<div style="font-size: 2rem; color: var(--gold);"><?php echo isset($stats['open_security']) ? $stats['open_security'] : 0; ?></div>
 							<small>Open Reports</small>
 						</div>
+						<?php endif; ?>
+						<?php if ($is_captain || $is_command): ?>
 						<div style="background: rgba(204, 68, 68, 0.2); padding: 1rem; border-radius: 10px; text-align: center; border: 2px solid var(--red);">
 							<h4 style="color: var(--red);">Suggestions</h4>
-							<div style="font-size: 2rem; color: var(--red);"><?php echo $stats['open_suggestions']; ?></div>
+							<div style="font-size: 2rem; color: var(--red);"><?php echo isset($stats['pending_suggestions']) ? $stats['pending_suggestions'] : 0; ?></div>
 							<small>Pending Review</small>
 						</div>
+						<?php endif; ?>
 					</div>
 					
 					<!-- Quick Access Buttons -->
 					<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+						<?php if ($is_captain || $is_command || $user_department === 'MED/SCI'): ?>
 						<button onclick="playSoundAndRedirect('audio2', 'med_sci.php')" style="background-color: var(--blue); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1.1rem;">
 							<strong>Medical/Science</strong><br>
 							<small>Report & Manage Health Issues</small>
 						</button>
+						<?php endif; ?>
+						<?php if ($is_captain || $is_command || $user_department === 'ENG/OPS'): ?>
 						<button onclick="playSoundAndRedirect('audio2', 'eng_ops.php')" style="background-color: var(--orange); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1.1rem;">
 							<strong>Engineering/Ops</strong><br>
 							<small>System Faults & Maintenance</small>
 						</button>
+						<?php endif; ?>
+						<?php if ($is_captain || $is_command || $user_department === 'SEC/TAC'): ?>
 						<button onclick="playSoundAndRedirect('audio2', 'sec_tac.php')" style="background-color: var(--gold); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1.1rem;">
 							<strong>Security/Tactical</strong><br>
 							<small>Incidents & Security Concerns</small>
 						</button>
+						<?php endif; ?>
+						<?php if ($is_captain || $is_command): ?>
 						<button onclick="playSoundAndRedirect('audio2', 'command.php')" style="background-color: var(--red); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1.1rem;">
 							<strong>Command</strong><br>
 							<small>Suggestions & Strategic Issues</small>
 						</button>
+						<?php endif; ?>
 					</div>
 					
 					<h3>Recent Reports</h3>
 					<div class="report-grid">
 						<!-- Medical Reports -->
+						<?php if ($is_captain || $is_command || $user_department === 'MED/SCI'): ?>
 						<div class="report-section medical">
 							<h4 style="color: var(--blue);">Recent Medical Reports</h4>
 							<?php if (empty($medical_reports)): ?>
@@ -241,8 +312,10 @@ try {
 							<?php endforeach; ?>
 							<?php endif; ?>
 						</div>
+						<?php endif; ?>
 						
 						<!-- Engineering Reports -->
+						<?php if ($is_captain || $is_command || $user_department === 'ENG/OPS'): ?>
 						<div class="report-section engineering">
 							<h4 style="color: var(--orange);">Recent Engineering Reports</h4>
 							<?php if (empty($engineering_reports)): ?>
@@ -260,8 +333,10 @@ try {
 							<?php endforeach; ?>
 							<?php endif; ?>
 						</div>
+						<?php endif; ?>
 						
 						<!-- Security Reports -->
+						<?php if ($is_captain || $is_command || $user_department === 'SEC/TAC'): ?>
 						<div class="report-section security">
 							<h4 style="color: var(--gold);">Recent Security Reports</h4>
 							<?php if (empty($security_reports)): ?>
@@ -279,8 +354,10 @@ try {
 							<?php endforeach; ?>
 							<?php endif; ?>
 						</div>
+						<?php endif; ?>
 						
 						<!-- Command Suggestions -->
+						<?php if ($is_captain || $is_command): ?>
 						<div class="report-section command">
 							<h4 style="color: var(--red);">Recent Suggestions</h4>
 							<?php if (empty($command_suggestions)): ?>
@@ -298,6 +375,7 @@ try {
 							<?php endforeach; ?>
 							<?php endif; ?>
 						</div>
+						<?php endif; ?>
 					</div>
 				</main>
 				<footer>
