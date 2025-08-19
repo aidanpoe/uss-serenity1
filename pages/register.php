@@ -83,20 +83,45 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'register') {
         
         // Create user account and link to roster
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("
-            INSERT INTO users (username, password, first_name, last_name, department, position, rank, roster_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([
-            $username,
-            $password_hash,
-            $_POST['first_name'],
-            $_POST['last_name'],
-            $_POST['department'],
-            $_POST['position'] ?? null,
-            $_POST['rank'],
-            $roster_id
-        ]);
+        
+        // Check if the additional columns exist in users table
+        try {
+            $pdo->query("SELECT position, rank, roster_id FROM users LIMIT 1");
+            $has_extended_columns = true;
+        } catch (Exception $e) {
+            $has_extended_columns = false;
+        }
+        
+        if ($has_extended_columns) {
+            // Use full INSERT with all columns
+            $stmt = $pdo->prepare("
+                INSERT INTO users (username, password, first_name, last_name, department, position, rank, roster_id) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $username,
+                $password_hash,
+                $_POST['first_name'],
+                $_POST['last_name'],
+                $_POST['department'],
+                $_POST['position'] ?? null,
+                $_POST['rank'],
+                $roster_id
+            ]);
+        } else {
+            // Use basic INSERT with only existing columns
+            $stmt = $pdo->prepare("
+                INSERT INTO users (username, password, first_name, last_name, department) 
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $username,
+                $password_hash,
+                $_POST['first_name'],
+                $_POST['last_name'],
+                $_POST['department']
+            ]);
+        }
         
         $pdo->commit();
         $success = "Account created successfully! You can now log in with your username and password.";
