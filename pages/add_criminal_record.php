@@ -64,15 +64,11 @@ try {
     $crew_members = $crew_stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Get current user info for investigating officer default
-    $user_stmt = $pdo->prepare("
-        SELECT r.first_name, r.last_name, r.rank 
-        FROM users u 
-        JOIN roster r ON u.crew_id = r.id 
-        WHERE u.id = ?
-    ");
-    $user_stmt->execute([$_SESSION['user_id']]);
-    $current_user = $user_stmt->fetch(PDO::FETCH_ASSOC);
-    $default_officer = $current_user ? $current_user['rank'] . ' ' . $current_user['first_name'] . ' ' . $current_user['last_name'] : '';
+    $default_officer = '';
+    if (isset($_SESSION['first_name']) && isset($_SESSION['last_name'])) {
+        $rank = $_SESSION['rank'] ?? '';
+        $default_officer = trim($rank . ' ' . $_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
+    }
     
 } catch (Exception $e) {
     $error = "Database error: " . $e->getMessage();
@@ -87,18 +83,21 @@ try {
     <title>Add Criminal Record - USS-Serenity</title>
     <link rel="stylesheet" href="../TEMPLATE/assets/classic.css">
     <style>
-        .form-container {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid var(--gold);
-            border-radius: 10px;
+        main {
+            padding: 1rem;
+        }
+        .lcars-form {
+            background: black;
+            border: 4px solid var(--red);
+            border-radius: 15px;
             padding: 2rem;
             margin: 1rem 0;
         }
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
         .form-group {
             margin-bottom: 1rem;
@@ -108,72 +107,117 @@ try {
             color: var(--gold);
             font-weight: bold;
             margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            font-size: 0.9rem;
         }
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 0.5rem;
-            background: black;
-            color: white;
-            border: 1px solid var(--gold);
-            border-radius: 5px;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--space-white);
+            border: 2px solid var(--gold);
+            border-radius: 8px;
             font-family: inherit;
+            font-size: 1rem;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--bluey);
+            box-shadow: 0 0 10px rgba(86, 255, 102, 0.3);
         }
         .form-group textarea {
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
         }
         .submit-btn {
             background: var(--red);
             color: black;
-            padding: 0.8rem 2rem;
+            padding: 1rem 3rem;
             border: none;
-            border-radius: 5px;
+            border-radius: 25px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
         }
         .submit-btn:hover {
             background: var(--orange);
+            transform: scale(1.05);
         }
         .back-btn {
-            background: var(--blue);
+            background: var(--bluey);
             color: black;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 20px;
             font-weight: bold;
             display: inline-block;
             margin-bottom: 1rem;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
         }
         .back-btn:hover {
             background: var(--green);
+            transform: scale(1.05);
         }
-        .message {
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .alert.success {
             background: rgba(0, 255, 0, 0.2);
-            border: 1px solid var(--green);
+            border: 2px solid var(--green);
             color: var(--green);
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
         }
-        .error {
+        .alert.error {
             background: rgba(255, 0, 0, 0.2);
-            border: 1px solid var(--red);
+            border: 2px solid var(--red);
             color: var(--red);
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
         }
         .classification-info {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--orange);
             font-style: italic;
             margin-top: 0.25rem;
+            text-transform: none;
         }
         .required {
             color: var(--red);
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(45deg, var(--red), var(--orange));
+            border-radius: 15px;
+            color: black;
+        }
+        .form-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .form-section {
+            background: rgba(255, 170, 0, 0.1);
+            border: 2px solid var(--gold);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .form-section h4 {
+            color: var(--gold);
+            margin: 0 0 1rem 0;
+            text-transform: uppercase;
+            font-size: 1.1rem;
         }
     </style>
 </head>
@@ -181,7 +225,7 @@ try {
     <div class="container">
         <header>
             <h1>USS-Serenity NCC-74714</h1>
-            <h2>🚨 Security Department - Add Criminal Record</h2>
+            <h2>🚨 Security Department - Criminal Records Entry</h2>
         </header>
         
         <nav>
@@ -201,130 +245,143 @@ try {
             <a href="criminal_records.php" class="back-btn">← Back to Criminal Records</a>
             
             <?php if ($message): ?>
-                <div class="message"><?php echo htmlspecialchars($message); ?></div>
+                <div class="alert success"><?php echo htmlspecialchars($message); ?></div>
             <?php endif; ?>
             
             <?php if ($error): ?>
-                <div class="error"><?php echo htmlspecialchars($error); ?></div>
+                <div class="alert error"><?php echo htmlspecialchars($error); ?></div>
             <?php endif; ?>
             
-            <div class="form-container">
-                <h3>📝 New Criminal Record Entry</h3>
-                <p style="color: var(--gold);"><em>⚠️ All fields marked with <span class="required">*</span> are required</em></p>
+            <div class="lcars-form">
+                <div class="form-header">
+                    <h3>📝 New Criminal Record Entry</h3>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">⚠️ All fields marked with <span class="required">*</span> are required</p>
+                </div>
                 
                 <form method="POST" action="">
-                    <div class="form-grid">
-                        <!-- Crew Member Selection -->
-                        <div class="form-group">
-                            <label for="crew_id">Subject Personnel <span class="required">*</span></label>
-                            <select name="crew_id" id="crew_id" required>
-                                <option value="">Select Crew Member</option>
-                                <?php foreach ($crew_members as $member): ?>
-                                <option value="<?php echo $member['id']; ?>" <?php echo (($preselected_crew_id && $preselected_crew_id == $member['id']) || (isset($_POST['crew_id']) && $_POST['crew_id'] == $member['id'])) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($member['rank'] . ' ' . $member['first_name'] . ' ' . $member['last_name'] . ' (' . $member['department'] . ')'); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        
-                        <!-- Incident Type -->
-                        <div class="form-group">
-                            <label for="incident_type">Incident Type <span class="required">*</span></label>
-                            <select name="incident_type" id="incident_type" required>
-                                <option value="">Select Type</option>
-                                <option value="Minor Violation" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Minor Violation') ? 'selected' : ''; ?>>Minor Violation</option>
-                                <option value="Major Violation" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Major Violation') ? 'selected' : ''; ?>>Major Violation</option>
-                                <option value="Court Martial" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Court Martial') ? 'selected' : ''; ?>>Court Martial</option>
-                                <option value="Disciplinary Action" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Disciplinary Action') ? 'selected' : ''; ?>>Disciplinary Action</option>
-                                <option value="Criminal Investigation" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Criminal Investigation') ? 'selected' : ''; ?>>Criminal Investigation</option>
-                                <option value="Security Breach" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Security Breach') ? 'selected' : ''; ?>>Security Breach</option>
-                                <option value="Assault" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Assault') ? 'selected' : ''; ?>>Assault</option>
-                                <option value="Insubordination" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Insubordination') ? 'selected' : ''; ?>>Insubordination</option>
-                                <option value="Theft" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Theft') ? 'selected' : ''; ?>>Theft</option>
-                                <option value="Other" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Other') ? 'selected' : ''; ?>>Other</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Incident Date -->
-                        <div class="form-group">
-                            <label for="incident_date">Incident Date <span class="required">*</span></label>
-                            <input type="date" name="incident_date" id="incident_date" value="<?php echo isset($_POST['incident_date']) ? htmlspecialchars($_POST['incident_date']) : date('Y-m-d'); ?>" required>
-                        </div>
-                        
-                        <!-- Location -->
-                        <div class="form-group">
-                            <label for="location">Location <span class="required">*</span></label>
-                            <input type="text" name="location" id="location" placeholder="e.g., Deck 5 - Security Office" value="<?php echo isset($_POST['location']) ? htmlspecialchars($_POST['location']) : ''; ?>" required>
-                        </div>
-                        
-                        <!-- Investigation Status -->
-                        <div class="form-group">
-                            <label for="investigation_status">Investigation Status <span class="required">*</span></label>
-                            <select name="investigation_status" id="investigation_status" required>
-                                <option value="">Select Status</option>
-                                <option value="Pending" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Pending') ? 'selected' : ''; ?>>Pending</option>
-                                <option value="Active" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Active') ? 'selected' : ''; ?>>Active</option>
-                                <option value="Completed" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Completed') ? 'selected' : ''; ?>>Completed</option>
-                                <option value="Closed" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Closed') ? 'selected' : ''; ?>>Closed</option>
-                                <option value="Dismissed" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Dismissed') ? 'selected' : ''; ?>>Dismissed</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Investigating Officer -->
-                        <div class="form-group">
-                            <label for="investigating_officer">Investigating Officer <span class="required">*</span></label>
-                            <input type="text" name="investigating_officer" id="investigating_officer" placeholder="Rank First Last" value="<?php echo isset($_POST['investigating_officer']) ? htmlspecialchars($_POST['investigating_officer']) : htmlspecialchars($default_officer); ?>" required>
-                        </div>
-                        
-                        <!-- Classification -->
-                        <div class="form-group">
-                            <label for="classification">Security Classification <span class="required">*</span></label>
-                            <select name="classification" id="classification" required>
-                                <option value="">Select Classification</option>
-                                <option value="Public" <?php echo (isset($_POST['classification']) && $_POST['classification'] == 'Public') ? 'selected' : ''; ?>>Public</option>
-                                <option value="Restricted" <?php echo (isset($_POST['classification']) && $_POST['classification'] == 'Restricted') ? 'selected' : ''; ?>>Restricted</option>
-                                <option value="Classified" <?php echo (isset($_POST['classification']) && $_POST['classification'] == 'Classified') ? 'selected' : ''; ?>>Classified</option>
-                            </select>
-                            <div class="classification-info">
-                                Public: Viewable by all security staff • Restricted: Command+ only • Classified: Captain only
+                    <div class="form-section">
+                        <h4>📋 Basic Incident Information</h4>
+                        <div class="form-grid">
+                            <!-- Crew Member Selection -->
+                            <div class="form-group">
+                                <label for="crew_id">Subject Personnel <span class="required">*</span></label>
+                                <select name="crew_id" id="crew_id" required>
+                                    <option value="">Select Crew Member</option>
+                                    <?php foreach ($crew_members as $member): ?>
+                                    <option value="<?php echo $member['id']; ?>" <?php echo (($preselected_crew_id && $preselected_crew_id == $member['id']) || (isset($_POST['crew_id']) && $_POST['crew_id'] == $member['id'])) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($member['rank'] . ' ' . $member['first_name'] . ' ' . $member['last_name'] . ' (' . $member['department'] . ')'); ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <!-- Incident Type -->
+                            <div class="form-group">
+                                <label for="incident_type">Incident Type <span class="required">*</span></label>
+                                <select name="incident_type" id="incident_type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="Minor Violation" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Minor Violation') ? 'selected' : ''; ?>>Minor Violation</option>
+                                    <option value="Major Violation" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Major Violation') ? 'selected' : ''; ?>>Major Violation</option>
+                                    <option value="Court Martial" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Court Martial') ? 'selected' : ''; ?>>Court Martial</option>
+                                    <option value="Disciplinary Action" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Disciplinary Action') ? 'selected' : ''; ?>>Disciplinary Action</option>
+                                    <option value="Criminal Investigation" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Criminal Investigation') ? 'selected' : ''; ?>>Criminal Investigation</option>
+                                    <option value="Security Breach" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Security Breach') ? 'selected' : ''; ?>>Security Breach</option>
+                                    <option value="Assault" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Assault') ? 'selected' : ''; ?>>Assault</option>
+                                    <option value="Insubordination" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Insubordination') ? 'selected' : ''; ?>>Insubordination</option>
+                                    <option value="Theft" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Theft') ? 'selected' : ''; ?>>Theft</option>
+                                    <option value="Other" <?php echo (isset($_POST['incident_type']) && $_POST['incident_type'] == 'Other') ? 'selected' : ''; ?>>Other</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Incident Date -->
+                            <div class="form-group">
+                                <label for="incident_date">Incident Date <span class="required">*</span></label>
+                                <input type="date" name="incident_date" id="incident_date" value="<?php echo isset($_POST['incident_date']) ? htmlspecialchars($_POST['incident_date']) : date('Y-m-d'); ?>" required>
+                            </div>
+                            
+                            <!-- Location -->
+                            <div class="form-group">
+                                <label for="location">Location <span class="required">*</span></label>
+                                <input type="text" name="location" id="location" placeholder="e.g., Deck 5 - Security Office" value="<?php echo isset($_POST['location']) ? htmlspecialchars($_POST['location']) : ''; ?>" required>
                             </div>
                         </div>
-                        
-                        <!-- Punishment Type -->
-                        <div class="form-group">
-                            <label for="punishment_type">Punishment Type</label>
-                            <select name="punishment_type" id="punishment_type">
-                                <option value="">None/Pending</option>
-                                <option value="Verbal Warning" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Verbal Warning') ? 'selected' : ''; ?>>Verbal Warning</option>
-                                <option value="Written Reprimand" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Written Reprimand') ? 'selected' : ''; ?>>Written Reprimand</option>
-                                <option value="Suspension" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Suspension') ? 'selected' : ''; ?>>Suspension</option>
-                                <option value="Demotion" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Demotion') ? 'selected' : ''; ?>>Demotion</option>
-                                <option value="Confinement" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Confinement') ? 'selected' : ''; ?>>Confinement</option>
-                                <option value="Discharge" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Discharge') ? 'selected' : ''; ?>>Discharge</option>
-                                <option value="Court Martial" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Court Martial') ? 'selected' : ''; ?>>Court Martial</option>
-                            </select>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4>🔍 Investigation Details</h4>
+                        <div class="form-grid">
+                            <!-- Investigation Status -->
+                            <div class="form-group">
+                                <label for="investigation_status">Investigation Status <span class="required">*</span></label>
+                                <select name="investigation_status" id="investigation_status" required>
+                                    <option value="">Select Status</option>
+                                    <option value="Pending" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                    <option value="Active" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Active') ? 'selected' : ''; ?>>Active</option>
+                                    <option value="Completed" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Completed') ? 'selected' : ''; ?>>Completed</option>
+                                    <option value="Closed" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Closed') ? 'selected' : ''; ?>>Closed</option>
+                                    <option value="Dismissed" <?php echo (isset($_POST['investigation_status']) && $_POST['investigation_status'] == 'Dismissed') ? 'selected' : ''; ?>>Dismissed</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Investigating Officer -->
+                            <div class="form-group">
+                                <label for="investigating_officer">Investigating Officer <span class="required">*</span></label>
+                                <input type="text" name="investigating_officer" id="investigating_officer" placeholder="Rank First Last" value="<?php echo isset($_POST['investigating_officer']) ? htmlspecialchars($_POST['investigating_officer']) : htmlspecialchars($default_officer); ?>" required>
+                            </div>
+                            
+                            <!-- Classification -->
+                            <div class="form-group">
+                                <label for="classification">Security Classification <span class="required">*</span></label>
+                                <select name="classification" id="classification" required>
+                                    <option value="">Select Classification</option>
+                                    <option value="Public" <?php echo (isset($_POST['classification']) && $_POST['classification'] == 'Public') ? 'selected' : ''; ?>>Public</option>
+                                    <option value="Restricted" <?php echo (isset($_POST['classification']) && $_POST['classification'] == 'Restricted') ? 'selected' : ''; ?>>Restricted</option>
+                                    <option value="Classified" <?php echo (isset($_POST['classification']) && $_POST['classification'] == 'Classified') ? 'selected' : ''; ?>>Classified</option>
+                                </select>
+                                <div class="classification-info">
+                                    Public: Viewable by all security staff • Restricted: Command+ only • Classified: Captain only
+                                </div>
+                            </div>
+                            
+                            <!-- Punishment Type -->
+                            <div class="form-group">
+                                <label for="punishment_type">Punishment Type</label>
+                                <select name="punishment_type" id="punishment_type">
+                                    <option value="">None/Pending</option>
+                                    <option value="Verbal Warning" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Verbal Warning') ? 'selected' : ''; ?>>Verbal Warning</option>
+                                    <option value="Written Reprimand" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Written Reprimand') ? 'selected' : ''; ?>>Written Reprimand</option>
+                                    <option value="Suspension" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Suspension') ? 'selected' : ''; ?>>Suspension</option>
+                                    <option value="Demotion" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Demotion') ? 'selected' : ''; ?>>Demotion</option>
+                                    <option value="Confinement" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Confinement') ? 'selected' : ''; ?>>Confinement</option>
+                                    <option value="Discharge" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Discharge') ? 'selected' : ''; ?>>Discharge</option>
+                                    <option value="Court Martial" <?php echo (isset($_POST['punishment_type']) && $_POST['punishment_type'] == 'Court Martial') ? 'selected' : ''; ?>>Court Martial</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Full Width Fields -->
-                    <div class="form-group">
-                        <label for="description">Incident Description <span class="required">*</span></label>
-                        <textarea name="description" id="description" placeholder="Detailed description of the incident..." required><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="evidence_notes">Evidence & Investigation Notes</label>
-                        <textarea name="evidence_notes" id="evidence_notes" placeholder="Physical evidence, witness statements, investigation findings..."><?php echo isset($_POST['evidence_notes']) ? htmlspecialchars($_POST['evidence_notes']) : ''; ?></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="witnesses">Witnesses</label>
-                        <textarea name="witnesses" id="witnesses" placeholder="List of witnesses with ranks and names..."><?php echo isset($_POST['witnesses']) ? htmlspecialchars($_POST['witnesses']) : ''; ?></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="punishment_details">Punishment Details</label>
-                        <textarea name="punishment_details" id="punishment_details" placeholder="Specific details of punishment, duration, conditions..."><?php echo isset($_POST['punishment_details']) ? htmlspecialchars($_POST['punishment_details']) : ''; ?></textarea>
+                    <div class="form-section">
+                        <h4>📝 Detailed Information</h4>
+                        <!-- Full Width Fields -->
+                        <div class="form-group">
+                            <label for="description">Incident Description <span class="required">*</span></label>
+                            <textarea name="description" id="description" placeholder="Detailed description of the incident..." required><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="evidence_notes">Evidence & Investigation Notes</label>
+                            <textarea name="evidence_notes" id="evidence_notes" placeholder="Physical evidence, witness statements, investigation findings..."><?php echo isset($_POST['evidence_notes']) ? htmlspecialchars($_POST['evidence_notes']) : ''; ?></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="witnesses">Witnesses</label>
+                            <textarea name="witnesses" id="witnesses" placeholder="List of witnesses with ranks and names..."><?php echo isset($_POST['witnesses']) ? htmlspecialchars($_POST['witnesses']) : ''; ?></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="punishment_details">Punishment Details</label>
+                            <textarea name="punishment_details" id="punishment_details" placeholder="Specific details of punishment, duration, conditions..."><?php echo isset($_POST['punishment_details']) ? htmlspecialchars($_POST['punishment_details']) : ''; ?></textarea>
+                        </div>
                     </div>
                     
                     <div style="text-align: center; margin-top: 2rem;">
