@@ -118,13 +118,13 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
 // Handle self-registration for reporting purposes (limited to basic crew positions)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'self_register') {
     try {
-        // Check if person already exists
+        // Check if person already exists (by name only, species can be shared)
         $pdo = getConnection();
-        $check_stmt = $pdo->prepare("SELECT id FROM roster WHERE first_name = ? AND last_name = ? AND species = ?");
-        $check_stmt->execute([$_POST['first_name'], $_POST['last_name'], $_POST['species']]);
+        $check_stmt = $pdo->prepare("SELECT id FROM roster WHERE first_name = ? AND last_name = ?");
+        $check_stmt->execute([$_POST['first_name'], $_POST['last_name']]);
         
         if ($check_stmt->fetch()) {
-            $error = "A crew member with this name and species already exists in the roster.";
+            $error = "A crew member with this name already exists in the roster.";
         } else {
             $image_path = '';
             if (isset($_FILES['crew_image']) && $_FILES['crew_image']['error'] === UPLOAD_ERR_OK) {
