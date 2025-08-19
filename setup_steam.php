@@ -82,6 +82,11 @@
             <h2>Steam Integration Database Setup</h2>
             <p>This will update your database to support Steam authentication and enhanced user management.</p>
             
+            <div style="background: rgba(255,136,0,0.1); padding: 1rem; border: 1px solid orange; margin: 1rem 0;">
+                <h3 style="color: orange;">⚠️ Important</h3>
+                <p>If you're getting 500 errors on Steam login or profile pages, you need to run this setup first.</p>
+            </div>
+            
             <h3>Changes that will be made:</h3>
             <ul>
                 <li>Add <code>steam_id</code> column to users table</li>
@@ -95,6 +100,12 @@
                     Setup Steam Integration
                 </button>
             </form>
+            
+            <p style="margin-top: 2rem;">
+                <strong>Debug Tools:</strong><br>
+                <a href="steamauth/steamauth_debug.php?login" style="color: var(--bluey);">Test Steam Login (Debug)</a><br>
+                <a href="pages/profile_debug.php" style="color: var(--bluey);">Test Profile Page (Debug)</a>
+            </p>
         </div>
         
         <?php } ?>

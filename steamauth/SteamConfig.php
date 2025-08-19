@@ -1,7 +1,7 @@
 <?php
 //Version 4.0
 $steamauth['apikey'] = "9C00EAFE9AF867596D73067C86308C5A"; // Your Steam WebAPI-Key found at https://steamcommunity.com/dev/apikey
-$steamauth['domainname'] = ""; // The main URL of your website displayed in the login page
+$steamauth['domainname'] = "uss-serenity.org"; // The main URL of your website displayed in the login page
 $steamauth['logoutpage'] = "../index.php"; // Page to redirect to after a successfull logout
 $steamauth['loginpage'] = "../index.php"; // Page to redirect to after a successfull login
 
