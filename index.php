@@ -141,20 +141,14 @@ function loginbutton($buttonstyle = "square") {
 							<div style="background: rgba(255, 170, 0, 0.1); padding: 1rem; border-radius: 10px; border: 2px solid var(--gold);" data-gmod-status>
 								<?php
 								$gmodData = getGmodPlayersOnline();
-								if (isset($gmodData['error'])):
-									if (isset($gmodData['server_reachable'])):
-								?>
-									<p style="color: var(--orange);">🟡 Server Online - Player queries disabled</p>
-									<p style="color: var(--gold); font-size: 0.9rem;">Server: 46.4.12.78:27015 (Reachable but queries restricted)</p>
-								<?php else: ?>
-									<p style="color: var(--red);">⚠️ Server Status Unknown - <?php echo htmlspecialchars($gmodData['error']); ?></p>
-									<p style="color: var(--gold); font-size: 0.9rem;">Server: 46.4.12.78:27015</p>
-								<?php 
-									endif;
-								elseif ($gmodData['count'] > 0):
+								
+								// Handle different status types
+								switch($gmodData['status'] ?? 'unknown'):
+									case 'online_full_data':
+									case 'online_manual_update':
 								?>
 									<p style="color: var(--gold); margin-bottom: 0.5rem;"><strong><?php echo $gmodData['count']; ?> crew member<?php echo $gmodData['count'] != 1 ? 's' : ''; ?> currently on duty</strong></p>
-									<?php if (!empty($gmodData['players']) && !isset($gmodData['info_only'])): ?>
+									<?php if (!empty($gmodData['players'])): ?>
 									<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0;">
 										<?php foreach ($gmodData['players'] as $player): ?>
 											<span style="background: rgba(255, 170, 0, 0.2); padding: 0.25rem 0.5rem; border-radius: 5px; font-size: 0.9rem; color: var(--gold);">
@@ -162,20 +156,58 @@ function loginbutton($buttonstyle = "square") {
 											</span>
 										<?php endforeach; ?>
 									</div>
-									<?php elseif (isset($gmodData['info_only'])): ?>
-									<p style="color: var(--blue); font-size: 0.9rem;">Player details not available (count only)</p>
 									<?php endif; ?>
-									<p style="color: var(--gold); font-size: 0.8rem; margin-top: 0.5rem;">Server: <?php echo htmlspecialchars($gmodData['server']); ?></p>
-								<?php else: ?>
-									<p style="color: var(--blue);">📭 No crew members currently on duty</p>
-									<p style="color: var(--gold); font-size: 0.9rem;">Server: <?php echo htmlspecialchars($gmodData['server'] ?? '46.4.12.78:27015'); ?></p>
-								<?php endif; ?>
+									<?php if (isset($gmodData['manual_update']) && $gmodData['manual_update']): ?>
+									<p style="color: var(--blue); font-size: 0.8rem;">📝 Last updated: <?php echo htmlspecialchars($gmodData['updated_at'] ?? 'Recently'); ?></p>
+									<?php endif; ?>
+								<?php
+									break;
+									
+									case 'online_count_only':
+								?>
+									<p style="color: var(--gold); margin-bottom: 0.5rem;"><strong><?php echo $gmodData['count']; ?> crew member<?php echo $gmodData['count'] != 1 ? 's' : ''; ?> currently on duty</strong></p>
+									<p style="color: var(--blue); font-size: 0.9rem;">Player details not available (count only)</p>
+								<?php
+									break;
+									
+									case 'online_queries_disabled':
+									case 'online_no_details':
+								?>
+									<p style="color: var(--orange);">🟡 Server Online - Player information unavailable</p>
+									<p style="color: var(--gold); font-size: 0.9rem;"><?php echo htmlspecialchars($gmodData['message'] ?? 'Queries disabled for security'); ?></p>
+								<?php
+									break;
+									
+									case 'offline':
+								?>
+									<p style="color: var(--red);">🔴 Server Offline</p>
+									<?php if (isset($gmodData['manual_update']) && $gmodData['manual_update']): ?>
+									<p style="color: var(--blue); font-size: 0.8rem;">📝 Last updated: <?php echo htmlspecialchars($gmodData['updated_at'] ?? 'Recently'); ?></p>
+									<?php endif; ?>
+								<?php
+									break;
+									
+									case 'unreachable':
+									default:
+								?>
+									<p style="color: var(--red);">⚠️ Server Status Unknown</p>
+									<p style="color: var(--gold); font-size: 0.9rem;"><?php echo htmlspecialchars($gmodData['message'] ?? 'Unable to determine server status'); ?></p>
+								<?php
+									break;
+								endswitch;
+								?>
+								<p style="color: var(--gold); font-size: 0.8rem; margin-top: 0.5rem;">Server: <?php echo htmlspecialchars($gmodData['server'] ?? '46.4.12.78:27015'); ?></p>
 								<div style="margin-top: 0.5rem;">
 									<button onclick="refreshGmodStatus()" style="background-color: var(--gold); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">
 										🔄 Refresh Status
 									</button>
+									<?php if (hasPermission('Command')): ?>
+									<a href="server_admin.php" style="background-color: var(--red); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; text-decoration: none; margin-left: 0.5rem;">
+										⚙️ Admin
+									</a>
+									<?php endif; ?>
 									<a href="test_gmod.php" style="background-color: var(--blue); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; text-decoration: none; margin-left: 0.5rem;">
-										🔧 Test Connection
+										🔧 Test
 									</a>
 								</div>
 							</div>
@@ -262,52 +294,82 @@ function loginbutton($buttonstyle = "square") {
 			.then(data => {
 				let html = '';
 				
-				if (data.error) {
-					if (data.server_reachable) {
+				switch(data.status) {
+					case 'online_full_data':
+					case 'online_manual_update':
 						html = `
-							<p style="color: var(--orange);">🟡 Server Online - Player queries disabled</p>
-							<p style="color: var(--gold); font-size: 0.9rem;">Server: 46.4.12.78:27015 (Reachable but queries restricted)</p>
+							<p style="color: var(--gold); margin-bottom: 0.5rem;"><strong>${data.count} crew member${data.count != 1 ? 's' : ''} currently on duty</strong></p>
 						`;
-					} else {
+						
+						if (data.players && data.players.length > 0) {
+							html += `
+								<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0;">
+									${data.players.map(player => `
+										<span style="background: rgba(255, 170, 0, 0.2); padding: 0.25rem 0.5rem; border-radius: 5px; font-size: 0.9rem; color: var(--gold);">
+											👤 ${player}
+										</span>
+									`).join('')}
+								</div>
+							`;
+						}
+						
+						if (data.manual_update) {
+							html += `<p style="color: var(--blue); font-size: 0.8rem;">📝 Last updated: ${data.updated_at || 'Recently'}</p>`;
+						}
+						break;
+						
+					case 'online_count_only':
 						html = `
-							<p style="color: var(--red);">⚠️ Server Status Unknown - ${data.error}</p>
-							<p style="color: var(--gold); font-size: 0.9rem;">Server: 46.4.12.78:27015</p>
+							<p style="color: var(--gold); margin-bottom: 0.5rem;"><strong>${data.count} crew member${data.count != 1 ? 's' : ''} currently on duty</strong></p>
+							<p style="color: var(--blue); font-size: 0.9rem;">Player details not available (count only)</p>
 						`;
-					}
-				} else if (data.count > 0) {
-					html = `
-						<p style="color: var(--gold); margin-bottom: 0.5rem;"><strong>${data.count} crew member${data.count != 1 ? 's' : ''} currently on duty</strong></p>
-					`;
-					
-					if (data.players && data.players.length > 0 && !data.info_only) {
-						html += `
-							<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0;">
-								${data.players.map(player => `
-									<span style="background: rgba(255, 170, 0, 0.2); padding: 0.25rem 0.5rem; border-radius: 5px; font-size: 0.9rem; color: var(--gold);">
-										👤 ${player}
-									</span>
-								`).join('')}
-							</div>
+						break;
+						
+					case 'online_queries_disabled':
+					case 'online_no_details':
+						html = `
+							<p style="color: var(--orange);">🟡 Server Online - Player information unavailable</p>
+							<p style="color: var(--gold); font-size: 0.9rem;">${data.message || 'Queries disabled for security'}</p>
 						`;
-					} else if (data.info_only) {
-						html += `<p style="color: var(--blue); font-size: 0.9rem;">Player details not available (count only)</p>`;
-					}
-					
-					html += `<p style="color: var(--gold); font-size: 0.8rem; margin-top: 0.5rem;">Server: ${data.server}</p>`;
-				} else {
-					html = `
-						<p style="color: var(--blue);">📭 No crew members currently on duty</p>
-						<p style="color: var(--gold); font-size: 0.9rem;">Server: ${data.server || '46.4.12.78:27015'}</p>
-					`;
+						break;
+						
+					case 'offline':
+						html = `<p style="color: var(--red);">🔴 Server Offline</p>`;
+						if (data.manual_update) {
+							html += `<p style="color: var(--blue); font-size: 0.8rem;">📝 Last updated: ${data.updated_at || 'Recently'}</p>`;
+						}
+						break;
+						
+					case 'unreachable':
+					default:
+						html = `
+							<p style="color: var(--red);">⚠️ Server Status Unknown</p>
+							<p style="color: var(--gold); font-size: 0.9rem;">${data.message || 'Unable to determine server status'}</p>
+						`;
+						break;
 				}
+				
+				html += `<p style="color: var(--gold); font-size: 0.8rem; margin-top: 0.5rem;">Server: ${data.server || '46.4.12.78:27015'}</p>`;
 				
 				html += `
 					<div style="margin-top: 0.5rem;">
 						<button onclick="refreshGmodStatus()" style="background-color: var(--gold); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">
 							🔄 Refresh Status
 						</button>
+				`;
+				
+				// Add admin link if user has command permission
+				<?php if (hasPermission('Command')): ?>
+				html += `
+						<a href="server_admin.php" style="background-color: var(--red); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; text-decoration: none; margin-left: 0.5rem;">
+							⚙️ Admin
+						</a>
+				`;
+				<?php endif; ?>
+				
+				html += `
 						<a href="test_gmod.php" style="background-color: var(--blue); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; text-decoration: none; margin-left: 0.5rem;">
-							🔧 Test Connection
+							🔧 Test
 						</a>
 					</div>
 				`;

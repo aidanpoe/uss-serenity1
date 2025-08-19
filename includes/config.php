@@ -440,17 +440,41 @@ function getGmodPlayersOnline() {
     $serverIP = '46.4.12.78';
     $serverPort = 27015;
     
+    // Try to get data from cache first
+    $cachedData = getServerStatusFromCache();
+    if ($cachedData !== false) {
+        return $cachedData;
+    }
+    
     $result = queryGmodServer($serverIP, $serverPort);
     
     if ($result === false) {
-        return ['error' => 'Server unreachable or not responding to queries'];
+        // Server unreachable - check if we can at least connect
+        $isReachable = testBasicConnection($serverIP, $serverPort);
+        if ($isReachable) {
+            return [
+                'status' => 'online_queries_disabled',
+                'message' => 'Server online - Player queries disabled for security',
+                'server' => $serverIP . ':' . $serverPort,
+                'can_connect' => true
+            ];
+        } else {
+            return [
+                'status' => 'unreachable',
+                'message' => 'Server unreachable or offline',
+                'server' => $serverIP . ':' . $serverPort,
+                'can_connect' => false
+            ];
+        }
     }
     
-    // Handle different response types
+    // Handle successful query responses
     if (isset($result['server_online']) && $result['server_online'] && !$result['query_supported']) {
         return [
-            'error' => 'Server online but queries disabled',
-            'server_reachable' => true
+            'status' => 'online_queries_disabled',
+            'message' => 'Server online but queries disabled',
+            'server' => $serverIP . ':' . $serverPort,
+            'can_connect' => true
         ];
     }
     
@@ -459,6 +483,7 @@ function getGmodPlayersOnline() {
             'players' => [],
             'count' => $result['count'],
             'server' => $serverIP . ':' . $serverPort,
+            'status' => 'online_count_only',
             'info_only' => true
         ];
     }
@@ -467,11 +492,114 @@ function getGmodPlayersOnline() {
         return [
             'players' => $result['players'] ?? [],
             'count' => $result['count'],
-            'server' => $serverIP . ':' . $serverPort
+            'server' => $serverIP . ':' . $serverPort,
+            'status' => 'online_full_data'
         ];
     }
     
-    return ['error' => 'Invalid server response'];
+    return [
+        'status' => 'unknown',
+        'message' => 'Unable to determine server status',
+        'server' => $serverIP . ':' . $serverPort
+    ];
+}
+
+function testBasicConnection($ip, $port, $timeout = 3) {
+    try {
+        $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if (!$socket) {
+            return false;
+        }
+        
+        socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => $timeout, 'usec' => 0));
+        socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, array('sec' => $timeout, 'usec' => 0));
+        
+        // Send a simple UDP packet
+        $testPacket = "ping";
+        $result = socket_sendto($socket, $testPacket, strlen($testPacket), 0, $ip, $port);
+        
+        socket_close($socket);
+        
+        // If we can send to the port, assume server is running
+        return $result !== false;
+        
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function getServerStatusFromCache() {
+    $cacheFile = __DIR__ . '/../cache/server_status.json';
+    $cacheMaxAge = 60; // 1 minute cache
+    
+    if (!file_exists($cacheFile)) {
+        return false;
+    }
+    
+    $cacheData = json_decode(file_get_contents($cacheFile), true);
+    if (!$cacheData || !isset($cacheData['timestamp'])) {
+        return false;
+    }
+    
+    // Check if cache is still valid
+    if ((time() - $cacheData['timestamp']) > $cacheMaxAge) {
+        return false;
+    }
+    
+    return $cacheData['data'];
+}
+
+function saveServerStatusToCache($data) {
+    $cacheDir = __DIR__ . '/../cache';
+    $cacheFile = $cacheDir . '/server_status.json';
+    
+    // Create cache directory if it doesn't exist
+    if (!is_dir($cacheDir)) {
+        mkdir($cacheDir, 0755, true);
+    }
+    
+    $cacheData = [
+        'timestamp' => time(),
+        'data' => $data
+    ];
+    
+    file_put_contents($cacheFile, json_encode($cacheData));
+}
+
+// Manual status update function (for when you know server status)
+function updateServerStatusManually($playerCount = null, $playerList = null, $isOnline = true) {
+    $serverIP = '46.4.12.78';
+    $serverPort = 27015;
+    
+    if (!$isOnline) {
+        $data = [
+            'status' => 'offline',
+            'message' => 'Server offline',
+            'server' => $serverIP . ':' . $serverPort,
+            'manual_update' => true,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+    } else if ($playerCount !== null) {
+        $data = [
+            'players' => $playerList ?? [],
+            'count' => $playerCount,
+            'server' => $serverIP . ':' . $serverPort,
+            'status' => 'online_manual_update',
+            'manual_update' => true,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+    } else {
+        $data = [
+            'status' => 'online_no_details',
+            'message' => 'Server online - No player details available',
+            'server' => $serverIP . ':' . $serverPort,
+            'manual_update' => true,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+    }
+    
+    saveServerStatusToCache($data);
+    return $data;
 }
 
 // Alternative function using cURL for HTTP-based server APIs (if available)

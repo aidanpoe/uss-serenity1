@@ -95,6 +95,12 @@ echo "<li>Verify server is actually running on port 27015</li>";
 echo "<li>Consider using a web-based server status API instead</li>";
 echo "</ul>";
 
-echo '<p><a href="index.php">Return to Homepage</a></p>';
-echo '<p><a href="">Refresh Test</a></p>';
+echo '<p><a href="index.php">Return to Homepage</a> | <a href="">Refresh Test</a>';
+
+// Show admin panel link if user has command permission
+if (hasPermission('Command')) {
+    echo ' | <a href="server_admin.php">Server Admin Panel</a>';
+}
+
+echo '</p>';
 ?>
