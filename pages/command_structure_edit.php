@@ -1,12 +1,6 @@
 <?php
 require_once '../includes/config.php';
 
-// Debug session info
-$debug_info = "User ID: " . ($_SESSION['user_id'] ?? 'Not set') . 
-              " | Department: " . ($_SESSION['department'] ?? 'Not set') . 
-              " | Logged in: " . (isLoggedIn() ? 'Yes' : 'No') . 
-              " | Has Captain Permission: " . (hasPermission('Captain') ? 'Yes' : 'No');
-
 // Check if user is Captain
 if (!hasPermission('Captain')) {
     header('Location: login.php');
@@ -62,12 +56,12 @@ try {
         'S.R.T. Leader' => null
     ];
     
-    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('" . implode("','", array_keys($command_positions)) . "')");
+    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('" . implode("','", array_keys($command_positions)) . "') AND position IS NOT NULL AND position != ''");
     $stmt->execute();
     $command_crew = $stmt->fetchAll();
     
     foreach ($command_crew as $officer) {
-        if (isset($command_positions[$officer['position']])) {
+        if (isset($command_positions[$officer['position']]) && $officer['position']) {
             $command_positions[$officer['position']] = $officer;
         }
     }
@@ -267,12 +261,6 @@ function isEligibleForPosition($person, $position, $requirements, $rank_hierarch
 					<h1>Command Structure Editor</h1>
 					<h2>USS-Serenity Chain of Command Management</h2>
 					
-					<!-- Debug Information -->
-					<div style="background: rgba(255, 136, 0, 0.2); border: 2px solid var(--orange); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
-						<h4 style="color: var(--orange);">Debug Information</h4>
-						<p style="color: var(--orange); font-family: monospace;"><?php echo htmlspecialchars($debug_info); ?></p>
-					</div>
-					
 					<?php if (isset($success)): ?>
 					<div style="background: rgba(85, 102, 255, 0.3); border: 2px solid var(--blue); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--blue);"><?php echo htmlspecialchars($success); ?></p>
@@ -289,6 +277,16 @@ function isEligibleForPosition($person, $position, $requirements, $rank_hierarch
 						<h4>Captain Authorization Required</h4>
 						<p style="color: var(--red);"><strong>Access Level:</strong> Captain Only</p>
 						<p style="color: var(--orange);"><em>Click "Edit" on any position to assign personnel. System automatically filters by rank and department requirements.</em></p>
+						
+						<!-- Debug: Show filled positions -->
+						<div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 5px;">
+							<h5 style="color: var(--orange);">Current Assignments (Debug):</h5>
+							<?php foreach ($command_positions as $pos => $person): ?>
+								<div style="color: var(--bluey); font-size: 0.8rem;">
+									<?php echo $pos; ?>: <?php echo $person ? htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']) : 'VACANT'; ?>
+								</div>
+							<?php endforeach; ?>
+						</div>
 					</div>
 					
 					<h3>Current Command Structure</h3>
