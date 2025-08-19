@@ -410,32 +410,6 @@ $ranks = [
 								<?php endif; ?>
 							</div>
 						</div>
-								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Chief Engineer</small>
-								<?php endif; ?>
-							</div>
-							
-							<div class="officer-box med-sci-box">
-								<?php if ($command_positions['Chief Medical Officer']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Chief Medical Officer']['rank'] . ' ' . $command_positions['Chief Medical Officer']['first_name'] . ' ' . $command_positions['Chief Medical Officer']['last_name']); ?></strong><br>
-									<small>Chief Medical Officer</small>
-								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Chief Medical Officer</small>
-								<?php endif; ?>
-							</div>
-							
-							<div class="officer-box sec-tac-box">
-								<?php if ($command_positions['Security Chief']): ?>
-									<strong><?php echo htmlspecialchars($command_positions['Security Chief']['rank'] . ' ' . $command_positions['Security Chief']['first_name'] . ' ' . $command_positions['Security Chief']['last_name']); ?></strong><br>
-									<small>Security Chief</small>
-								<?php else: ?>
-									<em>Position Vacant</em><br>
-									<small>Security Chief</small>
-								<?php endif; ?>
-							</div>
-						</div>
 						
 						<!-- Lower Department Heads (Seventh Level - Three boxes) -->
 						<div class="command-row triple">
