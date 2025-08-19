@@ -1,0 +1,27 @@
+# Increase PHP upload limits for image uploads
+php_value upload_max_filesize 10M
+php_value post_max_size 12M
+php_value memory_limit 128M
+php_value max_execution_time 300
+php_value max_input_time 300
+
+# Security settings for uploads
+<Files "*.php">
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+# Prevent execution of uploaded files
+<Directory "assets/crew_photos">
+    <Files "*">
+        SetHandler none
+        ForceType text/plain
+    </Files>
+</Directory>
+
+<Directory "uploads">
+    <Files "*">
+        SetHandler none
+        ForceType text/plain
+    </Files>
+</Directory>
