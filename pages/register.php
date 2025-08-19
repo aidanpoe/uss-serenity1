@@ -1,6 +1,91 @@
 <?php
 require_once '../includes/config.php';
 
+// Handle image upload function
+function handleImageUpload($file) {
+    if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+        if (isset($file['error'])) {
+            switch ($file['error']) {
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    throw new Exception("File size exceeds maximum allowed.");
+                case UPLOAD_ERR_PARTIAL:
+                    throw new Exception("File upload was incomplete.");
+                case UPLOAD_ERR_NO_FILE:
+                    return null; // No file uploaded, which is OK
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    throw new Exception("Server configuration error: no temp directory.");
+                case UPLOAD_ERR_CANT_WRITE:
+                    throw new Exception("Server error: cannot write file.");
+                default:
+                    throw new Exception("Unknown upload error.");
+            }
+        }
+        return null;
+    }
+    
+    // Check file size (5MB limit)
+    $max_size = 5 * 1024 * 1024; // 5MB
+    if ($file['size'] > $max_size) {
+        throw new Exception("Image file size must be less than 5MB. Your file is " . round($file['size'] / 1024 / 1024, 2) . "MB.");
+    }
+    
+    // Get file extension and normalize it
+    $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    
+    if (!in_array($file_extension, $allowed_extensions)) {
+        throw new Exception("Only JPEG, PNG, GIF, and WebP images are allowed. You uploaded: " . strtoupper($file_extension));
+    }
+    
+    // Additional MIME type validation (more comprehensive)
+    $allowed_mime_types = [
+        'image/jpeg',
+        'image/jpg', 
+        'image/png',
+        'image/gif',
+        'image/webp'
+    ];
+    
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $detected_type = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    
+    if (!in_array($detected_type, $allowed_mime_types) && !in_array($file['type'], $allowed_mime_types)) {
+        throw new Exception("Invalid image file type detected. Expected image file, got: " . $detected_type);
+    }
+    
+    // Verify it's actually an image by trying to get image info
+    $image_info = getimagesize($file['tmp_name']);
+    if ($image_info === false) {
+        throw new Exception("File is not a valid image or is corrupted.");
+    }
+    
+    // Create upload directory if it doesn't exist
+    $upload_dir = '../uploads/';
+    if (!is_dir($upload_dir)) {
+        if (!mkdir($upload_dir, 0755, true)) {
+            throw new Exception("Could not create upload directory.");
+        }
+    }
+    
+    // Check if directory is writable
+    if (!is_writable($upload_dir)) {
+        throw new Exception("Upload directory is not writable.");
+    }
+    
+    // Generate unique filename
+    $filename = uniqid('user_') . '.' . $file_extension;
+    $upload_path = $upload_dir . $filename;
+    
+    // Move uploaded file
+    if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+        return 'uploads/' . $filename;
+    } else {
+        throw new Exception("Failed to save uploaded image file.");
+    }
+}
+
 // If already logged in, redirect to home
 if (isLoggedIn()) {
     header('Location: ../index.php');
@@ -45,24 +130,18 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'register') {
         
         // Handle image upload
         $image_path = null;
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = '../uploads/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
-            }
-            
-            $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-            $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
-            
-            if (in_array($file_extension, $allowed_extensions)) {
-                $filename = uniqid() . '.' . $file_extension;
-                $target_path = $upload_dir . $filename;
-                
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
-                    $image_path = 'uploads/' . $filename;
-                }
+        $image_error = null;
+        if (isset($_FILES['image'])) {
+            try {
+                $image_path = handleImageUpload($_FILES['image']);
+            } catch (Exception $e) {
+                $image_error = "Image upload failed: " . $e->getMessage();
+                // Continue with registration even if image upload fails
             }
         }
+        
+        // Only proceed if no critical errors
+        if (!$error) {
         
         // Insert into roster first
         $stmt = $pdo->prepare("
@@ -126,6 +205,14 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'register') {
         $pdo->commit();
         $success = "Account created successfully! You can now log in with your username and password.";
         
+        // Add image upload status to success message
+        if ($image_error) {
+            $success .= " Note: " . $image_error;
+        } else if ($image_path) {
+            $success .= " Profile photo uploaded successfully.";
+        }
+        
+        }
     } catch (Exception $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
@@ -302,8 +389,8 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'register') {
 								<legend style="color: var(--orange); font-weight: bold; padding: 0 1rem;">Profile Photo (Optional)</legend>
 								<div>
 									<label style="color: var(--orange);">Crew Photo:</label>
-									<input type="file" name="image" accept="image/*" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
-									<small style="color: var(--bluey);">Accepted formats: JPG, PNG, GIF (Max 5MB)</small>
+									<input type="file" name="image" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
+									<small style="color: var(--bluey);">Accepted formats: JPEG, PNG, GIF, WebP (Max 5MB)</small>
 								</div>
 							</fieldset>
 							
