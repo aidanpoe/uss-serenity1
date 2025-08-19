@@ -111,7 +111,13 @@ function loginbutton($buttonstyle = "square") {
 				<main>
 					<h1>Welcome to USS-Serenity</h1>
 					<h2>NCC-74714 &#149; Main Computer Interface</h2>
-					<h3 class="font-gold">Stardate 101825.4</h3>
+					<h3 class="font-gold">Stardate <?php 
+						// Calculate current stardate (Star Trek formula with 360 years added)
+						$currentYear = (int)date('Y') + 360;
+						$dayOfYear = (int)date('z') + 1; // z is 0-indexed, so add 1
+						$stardate = ($currentYear - 2323) * 1000 + (($dayOfYear - 1) * 1000 / 365.25);
+						echo number_format($stardate, 1);
+					?> &#149; <?php echo date('F j, ') . ($currentYear); ?></h3>
 					
 					<div style="margin: 2rem 0;">
 						<h4>Ship Status: All Systems Nominal</h4>
