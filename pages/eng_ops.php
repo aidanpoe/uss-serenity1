@@ -176,13 +176,9 @@ try {
 								</div>
 								<div>
 									<label style="color: var(--orange);">Reported By:</label>
-									<select name="reported_by_roster_id" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
-										<option value="">Select Person (Optional)</option>
-										<?php foreach ($roster as $person): ?>
-										<option value="<?php echo $person['id']; ?>"><?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?></option>
-										<?php endforeach; ?>
-									</select>
-									<small style="color: var(--orange);"><a href="roster.php" style="color: var(--orange);">Not in the roster? Click here to add yourself first.</a></small>
+									<input type="text" name="reported_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--orange); border: 1px solid var(--orange); cursor: not-allowed;">
+									<input type="hidden" name="reported_by_roster_id" value="<?php echo getCurrentUser()['active_character_id']; ?>">
+									<input type="hidden" name="reported_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>">
 								</div>
 							</div>
 							
