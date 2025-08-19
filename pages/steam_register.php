@@ -102,23 +102,16 @@ if ($_POST) {
             
             $pdo->commit();
             
-            // Log the user in
-            $stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.department as roster_department, r.position, r.image_path 
-                FROM users u 
-                LEFT JOIN roster r ON u.id = r.user_id 
-                WHERE u.id = ?");
-            $stmt->execute([$user_id]);
-            $user = $stmt->fetch();
-            
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['rank'] = $user['rank'];
-            $_SESSION['first_name'] = $user['first_name'];
-            $_SESSION['last_name'] = $user['last_name'];
-            $_SESSION['department'] = $user['department']; // User permission department (MED/SCI, ENG/OPS, SEC/TAC)
-            $_SESSION['roster_department'] = $user['roster_department']; // Roster display department
-            $_SESSION['position'] = $user['position'];
-            $_SESSION['image_path'] = $user['image_path'];
+            // Log the user in with proper session variables
+            $_SESSION['user_id'] = $user_id;
+            $_SESSION['username'] = $username;
+            $_SESSION['rank'] = $rank;
+            $_SESSION['first_name'] = $first_name;
+            $_SESSION['last_name'] = $last_name;
+            $_SESSION['department'] = $user_department; // User permission department (MED/SCI, ENG/OPS, SEC/TAC)
+            $_SESSION['roster_department'] = $department; // Roster display department
+            $_SESSION['position'] = $position;
+            $_SESSION['steamid'] = $_SESSION['pending_steam_id']; // Set steamid for session
             
             // Update last login
             $updateStmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");

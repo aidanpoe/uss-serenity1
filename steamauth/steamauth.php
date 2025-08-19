@@ -53,24 +53,33 @@ if (isset($_GET['login'])){
 				}
 				
 				// Check if user exists in USS Serenity database
-				$stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.department, r.position, r.image_path 
+				$stmt = $pdo->prepare("
+					SELECT u.*, r.rank, r.first_name, r.last_name, r.department as roster_department, r.position, r.image_path 
 					FROM users u 
-					LEFT JOIN roster r ON u.id = r.user_id 
-					WHERE u.steam_id = ?");
+					LEFT JOIN roster r ON u.active_character_id = r.id 
+					WHERE u.steam_id = ? AND u.active = 1
+				");
 				$stmt->execute([$matches[1]]);
 				$user = $stmt->fetch();
 				
 				if ($user) {
-					// User exists, log them in
+					// User exists, log them in with their active character
 					$_SESSION['user_id'] = $user['id'];
 					$_SESSION['username'] = $user['username'];
 					$_SESSION['steamid'] = $matches[1]; // Ensure steamid is set
-					$_SESSION['rank'] = $user['rank'];
-					$_SESSION['first_name'] = $user['first_name'];
-					$_SESSION['last_name'] = $user['last_name'];
+					
+					// Set character data if they have an active character
+					if ($user['first_name']) {
+						$_SESSION['rank'] = $user['rank'];
+						$_SESSION['first_name'] = $user['first_name'];
+						$_SESSION['last_name'] = $user['last_name'];
+						$_SESSION['position'] = $user['position'];
+						$_SESSION['image_path'] = $user['image_path'];
+						$_SESSION['roster_department'] = $user['roster_department'];
+					}
+					
+					// Set user permission department (from users table)
 					$_SESSION['department'] = $user['department'];
-					$_SESSION['position'] = $user['position'];
-					$_SESSION['image_path'] = $user['image_path'];
 					
 					// Update last login
 					$updateStmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");

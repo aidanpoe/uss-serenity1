@@ -97,16 +97,37 @@ function switchCharacter($character_id) {
         
         if (!$character) return false;
         
-        // Update active character
-        $stmt = $pdo->prepare("UPDATE users SET active_character_id = ? WHERE id = ?");
-        $stmt->execute([$character_id, $_SESSION['user_id']]);
+        // Map roster department to user department permissions
+        $user_department = '';
+        switch($character['department']) {
+            case 'Medical':
+            case 'Science':
+                $user_department = 'MED/SCI';
+                break;
+            case 'Engineering':
+            case 'Operations':
+                $user_department = 'ENG/OPS';
+                break;
+            case 'Security':
+            case 'Tactical':
+                $user_department = 'SEC/TAC';
+                break;
+            default:
+                $user_department = 'SEC/TAC'; // Default fallback
+                break;
+        }
+        
+        // Update active character and user permissions in database
+        $stmt = $pdo->prepare("UPDATE users SET active_character_id = ?, department = ? WHERE id = ?");
+        $stmt->execute([$character_id, $user_department, $_SESSION['user_id']]);
         
         // Update session variables with new character data
         $_SESSION['first_name'] = $character['first_name'];
         $_SESSION['last_name'] = $character['last_name'];
         $_SESSION['rank'] = $character['rank'];
         $_SESSION['position'] = $character['position'];
-        $_SESSION['department'] = $character['roster_department'];
+        $_SESSION['department'] = $user_department; // Use the mapped permission group
+        $_SESSION['roster_department'] = $character['department']; // Store original department too
         
         return true;
     } catch (Exception $e) {
