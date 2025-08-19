@@ -240,7 +240,12 @@ try {
 					
 					<!-- Search and Filter Interface -->
 					<div class="search-container">
-						<h3>🔍 Criminal Records Search & Filter System</h3>
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+							<h3>🔍 Criminal Records Search & Filter System</h3>
+							<a href="add_criminal_record.php" style="background-color: var(--red); color: black; padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px; font-weight: bold;">
+								➕ Add Criminal Record
+							</a>
+						</div>
 						<p style="color: var(--gold);"><em>⚠️ RESTRICTED ACCESS - Security/Command Personnel Only</em></p>
 						
 						<form method="GET" action="">

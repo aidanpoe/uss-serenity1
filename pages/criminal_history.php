@@ -264,7 +264,12 @@ try {
 					
 					<!-- Criminal Records Timeline -->
 					<div class="record-container">
-						<h3>Criminal Records Timeline</h3>
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+							<h3>Criminal Records Timeline</h3>
+							<a href="add_criminal_record.php?crew_id=<?php echo $crew_id; ?>" style="background-color: var(--red); color: black; padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem;">
+								➕ Add Record
+							</a>
+						</div>
 						<?php if (empty($criminal_records)): ?>
 						<div style="text-align: center; padding: 2rem; color: var(--green);">
 							<h4>✅ Clean Criminal Record</h4>
