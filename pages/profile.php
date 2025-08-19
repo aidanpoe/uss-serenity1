@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once '../includes/config.php';
 
 // Check if user is logged in
@@ -13,8 +17,22 @@ $error = '';
 try {
     $pdo = getConnection();
     
+    // Debug: Check if user_id exists in session
+    if (!isset($_SESSION['user_id'])) {
+        throw new Exception("User ID not found in session. Session data: " . print_r($_SESSION, true));
+    }
+    
     // Get current user data with roster information
-    $current_user = getCurrentUser();
+    $stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.species, r.department as roster_department, r.position, r.image_path 
+                          FROM users u 
+                          LEFT JOIN roster r ON u.id = r.user_id 
+                          WHERE u.id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $current_user = $stmt->fetch();
+    
+    if (!$current_user) {
+        throw new Exception("User not found with ID: " . $_SESSION['user_id']);
+    }
     
     // Handle image upload
     if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_image') {
@@ -56,7 +74,12 @@ try {
                     
                     $success = "Profile image updated successfully!";
                     // Refresh user data
-                    $current_user = getCurrentUser();
+                    $stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.species, r.department as roster_department, r.position, r.image_path 
+                                          FROM users u 
+                                          LEFT JOIN roster r ON u.id = r.user_id 
+                                          WHERE u.id = ?");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    $current_user = $stmt->fetch();
                 } else {
                     throw new Exception("Failed to save uploaded file");
                 }
@@ -358,7 +381,7 @@ try {
 								<input type="file" id="profile_image" name="profile_image" accept="image/*">
 								<small class="help-text">Maximum file size: 5MB. Supported formats: JPEG, PNG, GIF, WebP</small>
 							</div>
-							<button type="submit" class="lcars-button" onclick="playSound('audio2')">Update Image</button>
+							<button type="submit" class="lcars-button" onclick="playSoundAndRedirect('audio2', '#')">Update Image</button>
 						</form>
 					</div>
 					<?php endif; ?>
