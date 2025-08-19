@@ -14,13 +14,33 @@ require '../steamauth/userInfo.php';
 // Handle form submission
 if ($_POST) {
     $username = trim($_POST['username']);
-    $roster_id = $_POST['roster_id'] ?? null;
+    $rank = trim($_POST['rank']);
+    $first_name = trim($_POST['first_name']);
+    $last_name = trim($_POST['last_name']);
+    $species = trim($_POST['species']);
+    $department = $_POST['department'];
+    $position = trim($_POST['position']);
     
     $errors = [];
     
     // Validation
     if (empty($username)) {
         $errors[] = "Username is required";
+    }
+    if (empty($first_name)) {
+        $errors[] = "First name is required";
+    }
+    if (empty($last_name)) {
+        $errors[] = "Last name is required";
+    }
+    if (empty($species)) {
+        $errors[] = "Species is required";
+    }
+    if (empty($department)) {
+        $errors[] = "Department is required";
+    }
+    if (empty($position)) {
+        $errors[] = "Position is required";
     }
     
     // Check if username already exists
@@ -32,18 +52,29 @@ if ($_POST) {
         }
     }
     
+    // Check if character name already exists
+    if (!empty($first_name) && !empty($last_name)) {
+        $stmt = $pdo->prepare("SELECT id FROM roster WHERE first_name = ? AND last_name = ?");
+        $stmt->execute([$first_name, $last_name]);
+        if ($stmt->fetch()) {
+            $errors[] = "A crew member with this name already exists in the roster";
+        }
+    }
+    
     if (empty($errors)) {
         try {
+            $pdo->beginTransaction();
+            
             // Create user account (Steam authentication only, no password needed)
             $stmt = $pdo->prepare("INSERT INTO users (username, steam_id, active, created_at) VALUES (?, ?, 1, NOW())");
             $stmt->execute([$username, $_SESSION['pending_steam_id']]);
             $user_id = $pdo->lastInsertId();
             
-            // Link to roster if selected
-            if ($roster_id) {
-                $stmt = $pdo->prepare("UPDATE roster SET user_id = ? WHERE id = ?");
-                $stmt->execute([$user_id, $roster_id]);
-            }
+            // Create roster entry and link to user
+            $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$rank, $first_name, $last_name, $species, $department, $position, $user_id]);
+            
+            $pdo->commit();
             
             // Log the user in
             $stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.department, r.position, r.image_path 
@@ -71,15 +102,11 @@ if ($_POST) {
             exit;
             
         } catch (PDOException $e) {
+            $pdo->rollBack();
             $errors[] = "Registration failed: " . $e->getMessage();
         }
     }
 }
-
-// Get available roster entries (not linked to users)
-$stmt = $pdo->prepare("SELECT id, rank, first_name, last_name, department, position FROM roster WHERE user_id IS NULL ORDER BY rank, last_name");
-$stmt->execute();
-$available_roster = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -180,7 +207,7 @@ $available_roster = $stmt->fetchAll();
 </head>
 <body>
     <div class="registration-container">
-        <h1 style="text-align: center; color: var(--blue); margin-bottom: 2rem;">Complete Your Registration</h1>
+        <h1 style="text-align: center; color: var(--blue); margin-bottom: 2rem;">Join the USS Serenity Crew</h1>
         
         <div class="steam-profile">
             <div class="steam-avatar">
@@ -193,7 +220,7 @@ $available_roster = $stmt->fetchAll();
         </div>
         
         <div class="info">
-            <strong>Welcome to USS Serenity!</strong> Your Steam account has been verified. Please create a username and optionally link to your crew roster entry.
+            <strong>Welcome to USS Serenity!</strong> Your Steam account has been verified. Please create your account and crew roster profile.
         </div>
         
         <?php if (!empty($errors)): ?>
@@ -213,27 +240,60 @@ $available_roster = $stmt->fetchAll();
                 <small style="color: var(--blue);">This will be your display name on USS Serenity systems.</small>
             </div>
             
-            <?php if (!empty($available_roster)): ?>
+            <h3 style="color: var(--blue); margin: 2rem 0 1rem 0; border-bottom: 2px solid var(--blue); padding-bottom: 0.5rem;">Crew Roster Profile</h3>
+            
+            <div class="form-group">
+                <label for="rank">Rank</label>
+                <input type="text" id="rank" name="rank" value="<?php echo htmlspecialchars($_POST['rank'] ?? ''); ?>" placeholder="e.g., Lieutenant, Commander">
+                <small style="color: var(--blue);">Your Starfleet rank (optional).</small>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label for="roster_id">Link to Roster Entry (Optional)</label>
-                    <select id="roster_id" name="roster_id">
-                        <option value="">-- Select your crew member entry --</option>
-                        <?php foreach ($available_roster as $member): ?>
-                            <option value="<?php echo $member['id']; ?>" <?php echo ($_POST['roster_id'] ?? '') == $member['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars(($member['rank'] ? $member['rank'] . ' ' : '') . $member['first_name'] . ' ' . $member['last_name'] . ' (' . $member['department'] . ')'); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <small style="color: var(--blue);">If your character appears in the roster, link your account to it. You can change this later.</small>
+                    <label for="first_name">First Name *</label>
+                    <input type="text" id="first_name" name="first_name" value="<?php echo htmlspecialchars($_POST['first_name'] ?? ''); ?>" required>
                 </div>
-            <?php endif; ?>
+                
+                <div class="form-group">
+                    <label for="last_name">Last Name *</label>
+                    <input type="text" id="last_name" name="last_name" value="<?php echo htmlspecialchars($_POST['last_name'] ?? ''); ?>" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="species">Species *</label>
+                <input type="text" id="species" name="species" value="<?php echo htmlspecialchars($_POST['species'] ?? ''); ?>" required placeholder="e.g., Human, Vulcan, Andorian">
+                <small style="color: var(--blue);">Your character's species.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="department">Department *</label>
+                <select id="department" name="department" required>
+                    <option value="">-- Select Department --</option>
+                    <option value="Command" <?php echo ($_POST['department'] ?? '') == 'Command' ? 'selected' : ''; ?>>Command</option>
+                    <option value="Engineering" <?php echo ($_POST['department'] ?? '') == 'Engineering' ? 'selected' : ''; ?>>Engineering</option>
+                    <option value="Operations" <?php echo ($_POST['department'] ?? '') == 'Operations' ? 'selected' : ''; ?>>Operations</option>
+                    <option value="Medical" <?php echo ($_POST['department'] ?? '') == 'Medical' ? 'selected' : ''; ?>>Medical</option>
+                    <option value="Science" <?php echo ($_POST['department'] ?? '') == 'Science' ? 'selected' : ''; ?>>Science</option>
+                    <option value="Security" <?php echo ($_POST['department'] ?? '') == 'Security' ? 'selected' : ''; ?>>Security</option>
+                    <option value="Tactical" <?php echo ($_POST['department'] ?? '') == 'Tactical' ? 'selected' : ''; ?>>Tactical</option>
+                    <option value="Marine" <?php echo ($_POST['department'] ?? '') == 'Marine' ? 'selected' : ''; ?>>Marine</option>
+                    <option value="Civilian" <?php echo ($_POST['department'] ?? '') == 'Civilian' ? 'selected' : ''; ?>>Civilian</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="position">Position *</label>
+                <input type="text" id="position" name="position" value="<?php echo htmlspecialchars($_POST['position'] ?? ''); ?>" required placeholder="e.g., Chief Engineer, Tactical Officer">
+                <small style="color: var(--blue);">Your character's role/position aboard the USS Serenity.</small>
+            </div>
             
             <div style="background: rgba(85, 102, 255, 0.2); padding: 1rem; border-radius: 5px; margin: 1rem 0; border: 1px solid var(--blue);">
-                <p style="margin: 0; color: var(--blue); font-size: 0.9rem;"><strong>Note:</strong> Authentication is handled entirely through Steam. You don't need to create a password - just use your Steam login!</p>
+                <p style="margin: 0; color: var(--blue); font-size: 0.9rem;"><strong>Note:</strong> Your crew roster profile will be created automatically with your account. Authentication is handled entirely through Steam - no password needed!</p>
             </div>
             
             <div style="text-align: center; margin-top: 2rem;">
-                <button type="submit" class="btn">Complete Registration</button>
+                <button type="submit" class="btn">Create Account & Join Crew</button>
                 <a href="../steamauth/steamauth.php?logout" class="btn btn-secondary">Cancel</a>
             </div>
         </form>

@@ -24,8 +24,8 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 #### For New Steam Users:
 1. Click "Sign in through Steam" on the homepage
 2. Steam authentication redirects to registration page
-3. User creates username and optionally links to roster entry
-4. Account is created and user is logged in (no password needed)
+3. User creates username and **must create their crew roster profile** (name, species, department, position, etc.)
+4. Account and roster entry are created simultaneously and user is logged in (no password needed)
 
 #### For Existing Users:
 - All users must now use Steam authentication
@@ -40,8 +40,8 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 ### 5. Features
 
 ✅ **Steam-Only Authentication** - Secure login exclusively via Steam  
-✅ **Roster Integration** - Link Steam accounts to crew roster entries  
-✅ **Simplified Registration** - No passwords needed, just Steam and username  
+✅ **Integrated Roster Creation** - Crew roster profile created during Steam registration  
+✅ **Mandatory Character Creation** - All users must create their character during signup  
 ✅ **User Profile Management** - View Steam account info and roster details  
 ✅ **Captain Admin Controls** - Account management and status control  
 ✅ **Enhanced Security** - Steam handles all authentication securely  
@@ -55,7 +55,7 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 - Profile and admin links appear for logged-in users
 
 **New Pages:**
-- `pages/steam_register.php` - Steam user registration (no password required)
+- `pages/steam_register.php` - Steam user registration with mandatory roster creation
 - `pages/profile.php` - User profile management (Steam-focused)
 - `pages/user_management.php` - Captain admin interface
 
@@ -66,6 +66,7 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 **Database Enhancements:**
 - `steam_id` column in users table (required for all users)
 - `active`, `last_login` columns for user management
+- `user_id` column in roster table (links Steam accounts to crew profiles)
 - Password column optional (Steam authentication only)
 
 ### 7. File Structure
