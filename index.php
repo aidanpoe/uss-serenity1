@@ -126,9 +126,6 @@ function loginbutton($buttonstyle = "square") {
 								<?php endif; ?>
 								<div style="margin-top: 1rem;">
 									<a href="pages/profile.php" style="color: var(--blue); margin-right: 1rem;">Edit Profile</a>
-									<?php if (isset($_SESSION['position']) && $_SESSION['position'] === 'Captain'): ?>
-									<a href="pages/user_management.php" style="color: var(--yellow); margin-right: 1rem;">User Management</a>
-									<?php endif; ?>
 									<?php if (isset($_SESSION['steamid'])): ?>
 									<a href="steamauth/steamauth.php?logout" style="color: var(--red);">Logout</a>
 									<?php else: ?>

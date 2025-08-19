@@ -261,9 +261,6 @@ try {
 						<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>
 						<button onclick="playSoundAndRedirect('audio2', 'roster.php')">ROSTER</button>
 						<button onclick="playSoundAndRedirect('audio2', '#')" style="background-color: var(--gold);">PROFILE</button>
-						<?php if (isset($_SESSION['position']) && $_SESSION['position'] === 'Captain'): ?>
-						<button onclick="playSoundAndRedirect('audio2', 'user_management.php')" style="background-color: var(--red);">ADMIN</button>
-						<?php endif; ?>
 					</nav>
 				</div>
 				<div class="bar-panel first-bar-panel">

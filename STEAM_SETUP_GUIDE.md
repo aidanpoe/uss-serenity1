@@ -39,9 +39,9 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 - Contact your Captain to link existing accounts to Steam IDs
 
 #### Admin Features:
-- Captains can view user information via User Management
-- Account status can be managed (active/inactive)
-- View last login times and Steam account linkage
+- Steam provides secure user account management
+- Account creation/deletion handled through Steam integration
+- User activity tracked through Steam login timestamps
 
 ### 5. Features
 
@@ -53,7 +53,6 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 ✅ **Department-Based Permissions** - Access groups automatically assigned based on department selection  
 ✅ **Rank Restrictions** - Command ranks (Captain, Commander) restricted to admin assignment  
 ✅ **User Profile Management** - View Steam account info and roster details  
-✅ **Captain Admin Controls** - Account management and status control  
 ✅ **Enhanced Security** - Steam handles all authentication securely  
 ✅ **LCARS Styling** - Consistent Star Trek interface design  
 
@@ -68,11 +67,11 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 - `pages/steam_register.php` - Steam user registration with mandatory roster creation
 - `pages/profile.php` - User profile management (Steam-focused) with character switching
 - `pages/create_character.php` - Create additional crew roster profiles
-- `pages/user_management.php` - Captain admin interface
 
 **Removed Pages:**
 - Traditional login and registration forms redirect to Steam authentication
 - Password change functionality removed (Steam handles authentication)
+- Traditional user management removed (Steam handles all user accounts)
 
 **Database Enhancements:**
 - `steam_id` column in users table (required for all users)
@@ -95,20 +94,18 @@ steamauth/
 pages/
 ├── steam_register.php   # Steam user registration
 ├── profile.php         # User profile management
-├── create_character.php # Create additional characters
-└── user_management.php  # Captain admin interface
+└── create_character.php # Create additional characters
 
 Database Scripts:
 ├── update_steam_integration.php    # Database update script
-├── setup_multi_character.php       # Multi-character system setup
-└── update_user_management.php      # User management setup
+└── setup_multi_character.php       # Multi-character system setup
 ```
 
 ### 8. Security Notes
 
 - Steam API keys should be kept secure
 - All authentication is handled by Steam (no local passwords)
-- Captains can manage account status (active/inactive)
+- Steam manages user account security and validation
 - Traditional login methods have been disabled for enhanced security
 - Users must have valid Steam accounts to access the system
 
