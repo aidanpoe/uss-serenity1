@@ -81,7 +81,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'self_register') {
             // Self-registration limited to lower ranks only
             $allowed_self_ranks = [
                 'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class', 
-                'Petty Officer 3rd class', 'Petty Officer 1st class'
+                'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petter Officer'
             ];
             
             if (!in_array($_POST['rank'], $allowed_self_ranks)) {
@@ -394,6 +394,7 @@ $ranks = [
 										<option value="Crewman 1st Class">Crewman 1st Class</option>
 										<option value="Petty Officer 3rd class">Petty Officer 3rd class</option>
 										<option value="Petty Officer 1st class">Petty Officer 1st class</option>
+										<option value="Chief Petter Officer">Chief Petter Officer</option>
 									</select>
 								</div>
 								<div>
