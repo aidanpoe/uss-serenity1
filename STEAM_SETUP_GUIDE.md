@@ -55,7 +55,6 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 ✅ **User Profile Management** - View Steam account info and roster details  
 ✅ **Enhanced Security** - Steam handles all authentication securely  
 ✅ **LCARS Styling** - Consistent Star Trek interface design  
-✅ **Garry's Mod Integration** - Live server status showing active players on duty  
 
 ### 6. User Experience
 
@@ -63,7 +62,6 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 - Steam login button is the only authentication option
 - Clean, streamlined interface focused on Steam authentication
 - Profile and admin links appear for logged-in users
-- **NEW:** "Who's on Shift?" section displays live Garry's Mod server player count and names
 
 **New Pages:**
 - `pages/steam_register.php` - Steam user registration with mandatory roster creation
