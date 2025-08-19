@@ -1,6 +1,8 @@
 <?php
 ob_start();
-session_start();
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 function logoutbutton() {
 	echo "<form action='' method='get'><button name='logout' type='submit' style='background-color: var(--red); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px;'>Logout</button></form>"; //logout button
@@ -9,20 +11,21 @@ function logoutbutton() {
 function loginbutton($buttonstyle = "square") {
 	$button['rectangle'] = "01";
 	$button['square'] = "02";
-	$button = "<a href='?login'><img src='https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_".$button[$buttonstyle].".png'></a>";
+	$button = "<a href='steamauth/steamauth.php?login'><img src='https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_".$button[$buttonstyle].".png'></a>";
 	
 	echo $button;
 }
 
 if (isset($_GET['login'])){
-	require 'openid.php';
+	require_once 'openid.php';
 	try {
-		require 'SteamConfig.php';
+		require_once 'SteamConfig.php';
 		$openid = new LightOpenID($steamauth['domainname']);
 		
 		if(!$openid->mode) {
 			$openid->identity = 'https://steamcommunity.com/openid';
 			header('Location: ' . $openid->authUrl());
+			exit;
 		} elseif ($openid->mode == 'cancel') {
 			echo 'User has canceled authentication!';
 		} else {
@@ -33,8 +36,23 @@ if (isset($_GET['login'])){
 				
 				$_SESSION['steamid'] = $matches[1];
 				
+				// Database connection for Steam authentication
+				try {
+					$pdo = new PDO(
+						"mysql:host=localhost;port=3306;dbname=serenity;charset=utf8mb4", 
+						"serenity", 
+						"Os~886go4",
+						[
+							PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+							PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+							PDO::ATTR_EMULATE_PREPARES => false,
+						]
+					);
+				} catch(PDOException $e) {
+					die("Connection failed: " . $e->getMessage());
+				}
+				
 				// Check if user exists in USS Serenity database
-				require '../includes/config.php';
 				$stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.department, r.position, r.image_path 
 					FROM users u 
 					LEFT JOIN roster r ON u.id = r.user_id 
@@ -63,20 +81,8 @@ if (isset($_GET['login'])){
 					exit;
 				}
 				
-				if (!headers_sent()) {
-					header('Location: '.$steamauth['loginpage']);
-					exit;
-				} else {
-					?>
-					<script type="text/javascript">
-						window.location.href="<?=$steamauth['loginpage']?>";
-					</script>
-					<noscript>
-						<meta http-equiv="refresh" content="0;url=<?=$steamauth['loginpage']?>" />
-					</noscript>
-					<?php
-					exit;
-				}
+				header('Location: '.$steamauth['loginpage']);
+				exit;
 			} else {
 				echo "User is not logged in.\n";
 			}
@@ -87,7 +93,7 @@ if (isset($_GET['login'])){
 }
 
 if (isset($_GET['logout'])){
-	require 'SteamConfig.php';
+	require_once 'SteamConfig.php';
 	session_unset();
 	session_destroy();
 	header('Location: '.$steamauth['logoutpage']);
@@ -96,7 +102,7 @@ if (isset($_GET['logout'])){
 
 if (isset($_GET['update'])){
 	unset($_SESSION['steam_uptodate']);
-	require 'userInfo.php';
+	require_once 'userInfo.php';
 	header('Location: '.$_SERVER['PHP_SELF']);
 	exit;
 }

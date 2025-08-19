@@ -13,10 +13,10 @@ $error = '';
 try {
     $pdo = getConnection();
     
-    // Get current user data
+    // Get current user data - handle both new and old database schema
     $stmt = $pdo->prepare("SELECT u.*, r.id as roster_id, r.rank, r.first_name, r.last_name, r.species, r.department, r.position, r.image_path 
                           FROM users u 
-                          LEFT JOIN roster r ON u.roster_id = r.id 
+                          LEFT JOIN roster r ON (u.roster_id = r.id OR (r.first_name = u.first_name AND r.last_name = u.last_name))
                           WHERE u.id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $current_user = $stmt->fetch();
@@ -205,7 +205,7 @@ try {
         // Refresh user data
         $stmt = $pdo->prepare("SELECT u.*, r.id as roster_id, r.rank, r.first_name, r.last_name, r.species, r.department, r.position, r.image_path 
                               FROM users u 
-                              LEFT JOIN roster r ON u.roster_id = r.id 
+                              LEFT JOIN roster r ON (u.roster_id = r.id OR (r.first_name = u.first_name AND r.last_name = u.last_name))
                               WHERE u.id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         $current_user = $stmt->fetch();

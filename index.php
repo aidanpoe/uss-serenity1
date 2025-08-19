@@ -1,6 +1,14 @@
 <?php
 require_once 'includes/config.php';
-require_once 'steamauth/steamauth.php';
+
+// Steam login functions
+function loginbutton($buttonstyle = "square") {
+	$button['rectangle'] = "01";
+	$button['square'] = "02";
+	$button = "<a href='steamauth/steamauth.php?login'><img src='https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_".$button[$buttonstyle].".png'></a>";
+	
+	echo $button;
+}
 ?>
 <!DOCTYPE html>
 <html>
