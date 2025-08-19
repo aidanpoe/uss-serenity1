@@ -174,7 +174,7 @@ class LightOpenID
         return $use_secure_protocol ? 'https://' : 'http://';
     }
 
-    protected function request_curl($url, $method='GET', $params=array(), $update_claimed_id)
+    protected function request_curl($url, $update_claimed_id, $method='GET', $params=array())
     {
         $params = http_build_query($params, '', '&');
         $curl = curl_init($url . ($method == 'GET' && $params ? '?' . $params : ''));
@@ -277,7 +277,7 @@ class LightOpenID
     protected function request($url, $method='GET', $params=array(), $update_claimed_id=false)
     {
         if (function_exists('curl_init')) {
-            return $this->request_curl($url, $method, $params, $update_claimed_id);
+            return $this->request_curl($url, $update_claimed_id, $method, $params);
         }
         
         throw new ErrorException('You must have cURL enabled.');
@@ -516,6 +516,47 @@ class LightOpenID
                 $params['openid.sreg.optional'][] = self::$ax_to_sreg[$optional];
             }
             $params['openid.sreg.optional'] = implode(',', $params['openid.sreg.optional']);
+        }
+        return $params;
+    }
+
+    protected function axParams()
+    {
+        $params = array();
+        if ($this->required || $this->optional) {
+            $params['openid.ns.ax'] = 'http://openid.net/srv/ax/1.0';
+            $params['openid.ax.mode'] = 'fetch_request';
+            $this->aliases = array();
+            $counts = array();
+            $required = array();
+            $optional = array();
+            foreach (array_merge($this->required, $this->optional) as $ns) {
+                if (!isset($counts[$ns])) $counts[$ns] = 0;
+            }
+            foreach ($this->required as $ns) {
+                $alias = 'req_' . $ns;
+                $params['openid.ax.type.' . $alias] = $ns;
+                $required[] = $alias;
+                $this->aliases[$ns] = 'http://axschema.org/';
+                if (++$counts[$ns] > 1) {
+                    $params['openid.ax.count.' . $alias] = $counts[$ns];
+                }
+            }
+            foreach ($this->optional as $ns) {
+                $alias = 'opt_' . $ns;
+                $params['openid.ax.type.' . $alias] = $ns;
+                $optional[] = $alias;
+                $this->aliases[$ns] = 'http://axschema.org/';
+                if (++$counts[$ns] > 1) {
+                    $params['openid.ax.count.' . $alias] = $counts[$ns];
+                }
+            }
+            if ($required) {
+                $params['openid.ax.required'] = implode(',', $required);
+            }
+            if ($optional) {
+                $params['openid.ax.if_available'] = implode(',', $optional);
+            }
         }
         return $params;
     }

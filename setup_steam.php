@@ -103,9 +103,10 @@
             
             <p style="margin-top: 2rem;">
                 <strong>Debug Tools:</strong><br>
-                <a href="steamauth/steamauth_debug.php?login" style="color: var(--bluey);">Test Steam Login (Debug)</a><br>
-                <a href="pages/profile_debug.php" style="color: var(--bluey);">Test Profile Page (Debug)</a><br>
-                <a href="pages/session_debug.php" style="color: var(--bluey);">Test Session Handling (Debug)</a>
+                <a href="steamauth/simple_steam_test.php" style="color: var(--gold);">🔹 Simple Steam Test (Basic)</a><br>
+                <a href="steamauth/steamauth_debug.php?login" style="color: var(--bluey);">🔹 Full Steam Login (Debug)</a><br>
+                <a href="pages/profile_debug.php" style="color: var(--bluey);">🔹 Profile Page (Debug)</a><br>
+                <a href="pages/session_debug.php" style="color: var(--bluey);">🔹 Session Handling (Debug)</a>
             </p>
         </div>
         
