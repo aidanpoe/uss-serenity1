@@ -104,7 +104,8 @@
             <p style="margin-top: 2rem;">
                 <strong>Debug Tools:</strong><br>
                 <a href="steamauth/steamauth_debug.php?login" style="color: var(--bluey);">Test Steam Login (Debug)</a><br>
-                <a href="pages/profile_debug.php" style="color: var(--bluey);">Test Profile Page (Debug)</a>
+                <a href="pages/profile_debug.php" style="color: var(--bluey);">Test Profile Page (Debug)</a><br>
+                <a href="pages/session_debug.php" style="color: var(--bluey);">Test Session Handling (Debug)</a>
             </p>
         </div>
         

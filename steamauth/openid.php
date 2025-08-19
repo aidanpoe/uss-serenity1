@@ -146,6 +146,19 @@ class LightOpenID
         $this->trustRoot = $realm;
     }
     
+    protected function set_proxy($proxy)
+    {
+        if ($proxy) {
+            if (is_array($proxy)) {
+                $this->proxy = $proxy;
+            } else {
+                $this->proxy = array('host' => $proxy);
+            }
+        } else {
+            $this->proxy = null;
+        }
+    }
+    
     protected function get_realm_protocol()
     {
         if (!empty($_SERVER['HTTPS'])) {
