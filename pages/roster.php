@@ -29,26 +29,9 @@ function handleImageUpload($file) {
     if (move_uploaded_file($file['tmp_name'], $upload_path)) {
         return 'assets/crew_photos/' . $filename;
     } else {
-        return '';
+        throw new Exception("Failed to upload image file.");
     }
-    
-    $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!in_array($file['type'], $allowed_types)) {
-        throw new Exception("Only JPEG, PNG, and GIF images are allowed.");
-    }
-    
-    $max_size = 5 * 1024 * 1024; // 5MB
-    if ($file['size'] > $max_size) {
-        throw new Exception("Image file size must be less than 5MB.");
-    }
-    
-    $upload_dir = '../assets/crew_photos/';
-    if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0755, true);
-    }
-    
-    $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $filename = uniqid('crew_') . '.' . $file_extension;
+}
     $upload_path = $upload_dir . $filename;
     
     if (move_uploaded_file($file['tmp_name'], $upload_path)) {
@@ -78,7 +61,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
                 $_POST['position'] ?? '',
                 $image_path
             ]);
-            $success = "Personnel added successfully.";
+            $success = "Personnel added successfully." . ($image_path ? " Image uploaded successfully." : "");
         } catch (Exception $e) {
             $error = "Error adding personnel: " . $e->getMessage();
         }
@@ -125,7 +108,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'self_register') {
                     '', // No special positions for self-registration
                     $image_path
                 ]);
-                $success = "Self-registration completed successfully. You can now submit reports.";
+                $success = "Self-registration completed successfully. You can now submit reports." . ($image_path ? " Image uploaded successfully." : "");
             }
         }
     } catch (Exception $e) {
@@ -491,6 +474,58 @@ $ranks = [
 					</div>
 					<?php endif; ?>
 					
+					<?php if (!hasPermission('Captain')): ?>
+					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+						<h4>Self-Registration (Limited Rank Personnel)</h4>
+						<p style="color: var(--orange); font-size: 0.9rem;">Limited rank crew can add themselves for reporting purposes.</p>
+						<form method="POST" action="" enctype="multipart/form-data">
+							<input type="hidden" name="action" value="self_register">
+							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+								<div>
+									<label style="color: var(--gold);">Rank:</label>
+									<select name="rank" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+										<option value="Crewman 3rd Class">Crewman 3rd Class</option>
+										<option value="Crewman 2nd Class">Crewman 2nd Class</option>
+										<option value="Crewman 1st Class">Crewman 1st Class</option>
+										<option value="Petty Officer 3rd class">Petty Officer 3rd class</option>
+										<option value="Petty Officer 1st class">Petty Officer 1st class</option>
+										<option value="Chief Petter Officer">Chief Petter Officer</option>
+										<option value="Ensign">Ensign</option>
+										<option value="Lieutenant Junior Grade">Lieutenant Junior Grade</option>
+										<option value="Lieutenant">Lieutenant</option>
+									</select>
+								</div>
+								<div>
+									<label style="color: var(--gold);">First Name:</label>
+									<input type="text" name="first_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+								</div>
+								<div>
+									<label style="color: var(--gold);">Last Name:</label>
+									<input type="text" name="last_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+								</div>
+								<div>
+									<label style="color: var(--gold);">Species:</label>
+									<input type="text" name="species" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+								</div>
+								<div>
+									<label style="color: var(--gold);">Department:</label>
+									<select name="department" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+										<option value="MED/SCI">MED/SCI</option>
+										<option value="ENG/OPS">ENG/OPS</option>
+										<option value="SEC/TAC">SEC/TAC</option>
+									</select>
+								</div>
+								<div style="grid-column: span 2;">
+									<label style="color: var(--gold);">Crew Photo:</label>
+									<input type="file" name="crew_image" accept="image/*" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+									<small style="color: var(--orange);">Optional. JPEG, PNG, or GIF. Max 5MB.</small>
+								</div>
+							</div>
+							<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem;">Self-Register</button>
+						</form>
+					</div>
+					<?php endif; ?>
+					
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
 						<h4>Need Access to Ship Systems?</h4>
 						<p style="color: var(--orange);">All new crew members should create a personal account to access department systems.</p>
@@ -516,8 +551,17 @@ $ranks = [
 								case 'SEC/TAC': echo 'sec-tac-box'; break;
 							}
 						?>">
-							<?php if ($crew_member['image_path'] && file_exists('../' . $crew_member['image_path'])): ?>
-							<img src="../<?php echo htmlspecialchars($crew_member['image_path']); ?>" alt="<?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?>" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; border: 2px solid var(--bluey);">
+							<?php if ($crew_member['image_path']): ?>
+								<?php 
+								$image_file_path = '../' . $crew_member['image_path'];
+								if (file_exists($image_file_path)): 
+								?>
+								<img src="../<?php echo htmlspecialchars($crew_member['image_path']); ?>" alt="<?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?>" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; border: 2px solid var(--bluey);">
+								<?php else: ?>
+								<div style="width: 80px; height: 80px; border-radius: 50%; background: #333; border: 2px solid var(--bluey); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; color: #666; font-size: 0.8rem;">No Photo</div>
+								<?php endif; ?>
+							<?php else: ?>
+							<div style="width: 80px; height: 80px; border-radius: 50%; background: #333; border: 2px solid var(--bluey); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; color: #666; font-size: 0.8rem;">No Photo</div>
 							<?php endif; ?>
 							<strong><?php echo htmlspecialchars($crew_member['rank']); ?></strong><br>
 							<h4><?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?></h4>
