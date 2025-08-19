@@ -229,8 +229,7 @@ try {
 							
 							<div style="margin-bottom: 1rem;">
 								<label style="color: var(--gold);">Reported By:</label>
-								<input type="text" name="reported_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--gold); border: 1px solid var(--gold); cursor: not-allowed;">
-								<input type="hidden" name="reported_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>">
+								<input type="text" name="reported_by" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
 							</div>
 							
 							<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; width: 100%;">Submit Security Report</button>

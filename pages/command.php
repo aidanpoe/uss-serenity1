@@ -233,8 +233,7 @@ try {
 							
 							<div style="margin-bottom: 1rem;">
 								<label style="color: var(--red);">Submitted By:</label>
-								<input type="text" name="submitted_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--red); border: 1px solid var(--red); cursor: not-allowed;">
-								<input type="hidden" name="submitted_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>">
+								<input type="text" name="submitted_by" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--red);">
 							</div>
 							
 							<button type="submit" style="background-color: var(--red); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; width: 100%;">Submit Suggestion</button>

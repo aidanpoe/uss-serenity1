@@ -215,8 +215,7 @@ try {
 								</div>
 								<div style="margin-bottom: 1rem;">
 									<label style="color: var(--blue);">Reported By:</label>
-									<input type="text" name="reported_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--blue); border: 1px solid var(--blue); cursor: not-allowed;">
-									<input type="hidden" name="reported_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>">
+									<input type="text" name="reported_by" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
 								</div>
 								<button type="submit" style="background-color: var(--blue); color: black; border: none; padding: 1rem; border-radius: 5px; width: 100%;">Submit Medical Report</button>
 							</form>
@@ -237,8 +236,7 @@ try {
 								</div>
 								<div style="margin-bottom: 1rem;">
 									<label style="color: var(--ice);">Reported By:</label>
-									<input type="text" name="reported_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--ice); border: 1px solid var(--ice); cursor: not-allowed;">
-									<input type="hidden" name="reported_by" value="<?php echo htmlspecialchars(getCurrentUser()['first_name'] . ' ' . getCurrentUser()['last_name']); ?>">
+									<input type="text" name="reported_by" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--ice);">
 								</div>
 								<button type="submit" style="background-color: var(--ice); color: black; border: none; padding: 1rem; border-radius: 5px; width: 100%;">Submit Science Inquiry</button>
 							</form>
