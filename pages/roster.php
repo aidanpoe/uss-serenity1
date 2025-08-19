@@ -1,6 +1,31 @@
 <?php
 require_once '../includes/config.php';
 
+// Handle admin update for Captain's name
+if (isset($_GET['update_captain_name']) && hasPermission('Captain')) {
+    try {
+        // Update the users table
+        $stmt = $pdo->prepare("UPDATE users SET first_name = 'Aidan' WHERE username = 'Poe' AND department = 'Captain'");
+        $stmt->execute();
+        $affected1 = $stmt->rowCount();
+        
+        // Update the roster table
+        $stmt = $pdo->prepare("UPDATE roster SET first_name = 'Aidan' WHERE last_name = 'Poe' AND rank = 'Captain'");
+        $stmt->execute();
+        $affected2 = $stmt->rowCount();
+        
+        // Update session if this is the current user
+        if ($_SESSION['username'] === 'Poe') {
+            $_SESSION['first_name'] = 'Aidan';
+        }
+        
+        $update_message = "Captain's name updated successfully. Users table: $affected1 rows, Roster table: $affected2 rows affected.";
+        
+    } catch (PDOException $e) {
+        $update_message = "Error updating Captain's name: " . $e->getMessage();
+    }
+}
+
 // Handle image upload
 function handleImageUpload($file) {
     if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
@@ -288,6 +313,19 @@ $ranks = [
 					<?php if (isset($success)): ?>
 					<div style="background: rgba(85, 102, 255, 0.3); border: 2px solid var(--blue); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--blue);"><?php echo htmlspecialchars($success); ?></p>
+					</div>
+					<?php endif; ?>
+					
+					<?php if (isset($update_message)): ?>
+					<div style="background: rgba(85, 102, 255, 0.3); border: 2px solid var(--blue); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+						<p style="color: var(--blue);"><?php echo htmlspecialchars($update_message); ?></p>
+					</div>
+					<?php endif; ?>
+					
+					<?php if (hasPermission('Captain')): ?>
+					<div style="background: rgba(204, 68, 68, 0.2); border: 2px solid var(--red); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+						<h4 style="color: var(--red);">Admin Functions</h4>
+						<a href="?update_captain_name=1" onclick="return confirm('Update Captain name from James to Aidan in database?')" style="background-color: var(--red); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; text-decoration: none; display: inline-block;">Fix Captain Name (James → Aidan)</a>
 					</div>
 					<?php endif; ?>
 					
