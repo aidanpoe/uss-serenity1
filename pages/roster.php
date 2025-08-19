@@ -170,6 +170,21 @@ try {
     $stmt->execute();
     $all_crew = $stmt->fetchAll();
     
+    // Calculate department counts
+    $department_counts = [
+        'All' => count($all_crew),
+        'Command' => 0,
+        'ENG/OPS' => 0,
+        'MED/SCI' => 0,
+        'SEC/TAC' => 0
+    ];
+    
+    foreach ($all_crew as $crew_member) {
+        if (isset($department_counts[$crew_member['department']])) {
+            $department_counts[$crew_member['department']]++;
+        }
+    }
+    
 } catch (Exception $e) {
     $error = "Database error: " . $e->getMessage();
 }
@@ -532,7 +547,32 @@ $ranks = [
 						<p style="color: var(--bluey); font-size: 0.9rem; text-align: center;">Account creation automatically adds you to the ship's roster.</p>
 					</div>
 					
-					<h3>All Personnel</h3>
+					<!-- Department Filter Section -->
+					<div style="background: rgba(0,0,0,0.5); padding: 1.5rem; border-radius: 15px; margin: 2rem 0;">
+						<h4 style="margin-bottom: 1rem;">Department Filters</h4>
+						<div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
+							<button class="filter-btn active" onclick="filterByDepartment('All')" data-department="All" style="background-color: var(--blue); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 5px; font-weight: bold; cursor: pointer;">
+								All Personnel (<?php echo $department_counts['All']; ?>)
+							</button>
+							<button class="filter-btn" onclick="filterByDepartment('Command')" data-department="Command" style="background-color: var(--red); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 5px; font-weight: bold; cursor: pointer;">
+								Command (<?php echo $department_counts['Command']; ?>)
+							</button>
+							<button class="filter-btn" onclick="filterByDepartment('ENG/OPS')" data-department="ENG/OPS" style="background-color: var(--gold); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 5px; font-weight: bold; cursor: pointer;">
+								ENG/OPS (<?php echo $department_counts['ENG/OPS']; ?>)
+							</button>
+							<button class="filter-btn" onclick="filterByDepartment('MED/SCI')" data-department="MED/SCI" style="background-color: var(--bluey); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 5px; font-weight: bold; cursor: pointer;">
+								MED/SCI (<?php echo $department_counts['MED/SCI']; ?>)
+							</button>
+							<button class="filter-btn" onclick="filterByDepartment('SEC/TAC')" data-department="SEC/TAC" style="background-color: var(--orange); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 5px; font-weight: bold; cursor: pointer;">
+								SEC/TAC (<?php echo $department_counts['SEC/TAC']; ?>)
+							</button>
+						</div>
+						<div id="filter-status" style="text-align: center; margin-top: 1rem; color: var(--gold); font-size: 0.9rem;">
+							Showing all <?php echo $department_counts['All']; ?> personnel
+						</div>
+					</div>
+					
+					<h3 id="personnel-header">All Personnel</h3>
 					<div class="crew-grid">
 						<?php foreach ($all_crew as $crew_member): ?>
 						<div class="crew-card <?php 
@@ -542,7 +582,7 @@ $ranks = [
 								case 'MED/SCI': echo 'med-sci-box'; break;
 								case 'SEC/TAC': echo 'sec-tac-box'; break;
 							}
-						?>">
+						?>" data-department="<?php echo htmlspecialchars($crew_member['department']); ?>">
 							<?php if ($crew_member['image_path']): ?>
 								<?php 
 								$image_file_path = '../' . $crew_member['image_path'];
@@ -596,6 +636,61 @@ $ranks = [
 			</div>
 		</div>
 	</section>	
+	
+	<script>
+		// Department filtering functionality
+		function filterByDepartment(department) {
+			const crewCards = document.querySelectorAll('.crew-card');
+			const filterButtons = document.querySelectorAll('.filter-btn');
+			const personnelHeader = document.getElementById('personnel-header');
+			const filterStatus = document.getElementById('filter-status');
+			
+			// Update button states
+			filterButtons.forEach(btn => {
+				btn.classList.remove('active');
+				if (btn.getAttribute('data-department') === department) {
+					btn.classList.add('active');
+				}
+			});
+			
+			// Filter crew cards
+			let visibleCount = 0;
+			crewCards.forEach(card => {
+				if (department === 'All' || card.getAttribute('data-department') === department) {
+					card.style.display = 'block';
+					visibleCount++;
+				} else {
+					card.style.display = 'none';
+				}
+			});
+			
+			// Update header and status
+			if (department === 'All') {
+				personnelHeader.textContent = 'All Personnel';
+				filterStatus.textContent = `Showing all ${visibleCount} personnel`;
+			} else {
+				personnelHeader.textContent = `${department} Department`;
+				filterStatus.textContent = `Showing ${visibleCount} personnel in ${department}`;
+			}
+		}
+		
+		// Add CSS for active filter button
+		document.addEventListener('DOMContentLoaded', function() {
+			const style = document.createElement('style');
+			style.textContent = `
+				.filter-btn.active {
+					box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+					transform: scale(1.05);
+				}
+				.filter-btn:hover {
+					transform: scale(1.02);
+					transition: transform 0.2s;
+				}
+			`;
+			document.head.appendChild(style);
+		});
+	</script>
+	
 	<script type="text/javascript" src="../assets/lcars.js"></script>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
