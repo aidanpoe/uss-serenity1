@@ -55,6 +55,40 @@ function hasPermission($required_department) {
     return $user_dept === $required_department;
 }
 
+// Check if user can edit personnel files (Heads of departments, Command, Captain)
+function canEditPersonnelFiles() {
+    if (!isLoggedIn()) return false;
+    
+    $user_dept = getUserDepartment();
+    
+    // Captain and Command have access
+    if ($user_dept === 'Command' || $user_dept === 'Captain') {
+        return true;
+    }
+    
+    // Check if user is a department head by checking their position in roster
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->prepare("SELECT position FROM roster r JOIN users u ON r.first_name = u.first_name AND r.last_name = u.last_name WHERE u.id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $result = $stmt->fetch();
+        
+        if ($result && $result['position']) {
+            $head_positions = [
+                'Head of ENG/OPS', 'Head of MED/SCI', 'Head of SEC/TAC',
+                'Chief Engineer', 'Chief Medical Officer', 'Security Chief',
+                'Operations Officer', 'Chief Science Officer', 'Tactical Officer',
+                'Helm Officer', 'Intelligence Officer', 'S.R.T. Leader'
+            ];
+            return in_array($result['position'], $head_positions);
+        }
+    } catch (Exception $e) {
+        return false;
+    }
+    
+    return false;
+}
+
 // Redirect if not authorized
 function requirePermission($required_department) {
     if (!hasPermission($required_department)) {

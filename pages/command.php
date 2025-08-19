@@ -191,6 +191,9 @@ try {
 									<button onclick="playSoundAndRedirect('audio2', 'eng_ops.php')" style="background-color: var(--orange); color: black; border: none; padding: 0.75rem; border-radius: 5px;">Engineering Department</button>
 									<button onclick="playSoundAndRedirect('audio2', 'sec_tac.php')" style="background-color: var(--gold); color: black; border: none; padding: 0.75rem; border-radius: 5px;">Security Department</button>
 									<button onclick="playSoundAndRedirect('audio2', 'roster.php')" style="background-color: var(--red); color: black; border: none; padding: 0.75rem; border-radius: 5px;">Ship's Roster</button>
+									<?php if (canEditPersonnelFiles()): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'personnel_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.75rem; border-radius: 5px;">Personnel File Editor</button>
+									<?php endif; ?>
 								</div>
 							</div>
 							<div>
