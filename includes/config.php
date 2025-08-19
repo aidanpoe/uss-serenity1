@@ -221,4 +221,108 @@ function requirePermission($required_department) {
         exit();
     }
 }
+
+// Garry's Mod Server Query Functions
+function queryGmodServer($ip, $port, $timeout = 5) {
+    try {
+        // Create socket
+        $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if (!$socket) {
+            return false;
+        }
+        
+        // Set timeout
+        socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => $timeout, 'usec' => 0));
+        socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, array('sec' => $timeout, 'usec' => 0));
+        
+        // Source Engine query packet for player info
+        $packet = "\xFF\xFF\xFF\xFF\x55\xFF\xFF\xFF\xFF";
+        
+        // Send packet
+        socket_sendto($socket, $packet, strlen($packet), 0, $ip, $port);
+        
+        // Read response
+        $response = '';
+        $from = '';
+        $fromPort = 0;
+        socket_recvfrom($socket, $response, 4096, 0, $from, $fromPort);
+        
+        socket_close($socket);
+        
+        if (strlen($response) > 4) {
+            return parseGmodResponse($response);
+        }
+        
+        return false;
+        
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function parseGmodResponse($response) {
+    // Skip the header (first 4 bytes are 0xFF)
+    $data = substr($response, 4);
+    
+    if (strlen($data) < 2) {
+        return false;
+    }
+    
+    // Check if this is a player info response (0x44)
+    if (ord($data[0]) !== 0x44) {
+        return false;
+    }
+    
+    $players = [];
+    $offset = 2; // Skip header and player count
+    
+    try {
+        $playerCount = ord($data[1]);
+        
+        for ($i = 0; $i < $playerCount && $offset < strlen($data); $i++) {
+            // Skip index (1 byte)
+            $offset++;
+            
+            // Read player name (null-terminated string)
+            $nameStart = $offset;
+            while ($offset < strlen($data) && ord($data[$offset]) !== 0) {
+                $offset++;
+            }
+            
+            if ($offset >= strlen($data)) break;
+            
+            $name = substr($data, $nameStart, $offset - $nameStart);
+            $offset++; // Skip null terminator
+            
+            // Skip score (4 bytes) and duration (4 bytes)
+            $offset += 8;
+            
+            if ($name && strlen($name) > 0) {
+                $players[] = $name;
+            }
+        }
+        
+        return $players;
+        
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function getGmodPlayersOnline() {
+    $serverIP = '46.4.12.78';
+    $serverPort = 27015;
+    
+    $players = queryGmodServer($serverIP, $serverPort);
+    
+    if ($players === false) {
+        return ['error' => 'Unable to connect to server'];
+    }
+    
+    return [
+        'players' => $players,
+        'count' => count($players),
+        'server' => $serverIP . ':' . $serverPort
+    ];
+}
 ?>

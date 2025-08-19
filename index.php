@@ -135,6 +135,40 @@ function loginbutton($buttonstyle = "square") {
 							</div>
 						<?php endif; ?>
 						
+						<!-- Who's on Shift Section -->
+						<div style="margin: 2rem 0;">
+							<h4 style="color: var(--gold);">🚀 Who's on Shift?</h4>
+							<div style="background: rgba(255, 170, 0, 0.1); padding: 1rem; border-radius: 10px; border: 2px solid var(--gold);" data-gmod-status>
+								<?php
+								$gmodData = getGmodPlayersOnline();
+								if (isset($gmodData['error'])):
+								?>
+									<p style="color: var(--red);">⚠️ Server Offline - <?php echo htmlspecialchars($gmodData['error']); ?></p>
+									<p style="color: var(--gold); font-size: 0.9rem;">Server: 46.4.12.78:27015</p>
+								<?php 
+								elseif ($gmodData['count'] > 0):
+								?>
+									<p style="color: var(--gold); margin-bottom: 0.5rem;"><strong><?php echo $gmodData['count']; ?> crew member<?php echo $gmodData['count'] != 1 ? 's' : ''; ?> currently on duty</strong></p>
+									<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0;">
+										<?php foreach ($gmodData['players'] as $player): ?>
+											<span style="background: rgba(255, 170, 0, 0.2); padding: 0.25rem 0.5rem; border-radius: 5px; font-size: 0.9rem; color: var(--gold);">
+												👤 <?php echo htmlspecialchars($player); ?>
+											</span>
+										<?php endforeach; ?>
+									</div>
+									<p style="color: var(--gold); font-size: 0.8rem; margin-top: 0.5rem;">Server: <?php echo htmlspecialchars($gmodData['server']); ?></p>
+								<?php else: ?>
+									<p style="color: var(--blue);">📭 No crew members currently on duty</p>
+									<p style="color: var(--gold); font-size: 0.9rem;">Server: <?php echo htmlspecialchars($gmodData['server']); ?></p>
+								<?php endif; ?>
+								<div style="margin-top: 0.5rem;">
+									<button onclick="refreshGmodStatus()" style="background-color: var(--gold); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">
+										🔄 Refresh Status
+									</button>
+								</div>
+							</div>
+						</div>
+						
 						<div style="margin: 2rem 0;">
 							<h4>Department Access:</h4>
 							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0;">
@@ -201,6 +235,70 @@ function loginbutton($buttonstyle = "square") {
 		</div>
 	</section>	
 	<script type="text/javascript" src="assets/lcars.js"></script>
+	
+	<!-- Gmod Server Status Script -->
+	<script>
+	function refreshGmodStatus() {
+		const statusContainer = document.querySelector('[data-gmod-status]');
+		if (!statusContainer) return;
+		
+		// Show loading state
+		statusContainer.innerHTML = '<p style="color: var(--gold);">🔄 Checking server status...</p>';
+		
+		fetch('api/gmod_status.php')
+			.then(response => response.json())
+			.then(data => {
+				let html = '';
+				
+				if (data.error) {
+					html = `
+						<p style="color: var(--red);">⚠️ Server Offline - ${data.error}</p>
+						<p style="color: var(--gold); font-size: 0.9rem;">Server: 46.4.12.78:27015</p>
+					`;
+				} else if (data.count > 0) {
+					html = `
+						<p style="color: var(--gold); margin-bottom: 0.5rem;"><strong>${data.count} crew member${data.count != 1 ? 's' : ''} currently on duty</strong></p>
+						<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0;">
+							${data.players.map(player => `
+								<span style="background: rgba(255, 170, 0, 0.2); padding: 0.25rem 0.5rem; border-radius: 5px; font-size: 0.9rem; color: var(--gold);">
+									👤 ${player}
+								</span>
+							`).join('')}
+						</div>
+						<p style="color: var(--gold); font-size: 0.8rem; margin-top: 0.5rem;">Server: ${data.server}</p>
+					`;
+				} else {
+					html = `
+						<p style="color: var(--blue);">📭 No crew members currently on duty</p>
+						<p style="color: var(--gold); font-size: 0.9rem;">Server: ${data.server}</p>
+					`;
+				}
+				
+				html += `
+					<div style="margin-top: 0.5rem;">
+						<button onclick="refreshGmodStatus()" style="background-color: var(--gold); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">
+							🔄 Refresh Status
+						</button>
+					</div>
+				`;
+				
+				statusContainer.innerHTML = html;
+			})
+			.catch(error => {
+				statusContainer.innerHTML = `
+					<p style="color: var(--red);">❌ Error checking server status</p>
+					<div style="margin-top: 0.5rem;">
+						<button onclick="refreshGmodStatus()" style="background-color: var(--gold); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">
+							🔄 Refresh Status
+						</button>
+					</div>
+				`;
+			});
+	}
+	
+	// Auto-refresh every 30 seconds
+	setInterval(refreshGmodStatus, 30000);
+	</script>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
 </body>
