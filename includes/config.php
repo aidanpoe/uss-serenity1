@@ -156,8 +156,8 @@ function canCreateCharacter($user_id = null) {
 
 // Check user department (from current active character)
 function getUserDepartment() {
-    $character = getCurrentCharacter();
-    return $character['roster_department'] ?? $_SESSION['department'] ?? null;
+    // Return the permission group from session (MED/SCI, ENG/OPS, SEC/TAC, Command)
+    return $_SESSION['department'] ?? null;
 }
 
 // Check if user has specific permission
