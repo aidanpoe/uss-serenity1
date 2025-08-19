@@ -1,10 +1,47 @@
 <?php
 require_once '../includes/config.php';
 
-// Handle adding new personnel
+// Handle image upload
+function handleImageUpload($file) {
+    if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+        return '';
+    }
+    
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!in_array($file['type'], $allowed_types)) {
+        throw new Exception("Only JPEG, PNG, and GIF images are allowed.");
+    }
+    
+    $max_size = 5 * 1024 * 1024; // 5MB
+    if ($file['size'] > $max_size) {
+        throw new Exception("Image file size must be less than 5MB.");
+    }
+    
+    $upload_dir = '../assets/crew_photos/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+    
+    $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = uniqid('crew_') . '.' . $file_extension;
+    $upload_path = $upload_dir . $filename;
+    
+    if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+        return 'assets/crew_photos/' . $filename;
+    } else {
+        throw new Exception("Failed to upload image.");
+    }
+}
+
+// Handle adding new personnel (Captain only - full command positions)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
     if (hasPermission('Captain')) {
         try {
+            $image_path = '';
+            if (isset($_FILES['crew_image']) && $_FILES['crew_image']['error'] === UPLOAD_ERR_OK) {
+                $image_path = handleImageUpload($_FILES['crew_image']);
+            }
+            
             $pdo = getConnection();
             $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
@@ -14,7 +51,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
                 $_POST['species'],
                 $_POST['department'],
                 $_POST['position'] ?? '',
-                $_POST['image_path'] ?? ''
+                $image_path
             ]);
             $success = "Personnel added successfully.";
         } catch (Exception $e) {
@@ -22,6 +59,49 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
         }
     } else {
         $error = "Access denied. Captain authorization required.";
+    }
+}
+
+// Handle self-registration for reporting purposes (limited to basic crew positions)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'self_register') {
+    try {
+        // Check if person already exists
+        $pdo = getConnection();
+        $check_stmt = $pdo->prepare("SELECT id FROM roster WHERE first_name = ? AND last_name = ? AND species = ?");
+        $check_stmt->execute([$_POST['first_name'], $_POST['last_name'], $_POST['species']]);
+        
+        if ($check_stmt->fetch()) {
+            $error = "A crew member with this name and species already exists in the roster.";
+        } else {
+            $image_path = '';
+            if (isset($_FILES['crew_image']) && $_FILES['crew_image']['error'] === UPLOAD_ERR_OK) {
+                $image_path = handleImageUpload($_FILES['crew_image']);
+            }
+            
+            // Self-registration limited to lower ranks only
+            $allowed_self_ranks = [
+                'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class', 
+                'Petty Officer 3rd class', 'Petty Officer 1st class'
+            ];
+            
+            if (!in_array($_POST['rank'], $allowed_self_ranks)) {
+                $error = "Self-registration is limited to enlisted ranks only.";
+            } else {
+                $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([
+                    $_POST['rank'],
+                    $_POST['first_name'],
+                    $_POST['last_name'],
+                    $_POST['species'],
+                    $_POST['department'],
+                    '', // No special positions for self-registration
+                    $image_path
+                ]);
+                $success = "Self-registration completed successfully. You can now submit reports.";
+            }
+        }
+    } catch (Exception $e) {
+        $error = "Error during self-registration: " . $e->getMessage();
     }
 }
 
@@ -253,7 +333,7 @@ $ranks = [
 					<?php if (hasPermission('Captain')): ?>
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
 						<h4>Add New Personnel (Captain Only)</h4>
-						<form method="POST" action="">
+						<form method="POST" action="" enctype="multipart/form-data">
 							<input type="hidden" name="action" value="add_personnel">
 							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
 								<div>
@@ -289,11 +369,62 @@ $ranks = [
 									<label style="color: var(--bluey);">Position:</label>
 									<input type="text" name="position" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
 								</div>
+								<div style="grid-column: span 2;">
+									<label style="color: var(--bluey);">Crew Photo:</label>
+									<input type="file" name="crew_image" accept="image/*" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
+									<small style="color: var(--orange);">Optional. JPEG, PNG, or GIF. Max 5MB.</small>
+								</div>
 							</div>
 							<button type="submit" style="background-color: var(--blue); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem;">Add Personnel</button>
 						</form>
 					</div>
 					<?php endif; ?>
+					
+					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+						<h4>Not in the Roster? Register for Reporting</h4>
+						<p style="color: var(--orange);">If you need to submit reports but aren't in the roster, you can add yourself here. Limited to enlisted ranks only.</p>
+						<form method="POST" action="" enctype="multipart/form-data">
+							<input type="hidden" name="action" value="self_register">
+							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+								<div>
+									<label style="color: var(--bluey);">Rank:</label>
+									<select name="rank" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
+										<option value="Crewman 3rd Class">Crewman 3rd Class</option>
+										<option value="Crewman 2nd Class">Crewman 2nd Class</option>
+										<option value="Crewman 1st Class">Crewman 1st Class</option>
+										<option value="Petty Officer 3rd class">Petty Officer 3rd class</option>
+										<option value="Petty Officer 1st class">Petty Officer 1st class</option>
+									</select>
+								</div>
+								<div>
+									<label style="color: var(--bluey);">First Name:</label>
+									<input type="text" name="first_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
+								</div>
+								<div>
+									<label style="color: var(--bluey);">Last Name:</label>
+									<input type="text" name="last_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
+								</div>
+								<div>
+									<label style="color: var(--bluey);">Species:</label>
+									<input type="text" name="species" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
+								</div>
+								<div>
+									<label style="color: var(--bluey);">Department:</label>
+									<select name="department" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
+										<option value="MED/SCI">MED/SCI</option>
+										<option value="ENG/OPS">ENG/OPS</option>
+										<option value="SEC/TAC">SEC/TAC</option>
+									</select>
+								</div>
+								<div>
+									<label style="color: var(--bluey);">Crew Photo:</label>
+									<input type="file" name="crew_image" accept="image/*" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
+									<small style="color: var(--orange);">Optional. JPEG, PNG, or GIF. Max 5MB.</small>
+								</div>
+							</div>
+							<button type="submit" style="background-color: var(--orange); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem;">Register for Reporting</button>
+						</form>
+					</div>
 					
 					<h3>All Personnel</h3>
 					<div class="crew-grid">
@@ -306,6 +437,9 @@ $ranks = [
 								case 'SEC/TAC': echo 'sec-tac-box'; break;
 							}
 						?>">
+							<?php if ($crew_member['image_path'] && file_exists('../' . $crew_member['image_path'])): ?>
+							<img src="../<?php echo htmlspecialchars($crew_member['image_path']); ?>" alt="<?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?>" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; border: 2px solid var(--bluey);">
+							<?php endif; ?>
 							<strong><?php echo htmlspecialchars($crew_member['rank']); ?></strong><br>
 							<h4><?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?></h4>
 							<p>Species: <?php echo htmlspecialchars($crew_member['species']); ?></p>

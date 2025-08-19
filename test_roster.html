@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Roster Functionality</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>USS-Serenity Roster Enhancement Summary</h1>
+    
+    <div class="section success">
+        <h2>✅ Functionality Added</h2>
+        <h3>1. Enhanced Crew Addition (Captain Only)</h3>
+        <ul>
+            <li>Captain can add personnel with full rank selection</li>
+            <li>Image upload support (JPEG, PNG, GIF up to 5MB)</li>
+            <li>All rank hierarchy from Crewman 3rd Class to Captain</li>
+            <li>Department assignment (Command, MED/SCI, ENG/OPS, SEC/TAC)</li>
+            <li>Position/title assignment for command positions</li>
+        </ul>
+        
+        <h3>2. Self-Registration for Reporting</h3>
+        <ul>
+            <li>Crew members can add themselves for reporting purposes</li>
+            <li>Limited to enlisted ranks (Crewman 3rd Class through Petty Officer 1st class)</li>
+            <li>Prevents duplicate entries based on name and species</li>
+            <li>Includes image upload option</li>
+            <li>No special position assignments for self-registration</li>
+        </ul>
+        
+        <h3>3. Image Display Enhancement</h3>
+        <ul>
+            <li>Crew photos displayed in roster cards when available</li>
+            <li>80px circular images with blue border</li>
+            <li>File existence check to prevent broken images</li>
+            <li>Photos stored in assets/crew_photos/ directory</li>
+        </ul>
+        
+        <h3>4. Cross-Page Integration</h3>
+        <ul>
+            <li>All department reporting pages link to roster for self-registration</li>
+            <li>Medical, Engineering, and Security pages include "Not in roster?" links</li>
+            <li>Seamless workflow for new crew members to register and submit reports</li>
+        </ul>
+    </div>
+    
+    <div class="section info">
+        <h2>📋 Database Structure</h2>
+        <h3>Roster Table Fields:</h3>
+        <ul>
+            <li><strong>id</strong> - Auto-increment primary key</li>
+            <li><strong>rank</strong> - ENUM with all Starfleet ranks</li>
+            <li><strong>first_name, last_name</strong> - Personnel names</li>
+            <li><strong>species</strong> - Species designation</li>
+            <li><strong>department</strong> - Command, MED/SCI, ENG/OPS, SEC/TAC</li>
+            <li><strong>position</strong> - Special positions (Captain, First Officer, etc.)</li>
+            <li><strong>image_path</strong> - Path to crew photo</li>
+            <li><strong>phaser_training</strong> - Training levels (Type I, II, III)</li>
+            <li><strong>created_at, updated_at</strong> - Timestamps</li>
+        </ul>
+    </div>
+    
+    <div class="section info">
+        <h2>🔒 Permission System</h2>
+        <h3>Access Levels:</h3>
+        <ul>
+            <li><strong>Captain</strong> - Full access to add any personnel, any rank</li>
+            <li><strong>Command</strong> - View all departments, limited roster modification</li>
+            <li><strong>Department Staff</strong> - Access to their department's backend systems</li>
+            <li><strong>Public</strong> - Can view roster, submit reports, self-register (limited ranks)</li>
+        </ul>
+    </div>
+    
+    <div class="section info">
+        <h2>🎨 Design Compliance</h2>
+        <h3>LCARS Theme Integration:</h3>
+        <ul>
+            <li>All forms use LCARS color scheme and styling</li>
+            <li>Department color coding maintained (Red=Command, Blue=MED/SCI, Orange=ENG/OPS, Gold=SEC/TAC)</li>
+            <li>Consistent with existing template design</li>
+            <li>Sound effects and navigation preserved</li>
+            <li>Responsive grid layouts for crew display</li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>🚀 Next Steps</h2>
+        <ol>
+            <li>Ensure PHP and MySQL are running on your system</li>
+            <li>Run setup_database.php to create tables and sample data</li>
+            <li>Test crew addition functionality as Captain (username: Poe, password: Class390)</li>
+            <li>Test self-registration from department pages</li>
+            <li>Upload crew photos to verify image functionality</li>
+        </ol>
+    </div>
+    
+    <div class="section">
+        <h2>📁 File Structure Updates</h2>
+        <ul>
+            <li><strong>pages/roster.php</strong> - Enhanced with image upload and self-registration</li>
+            <li><strong>pages/med_sci.php</strong> - Added roster link for non-registered users</li>
+            <li><strong>pages/eng_ops.php</strong> - Added roster link for non-registered users</li>
+            <li><strong>pages/sec_tac.php</strong> - Added roster link for non-registered users</li>
+            <li><strong>assets/crew_photos/</strong> - New directory for storing crew images</li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -199,6 +199,7 @@ try {
 										<option value="<?php echo $person['id']; ?>"><?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?></option>
 										<?php endforeach; ?>
 									</select>
+									<small style="color: var(--gold);"><a href="roster.php" style="color: var(--gold);">Not in the roster? Click here to add yourself first.</a></small>
 								</div>
 							</div>
 							
