@@ -170,15 +170,13 @@ function loginbutton($buttonstyle = "square") {
 						<?php if (!isLoggedIn() && !isset($_SESSION['steamid'])): ?>
 						<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 10px; margin: 2rem 0; border: 2px solid var(--african-violet);">
 							<h4>Staff Access</h4>
-							<p>Access to administrative functions requires authentication.</p>
-							<div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-								<button onclick="playSoundAndRedirect('audio2', 'pages/login.php')" style="background-color: var(--african-violet); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.2rem;">LOGIN</button>
-								<button onclick="playSoundAndRedirect('audio2', 'pages/register.php')" style="background-color: var(--blue); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.2rem;">CREATE ACCOUNT</button>
-								<div style="margin-left: 1rem;">
+							<p>Access to administrative functions requires Steam authentication.</p>
+							<div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: center;">
+								<div style="text-align: center;">
 									<?php loginbutton("rectangle"); ?>
 								</div>
 							</div>
-							<p style="margin-top: 1rem; font-size: 0.9rem; color: var(--bluey);">New crew members can create an account to access department systems or login with Steam.</p>
+							<p style="margin-top: 1rem; font-size: 0.9rem; color: var(--bluey); text-align: center;">All crew members must use Steam to access department systems.</p>
 						</div>
 						<?php endif; ?>
 						

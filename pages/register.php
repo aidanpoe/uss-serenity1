@@ -1,7 +1,8 @@
 <?php
-require_once '../includes/config.php';
-
-// Handle image upload function
+// Traditional registration has been disabled - redirect to Steam authentication
+header('Location: ../steamauth/steamauth.php?login');
+exit;
+?>
 function handleImageUpload($file) {
     if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
         if (isset($file['error'])) {

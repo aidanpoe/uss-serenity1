@@ -14,8 +14,6 @@ require '../steamauth/userInfo.php';
 // Handle form submission
 if ($_POST) {
     $username = trim($_POST['username']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
     $roster_id = $_POST['roster_id'] ?? null;
     
     $errors = [];
@@ -23,14 +21,6 @@ if ($_POST) {
     // Validation
     if (empty($username)) {
         $errors[] = "Username is required";
-    }
-    
-    if (empty($password)) {
-        $errors[] = "Password is required";
-    } elseif ($password !== $confirm_password) {
-        $errors[] = "Passwords do not match";
-    } elseif (strlen($password) < 6) {
-        $errors[] = "Password must be at least 6 characters";
     }
     
     // Check if username already exists
@@ -44,10 +34,9 @@ if ($_POST) {
     
     if (empty($errors)) {
         try {
-            // Create user account
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO users (username, password, steam_id, active, created_at) VALUES (?, ?, ?, 1, NOW())");
-            $stmt->execute([$username, $hashed_password, $_SESSION['pending_steam_id']]);
+            // Create user account (Steam authentication only, no password needed)
+            $stmt = $pdo->prepare("INSERT INTO users (username, steam_id, active, created_at) VALUES (?, ?, 1, NOW())");
+            $stmt->execute([$username, $_SESSION['pending_steam_id']]);
             $user_id = $pdo->lastInsertId();
             
             // Link to roster if selected
@@ -204,7 +193,7 @@ $available_roster = $stmt->fetchAll();
         </div>
         
         <div class="info">
-            <strong>Welcome to USS Serenity!</strong> Your Steam account has been verified. Please complete your registration by creating a username and password, then optionally link to your crew roster entry.
+            <strong>Welcome to USS Serenity!</strong> Your Steam account has been verified. Please create a username and optionally link to your crew roster entry.
         </div>
         
         <?php if (!empty($errors)): ?>
@@ -221,17 +210,7 @@ $available_roster = $stmt->fetchAll();
             <div class="form-group">
                 <label for="username">Username *</label>
                 <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password *</label>
-                <input type="password" id="password" name="password" required>
-                <small style="color: var(--blue);">Minimum 6 characters</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="confirm_password">Confirm Password *</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
+                <small style="color: var(--blue);">This will be your display name on USS Serenity systems.</small>
             </div>
             
             <?php if (!empty($available_roster)): ?>
@@ -248,6 +227,10 @@ $available_roster = $stmt->fetchAll();
                     <small style="color: var(--blue);">If your character appears in the roster, link your account to it. You can change this later.</small>
                 </div>
             <?php endif; ?>
+            
+            <div style="background: rgba(85, 102, 255, 0.2); padding: 1rem; border-radius: 5px; margin: 1rem 0; border: 1px solid var(--blue);">
+                <p style="margin: 0; color: var(--blue); font-size: 0.9rem;"><strong>Note:</strong> Authentication is handled entirely through Steam. You don't need to create a password - just use your Steam login!</p>
+            </div>
             
             <div style="text-align: center; margin-top: 2rem;">
                 <button type="submit" class="btn">Complete Registration</button>

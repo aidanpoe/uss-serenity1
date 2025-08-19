@@ -29,85 +29,8 @@ try {
     if ($_POST) {
         $pdo->beginTransaction();
         
-        // Handle password change
-        if (isset($_POST['action']) && $_POST['action'] === 'change_password') {
-            $current_password = $_POST['current_password'];
-            $new_password = $_POST['new_password'];
-            $confirm_password = $_POST['confirm_password'];
-            
-            // Verify current password
-            if (!password_verify($current_password, $current_user['password'])) {
-                throw new Exception("Current password is incorrect.");
-            }
-            
-            // Validate new password
-            if (strlen($new_password) < 6) {
-                throw new Exception("New password must be at least 6 characters long.");
-            }
-            
-            if ($new_password !== $confirm_password) {
-                throw new Exception("New passwords do not match.");
-            }
-            
-            // Update password and clear force_password_change flag
-            $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("UPDATE users SET password = ?, force_password_change = 0 WHERE id = ?");
-            $stmt->execute([$password_hash, $_SESSION['user_id']]);
-            
-            $success = "Password changed successfully!";
-        }
-        
-        // Handle username change
-        elseif (isset($_POST['action']) && $_POST['action'] === 'change_username') {
-            $new_username = trim($_POST['new_username']);
-            
-            if (empty($new_username)) {
-                throw new Exception("Username cannot be empty.");
-            }
-            
-            if (!preg_match('/^[a-zA-Z0-9_]+$/', $new_username)) {
-                throw new Exception("Username can only contain letters, numbers, and underscores.");
-            }
-            
-            // Check if username already exists
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
-            $stmt->execute([$new_username, $_SESSION['user_id']]);
-            if ($stmt->fetch()) {
-                throw new Exception("Username already exists. Please choose a different username.");
-            }
-            
-            // Update username
-            $stmt = $pdo->prepare("UPDATE users SET username = ? WHERE id = ?");
-            $stmt->execute([$new_username, $_SESSION['user_id']]);
-            
-            // Update session
-            $_SESSION['username'] = $new_username;
-            
-            $success = "Username changed successfully!";
-        }
-        
-        // Handle profile information update
-        elseif (isset($_POST['action']) && $_POST['action'] === 'update_profile') {
-            if ($current_user['roster_id']) {
-                // Update roster information
-                $stmt = $pdo->prepare("UPDATE roster SET first_name = ?, last_name = ?, species = ? WHERE id = ?");
-                $stmt->execute([
-                    $_POST['first_name'],
-                    $_POST['last_name'],
-                    $_POST['species'],
-                    $current_user['roster_id']
-                ]);
-                
-                // Update session names if changed
-                $_SESSION['first_name'] = $_POST['first_name'];
-                $_SESSION['last_name'] = $_POST['last_name'];
-            }
-            
-            $success = "Profile information updated successfully!";
-        }
-        
-        // Handle image upload
-        elseif (isset($_POST['action']) && $_POST['action'] === 'update_image') {
+        // Handle image upload only
+        if (isset($_POST['action']) && $_POST['action'] === 'update_image') {
             if ($current_user['roster_id'] && isset($_FILES['profile_image'])) {
                 try {
                     // Use the same image upload function from roster.php
@@ -220,9 +143,6 @@ try {
 } catch (Exception $e) {
     $error = "Database error: " . $e->getMessage();
 }
-
-// Check if user needs to change password
-$force_password_change = $current_user['force_password_change'] ?? 0;
 ?>
 
 <!DOCTYPE html>
@@ -278,13 +198,6 @@ $force_password_change = $current_user['force_password_change'] ?? 0;
 		<div class="right-frame">
 			<div class="right-frame-2">
 				<main>
-					<?php if ($force_password_change): ?>
-					<div style="background: #5a2d2d; padding: 1.5rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--red);">
-						<h3 style="color: var(--red); margin-top: 0;">⚠️ Password Change Required</h3>
-						<p style="color: var(--orange);">Your password has been reset by the Captain. You must change it before accessing other features.</p>
-					</div>
-					<?php endif; ?>
-					
 					<?php if ($success): ?>
 					<div style="background: rgba(0, 255, 0, 0.1); color: #00ff00; padding: 1rem; border-radius: 10px; margin: 1rem 0; border: 1px solid #00ff00;">
 						<?php echo htmlspecialchars($success); ?>
@@ -329,89 +242,56 @@ $force_password_change = $current_user['force_password_change'] ?? 0;
 								<?php endif; ?>
 							</div>
 						</div>
-					</div>
+						</div>
 
-					<!-- Password Change Form -->
+					<!-- Steam Account Information -->
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
-						<h3>Change Password</h3>
-						<form method="POST" action="">
-							<input type="hidden" name="action" value="change_password">
-							<div style="display: grid; grid-template-columns: 1fr; gap: 1rem; max-width: 400px;">
-								<div>
-									<label style="color: var(--gold);">Current Password:</label>
-									<input type="password" name="current_password" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
-								</div>
-								<div>
-									<label style="color: var(--gold);">New Password:</label>
-									<input type="password" name="new_password" required minlength="6" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
-									<small style="color: var(--orange);">Minimum 6 characters</small>
-								</div>
-								<div>
-									<label style="color: var(--gold);">Confirm New Password:</label>
-									<input type="password" name="confirm_password" required minlength="6" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
-								</div>
-							</div>
-							<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem;">Change Password</button>
-						</form>
+						<h3>Steam Account</h3>
+						<?php if (!empty($_SESSION['steamid'])): ?>
+						<p style="color: var(--green);">✅ <strong>Steam Account Linked</strong></p>
+						<p><strong>Steam ID:</strong> <?php echo htmlspecialchars($_SESSION['steamid']); ?></p>
+						<p style="color: var(--bluey); font-size: 0.9rem;">You are logged in via Steam. All authentication is handled through Steam.</p>
+						<?php else: ?>
+						<p style="color: var(--orange);">⚠️ <strong>No Steam Account Linked</strong></p>
+						<p>This account is not linked to Steam. Contact your Captain to link a Steam account.</p>
+						<?php endif; ?>
 					</div>
 
-					<?php if (!$force_password_change): ?>
-					<!-- Username Change Form -->
-					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
-						<h3>Change Username</h3>
-						<p style="color: var(--orange); font-size: 0.9rem;">⚠️ Warning: Changing your username will affect your login credentials.</p>
-						<form method="POST" action="">
-							<input type="hidden" name="action" value="change_username">
-							<div style="display: grid; grid-template-columns: 1fr; gap: 1rem; max-width: 400px;">
-								<div>
-									<label style="color: var(--bluey);">New Username:</label>
-									<input type="text" name="new_username" required pattern="[a-zA-Z0-9_]+" title="Username can only contain letters, numbers, and underscores" value="<?php echo htmlspecialchars($current_user['username']); ?>" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey);">
-									<small style="color: var(--orange);">Letters, numbers, and underscores only</small>
-								</div>
-							</div>
-							<button type="submit" style="background-color: var(--bluey); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem;" onclick="return confirm('Are you sure you want to change your username?')">Change Username</button>
-						</form>
-					</div>
-
-					<!-- Profile Information Form -->
+					<!-- Profile Information Form (Read-only for most fields) -->
 					<?php if ($current_user['roster_id']): ?>
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
-						<h3>Update Profile Information</h3>
-						<p style="color: var(--orange); font-size: 0.9rem;">Note: Rank, Department, and Position can only be changed by Command staff.</p>
-						<form method="POST" action="">
-							<input type="hidden" name="action" value="update_profile">
-							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-								<div>
-									<label style="color: var(--african-violet);">First Name:</label>
-									<input type="text" name="first_name" required value="<?php echo htmlspecialchars($current_user['first_name']); ?>" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--african-violet);">
-								</div>
-								<div>
-									<label style="color: var(--african-violet);">Last Name:</label>
-									<input type="text" name="last_name" required value="<?php echo htmlspecialchars($current_user['last_name']); ?>" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--african-violet);">
-								</div>
-								<div>
-									<label style="color: var(--african-violet);">Species:</label>
-									<input type="text" name="species" required value="<?php echo htmlspecialchars($current_user['species']); ?>" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--african-violet);">
-								</div>
-							</div>
-							<button type="submit" style="background-color: var(--african-violet); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem;">Update Profile</button>
-						</form>
-					</div>
-
-					<!-- Profile Image Upload -->
-					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
-						<h3>Update Profile Photo</h3>
-						<form method="POST" action="" enctype="multipart/form-data">
-							<input type="hidden" name="action" value="update_image">
+						<h3>Profile Information</h3>
+						<p style="color: var(--orange); font-size: 0.9rem;">Note: Most profile information can only be changed by Command staff via the roster system.</p>
+						<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
 							<div>
-								<label style="color: var(--orange);">Profile Photo:</label>
-								<input type="file" name="profile_image" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
-								<small style="color: var(--orange);">JPEG, PNG, GIF, or WebP. Max 5MB.</small>
+								<label style="color: var(--gray);">First Name (Read Only):</label>
+								<input type="text" value="<?php echo htmlspecialchars($current_user['first_name']); ?>" disabled style="width: 100%; padding: 0.5rem; background: #333; color: #ccc; border: 1px solid #555;">
 							</div>
-							<button type="submit" style="background-color: var(--orange); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem;">Upload Photo</button>
-						</form>
+							<div>
+								<label style="color: var(--gray);">Last Name (Read Only):</label>
+								<input type="text" value="<?php echo htmlspecialchars($current_user['last_name']); ?>" disabled style="width: 100%; padding: 0.5rem; background: #333; color: #ccc; border: 1px solid #555;">
+							</div>
+							<div>
+								<label style="color: var(--gray);">Rank (Read Only):</label>
+								<input type="text" value="<?php echo htmlspecialchars($current_user['rank']); ?>" disabled style="width: 100%; padding: 0.5rem; background: #333; color: #ccc; border: 1px solid #555;">
+							</div>
+							<div>
+								<label style="color: var(--gray);">Department (Read Only):</label>
+								<input type="text" value="<?php echo htmlspecialchars($current_user['department']); ?>" disabled style="width: 100%; padding: 0.5rem; background: #333; color: #ccc; border: 1px solid #555;">
+							</div>
+							<?php if ($current_user['position']): ?>
+							<div>
+								<label style="color: var(--gray);">Position (Read Only):</label>
+								<input type="text" value="<?php echo htmlspecialchars($current_user['position']); ?>" disabled style="width: 100%; padding: 0.5rem; background: #333; color: #ccc; border: 1px solid #555;">
+							</div>
+							<?php endif; ?>
+							<div>
+								<label style="color: var(--gray);">Species (Read Only):</label>
+								<input type="text" value="<?php echo htmlspecialchars($current_user['species']); ?>" disabled style="width: 100%; padding: 0.5rem; background: #333; color: #ccc; border: 1px solid #555;">
+							</div>
+						</div>
+						<p style="margin-top: 1rem; color: var(--bluey); font-size: 0.9rem;">To change profile information, contact your department head or Command staff.</p>
 					</div>
-					<?php endif; ?>
 					<?php endif; ?>
 
 				</main>

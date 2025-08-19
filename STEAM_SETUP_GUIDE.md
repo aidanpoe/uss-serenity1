@@ -16,51 +16,57 @@ Your USS Serenity website now supports Steam authentication! Users can log in wi
 3. Add your domain name: `$steamauth['domainname'] = "yourdomain.com";`
 
 ### 3. Update Database
-1. Run the database update script by visiting: `http://yourdomain.com/update_steam_integration.php`
-2. This adds the necessary columns to support Steam IDs and enhanced user management
+1. Run the database update script by visiting: `http://yourdomain.com/setup_steam.php`
+2. This adds the necessary columns to support Steam IDs and user management
 
 ### 4. How It Works
 
 #### For New Steam Users:
 1. Click "Sign in through Steam" on the homepage
 2. Steam authentication redirects to registration page
-3. User creates username/password and optionally links to roster entry
-4. Account is created and user is logged in
+3. User creates username and optionally links to roster entry
+4. Account is created and user is logged in (no password needed)
 
 #### For Existing Users:
-1. Users can link their Steam account in their profile settings
-2. Once linked, they can use either Steam login or traditional login
+- All users must now use Steam authentication
+- Traditional login/password has been disabled
+- Contact your Captain to link existing accounts to Steam IDs
 
 #### Admin Features:
-- Captains can reset passwords to username via User Management
-- Force password changes on next login
-- View last login times and account status
+- Captains can view user information via User Management
+- Account status can be managed (active/inactive)
+- View last login times and Steam account linkage
 
 ### 5. Features
 
-✅ **Steam OpenID Authentication** - Secure login via Steam  
+✅ **Steam-Only Authentication** - Secure login exclusively via Steam  
 ✅ **Roster Integration** - Link Steam accounts to crew roster entries  
-✅ **Dual Login Support** - Traditional and Steam login work simultaneously  
-✅ **User Self-Management** - Profile editing, password changes, username changes  
-✅ **Captain Admin Controls** - Password resets, account management  
-✅ **Enhanced Security** - Force password changes, account status control  
+✅ **Simplified Registration** - No passwords needed, just Steam and username  
+✅ **User Profile Management** - View Steam account info and roster details  
+✅ **Captain Admin Controls** - Account management and status control  
+✅ **Enhanced Security** - Steam handles all authentication securely  
 ✅ **LCARS Styling** - Consistent Star Trek interface design  
 
 ### 6. User Experience
 
 **Homepage Updates:**
-- Steam login button appears alongside traditional login options
-- Proper logout handling for Steam vs traditional sessions
+- Steam login button is the only authentication option
+- Clean, streamlined interface focused on Steam authentication
 - Profile and admin links appear for logged-in users
 
 **New Pages:**
-- `pages/steam_register.php` - Steam user registration
-- `pages/profile.php` - User profile management
+- `pages/steam_register.php` - Steam user registration (no password required)
+- `pages/profile.php` - User profile management (Steam-focused)
 - `pages/user_management.php` - Captain admin interface
 
+**Removed Pages:**
+- Traditional login and registration forms redirect to Steam authentication
+- Password change functionality removed (Steam handles authentication)
+
 **Database Enhancements:**
-- `steam_id` column in users table
-- `force_password_change`, `active`, `last_login` columns for user management
+- `steam_id` column in users table (required for all users)
+- `active`, `last_login` columns for user management
+- Password column optional (Steam authentication only)
 
 ### 7. File Structure
 
@@ -84,8 +90,9 @@ Database Scripts:
 ### 8. Security Notes
 
 - Steam API keys should be kept secure
-- Users maintain separate passwords for non-Steam access
-- Captains can reset passwords and force password changes
-- Account status can be managed (active/inactive)
+- All authentication is handled by Steam (no local passwords)
+- Captains can manage account status (active/inactive)
+- Traditional login methods have been disabled for enhanced security
+- Users must have valid Steam accounts to access the system
 
-Your USS Serenity website now has a complete user management system with Steam integration while maintaining the original LCARS design aesthetic!
+Your USS Serenity website now has a streamlined Steam-only authentication system while maintaining the original LCARS design aesthetic!

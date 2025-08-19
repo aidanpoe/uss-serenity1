@@ -33,9 +33,9 @@ if (session_status() == PHP_SESSION_NONE) {
 // Create global PDO connection
 $pdo = getConnection();
 
-// Check if user is logged in (either traditional or Steam)
+// Check if user is logged in (Steam only)
 function isLoggedIn() {
-    return isset($_SESSION['user_id']) || isset($_SESSION['steamid']);
+    return isset($_SESSION['user_id']) && isset($_SESSION['steamid']);
 }
 
 // Check user department

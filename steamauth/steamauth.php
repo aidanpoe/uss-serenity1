@@ -64,6 +64,7 @@ if (isset($_GET['login'])){
 					// User exists, log them in
 					$_SESSION['user_id'] = $user['id'];
 					$_SESSION['username'] = $user['username'];
+					$_SESSION['steamid'] = $matches[1]; // Ensure steamid is set
 					$_SESSION['rank'] = $user['rank'];
 					$_SESSION['first_name'] = $user['first_name'];
 					$_SESSION['last_name'] = $user['last_name'];
