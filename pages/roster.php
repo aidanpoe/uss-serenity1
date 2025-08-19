@@ -148,7 +148,7 @@ try {
 
 $ranks = [
     'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class', 
-    'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petty Officer', 
+    'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petter Officer', 
     'Senior Chief Petty Officer', 'Master Chief Petty Officer', 
     'Command Master Chief Petty Officer', 'Warrant officer', 'Ensign', 
     'Lieutenant Junior Grade', 'Lieutenant', 'Lieutenant Commander', 

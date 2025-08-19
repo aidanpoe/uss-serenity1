@@ -19,7 +19,7 @@ try {
     // Create roster table
     $pdo->exec("CREATE TABLE IF NOT EXISTS roster (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        rank ENUM('Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class', 'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petty Officer', 'Senior Chief Petty Officer', 'Master Chief Petty Officer', 'Command Master Chief Petty Officer', 'Warrant officer', 'Ensign', 'Lieutenant Junior Grade', 'Lieutenant', 'Lieutenant Commander', 'Commander', 'Captain') NOT NULL,
+        rank ENUM('Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class', 'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petter Officer', 'Senior Chief Petty Officer', 'Master Chief Petty Officer', 'Command Master Chief Petty Officer', 'Warrant officer', 'Ensign', 'Lieutenant Junior Grade', 'Lieutenant', 'Lieutenant Commander', 'Commander', 'Captain') NOT NULL,
         first_name VARCHAR(50) NOT NULL,
         last_name VARCHAR(50) NOT NULL,
         species VARCHAR(50) NOT NULL,
