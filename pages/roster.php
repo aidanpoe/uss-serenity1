@@ -218,13 +218,59 @@ $ranks = [
 	<style>
 		.command-structure {
 			display: grid;
+			grid-template-columns: 300px 1fr;
+			grid-template-rows: auto;
+			gap: 2rem;
+			margin: 1.5rem 0;
+			max-width: 1000px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		.ranking-info {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+		.ranking-box {
+			background: rgba(0,0,0,0.8);
+			border: 2px solid var(--bluey);
+			border-radius: 8px;
+			padding: 1rem;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+		}
+		.ranking-title {
+			color: var(--bluey);
+			font-size: 1.2rem;
+			font-weight: bold;
+			margin-bottom: 0.5rem;
+			text-align: center;
+		}
+		.ranking-subtitle {
+			color: #ccc;
+			font-size: 0.9rem;
+			text-align: center;
+			margin-bottom: 1rem;
+		}
+		.ranking-content {
+			color: #ccc;
+			font-size: 0.8rem;
+			line-height: 1.4;
+		}
+		.rank-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+		.rank-list li {
+			margin-bottom: 0.3rem;
+			color: #ccc;
+			font-size: 0.75rem;
+		}
+		.command-boxes {
+			display: grid;
 			grid-template-columns: 1fr 1fr 1fr;
 			grid-template-rows: auto auto;
 			gap: 1rem;
-			margin: 1.5rem 0;
-			max-width: 600px;
-			margin-left: auto;
-			margin-right: auto;
 		}
 		.department-box {
 			background: rgba(0,0,0,0.7);
@@ -234,7 +280,7 @@ $ranks = [
 			box-shadow: 0 3px 6px rgba(0,0,0,0.4);
 		}
 		.command-department {
-			grid-column: 1 / -1; /* Spans full width */
+			grid-column: 1 / -1; /* Spans full width of command boxes grid */
 			width: calc(33.33% + 10%); /* 10% wider than a single department box */
 			justify-self: center;
 			border-color: var(--red);
@@ -403,6 +449,50 @@ $ranks = [
 					</div>
 					<?php endif; ?>
 					<div class="command-structure">
+						<!-- Ranking Information (Left Side) -->
+						<div class="ranking-info">
+							<!-- CO Ranks Box -->
+							<div class="ranking-box">
+								<div class="ranking-title">Ranking Structure</div>
+								<div class="ranking-subtitle">CO Ranks</div>
+								<div class="ranking-content">
+									<div style="color: var(--bluey); font-weight: bold; margin-bottom: 1rem;">Training / Promotions</div>
+									<p style="margin-bottom: 1rem; font-size: 0.7rem;">DON'T PANIC! It may look scary but there are ways to jump ranks through merit. Not all ranks are equal, some rank will only last a few days due to being tied to training.</p>
+									<ul class="rank-list">
+										<li>Warrant Officer [WO.]</li>
+										<li>Ensign [ENS.]</li>
+										<li>Lieutenant Junior Grade [LT. JG.]</li>
+										<li>Lieutenant [LT.]</li>
+										<li>Lieutenant Commander [LT. CMD.]</li>
+										<li>Commander [CMD.]</li>
+										<li>Captain [CPT.]</li>
+									</ul>
+								</div>
+							</div>
+							
+							<!-- NCO Ranks Box -->
+							<div class="ranking-box">
+								<div class="ranking-title">Ranking Structure</div>
+								<div class="ranking-subtitle">NCO Ranks</div>
+								<div class="ranking-content">
+									<ul class="rank-list">
+										<li>Crewman 3rd Class [CRW3.]</li>
+										<li>Crewman 2nd Class [CRW2.]</li>
+										<li>Crewman 1st Class [CRW1.]</li>
+										<li>Petty Officer 3rd Class [PO3.]</li>
+										<li>Petty Officer 2nd Class [PO2.]</li>
+										<li>Petty Officer 1st Class [PO1.]</li>
+										<li>Chief Petty Officer [CPO.]</li>
+										<li>Senior Chief Petty Officer [SCPO.]</li>
+										<li>Master Chief Petty Officer [MCPO.]</li>
+										<li>Command Master Chief Petty Officer [CMCPO.]</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Command Boxes (Right Side) -->
+						<div class="command-boxes">
 						<!-- Command Department Box -->
 						<div class="department-box command-department">
 							<div class="department-title command-title">COMMAND</div>
@@ -631,6 +721,7 @@ $ranks = [
 									</div>
 								</div>
 							</div>
+						</div>
 						</div>
 					</div>
 
