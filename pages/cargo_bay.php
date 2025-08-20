@@ -621,7 +621,7 @@ try {
             font-weight: bold;
             font-size: 1rem;
             margin: 0;
-            color: var(--orange);
+            color: #000;
         }
         
         .item-quantity {
@@ -634,7 +634,7 @@ try {
         }
         
         .item-description {
-            color: var(--blue);
+            color: #000;
             font-size: 0.85rem;
             margin: 0.5rem 0;
             opacity: 0.8;
@@ -1191,9 +1191,14 @@ try {
     <!-- Audit Log Modal -->
     <div id="auditModal" class="modal">
         <div class="modal-content" style="max-width: 1200px; max-height: 90vh; overflow-y: auto;">
-            <h3 style="color: var(--orange); border-bottom: 2px solid var(--orange); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                🗂️ CARGO BAY AUDIT LOG
-            </h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="color: var(--orange); border-bottom: 2px solid var(--orange); padding-bottom: 0.5rem; margin: 0; flex-grow: 1;">
+                    🗂️ CARGO BAY AUDIT LOG
+                </h3>
+                <button type="button" onclick="closeModal('auditModal')" style="background: var(--red); color: #000; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-left: 1rem;">
+                    ×
+                </button>
+            </div>
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.3); border-radius: 5px;">
                 <div style="color: var(--blue);">
