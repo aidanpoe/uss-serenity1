@@ -528,8 +528,8 @@ $ranks = [
 								<!-- Head of MED/SCI (Top) -->
 								<div class="positions-row single">
 									<div class="officer-box med-sci-box">
-										<div style="color: var(--blue); font-size: 0.7rem; margin-bottom: 0.5rem;">Head of MED/SCI</div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem; font-size: 0.8rem;">
+										<div style="color: var(--blue); font-size: 0.45rem; margin-bottom: 0.25rem;">Head of MED/SCI</div>
+										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.25rem; font-size: 0.5rem;">
 											<?php if ($command_positions['Head of MED/SCI']): ?>
 												<?php echo htmlspecialchars($command_positions['Head of MED/SCI']['rank'] . ' ' . $command_positions['Head of MED/SCI']['first_name'] . ' ' . $command_positions['Head of MED/SCI']['last_name']); ?>
 											<?php else: ?>
@@ -537,7 +537,7 @@ $ranks = [
 											<?php endif; ?>
 										</div>
 										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.6rem;">Edit Assignment</button>
+										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.4rem;">Edit Assignment</button>
 										<?php endif; ?>
 									</div>
 								</div>
@@ -550,8 +550,8 @@ $ranks = [
 										$person = $command_positions[$position];
 									?>
 									<div class="officer-box med-sci-box">
-										<div style="color: var(--blue); font-size: 0.7rem; margin-bottom: 0.5rem;"><?php echo htmlspecialchars($position); ?></div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem; font-size: 0.8rem;">
+										<div style="color: var(--blue); font-size: 0.45rem; margin-bottom: 0.25rem;"><?php echo htmlspecialchars($position); ?></div>
+										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.25rem; font-size: 0.5rem;">
 											<?php if ($person): ?>
 												<?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?>
 											<?php else: ?>
@@ -559,7 +559,7 @@ $ranks = [
 											<?php endif; ?>
 										</div>
 										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.6rem;">Edit Assignment</button>
+										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.4rem;">Edit Assignment</button>
 										<?php endif; ?>
 									</div>
 									<?php endforeach; ?>
@@ -575,8 +575,8 @@ $ranks = [
 								<!-- Head of ENG/OPS (Top) -->
 								<div class="positions-row single">
 									<div class="officer-box eng-ops-box">
-										<div style="color: var(--orange); font-size: 0.7rem; margin-bottom: 0.5rem;">Head of ENG/OPS</div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem; font-size: 0.8rem;">
+										<div style="color: var(--orange); font-size: 0.45rem; margin-bottom: 0.25rem;">Head of ENG/OPS</div>
+										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.25rem; font-size: 0.5rem;">
 											<?php if ($command_positions['Head of ENG/OPS']): ?>
 												<?php echo htmlspecialchars($command_positions['Head of ENG/OPS']['rank'] . ' ' . $command_positions['Head of ENG/OPS']['first_name'] . ' ' . $command_positions['Head of ENG/OPS']['last_name']); ?>
 											<?php else: ?>
@@ -584,7 +584,7 @@ $ranks = [
 											<?php endif; ?>
 										</div>
 										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--orange); color: black; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.6rem;">Edit Assignment</button>
+										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.4rem;">Edit Assignment</button>
 										<?php endif; ?>
 									</div>
 								</div>
@@ -597,8 +597,8 @@ $ranks = [
 										$person = $command_positions[$position];
 									?>
 									<div class="officer-box eng-ops-box">
-										<div style="color: var(--orange); font-size: 0.7rem; margin-bottom: 0.5rem;"><?php echo htmlspecialchars($position); ?></div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem; font-size: 0.8rem;">
+										<div style="color: var(--orange); font-size: 0.45rem; margin-bottom: 0.25rem;"><?php echo htmlspecialchars($position); ?></div>
+										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.25rem; font-size: 0.5rem;">
 											<?php if ($person): ?>
 												<?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?>
 											<?php else: ?>
@@ -606,7 +606,7 @@ $ranks = [
 											<?php endif; ?>
 										</div>
 										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--orange); color: black; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.6rem;">Edit Assignment</button>
+										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.4rem;">Edit Assignment</button>
 										<?php endif; ?>
 									</div>
 									<?php endforeach; ?>
@@ -639,8 +639,8 @@ $ranks = [
 								<!-- Head of SEC/TAC (Top) -->
 								<div class="positions-row single">
 									<div class="officer-box sec-tac-box">
-										<div style="color: var(--gold); font-size: 0.7rem; margin-bottom: 0.5rem;">Head of SEC/TAC</div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem; font-size: 0.8rem;">
+										<div style="color: var(--gold); font-size: 0.45rem; margin-bottom: 0.25rem;">Head of SEC/TAC</div>
+										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.25rem; font-size: 0.5rem;">
 											<?php if ($command_positions['Head of SEC/TAC']): ?>
 												<?php echo htmlspecialchars($command_positions['Head of SEC/TAC']['rank'] . ' ' . $command_positions['Head of SEC/TAC']['first_name'] . ' ' . $command_positions['Head of SEC/TAC']['last_name']); ?>
 											<?php else: ?>
@@ -648,7 +648,7 @@ $ranks = [
 											<?php endif; ?>
 										</div>
 										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--gold); color: black; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.6rem;">Edit Assignment</button>
+										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.4rem;">Edit Assignment</button>
 										<?php endif; ?>
 									</div>
 								</div>
@@ -661,8 +661,8 @@ $ranks = [
 										$person = $command_positions[$position];
 									?>
 									<div class="officer-box sec-tac-box">
-										<div style="color: var(--gold); font-size: 0.7rem; margin-bottom: 0.5rem;"><?php echo htmlspecialchars($position); ?></div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem; font-size: 0.8rem;">
+										<div style="color: var(--gold); font-size: 0.45rem; margin-bottom: 0.25rem;"><?php echo htmlspecialchars($position); ?></div>
+										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.25rem; font-size: 0.5rem;">
 											<?php if ($person): ?>
 												<?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?>
 											<?php else: ?>
@@ -670,7 +670,7 @@ $ranks = [
 											<?php endif; ?>
 										</div>
 										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--gold); color: black; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.6rem;">Edit Assignment</button>
+										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.4rem;">Edit Assignment</button>
 										<?php endif; ?>
 									</div>
 									<?php endforeach; ?>
