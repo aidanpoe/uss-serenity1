@@ -102,14 +102,17 @@ function switchCharacter($character_id) {
         switch($character['department']) {
             case 'Medical':
             case 'Science':
+            case 'MED/SCI':
                 $user_department = 'MED/SCI';
                 break;
             case 'Engineering':
             case 'Operations':
+            case 'ENG/OPS':
                 $user_department = 'ENG/OPS';
                 break;
             case 'Security':
             case 'Tactical':
+            case 'SEC/TAC':
                 $user_department = 'SEC/TAC';
                 break;
             case 'Command':
