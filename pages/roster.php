@@ -235,7 +235,7 @@ $ranks = [
 		}
 		.command-department {
 			grid-column: 1 / -1; /* Spans full width */
-			width: 75%; /* 25% reduction from original width */
+			width: calc(33.33% + 10%); /* 10% wider than a single department box */
 			justify-self: center;
 			border-color: var(--red);
 			background: rgba(204, 68, 68, 0.1);
