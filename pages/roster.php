@@ -234,7 +234,9 @@ $ranks = [
 			box-shadow: 0 3px 6px rgba(0,0,0,0.4);
 		}
 		.command-department {
-			grid-column: 1 / -1; /* Spans full width */
+			grid-column: 2; /* Centers over middle column (ENG/OPS) */
+			max-width: 75%; /* 25% reduction from original size */
+			justify-self: center;
 			border-color: var(--red);
 			background: rgba(204, 68, 68, 0.1);
 		}
