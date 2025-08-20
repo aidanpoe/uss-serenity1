@@ -171,14 +171,21 @@ function getUserDepartment() {
     return $_SESSION['department'] ?? null;
 }
 
-// Update last_active timestamp for current character
+// Update last_active timestamp for current character and user session
 function updateLastActive() {
     if (!isLoggedIn() || !isset($_SESSION['character_id'])) return;
     
     try {
         $pdo = getConnection();
+        
+        // Update character's last_active timestamp
         $stmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
         $stmt->execute([$_SESSION['character_id']]);
+        
+        // Update user's last_login to track active session
+        $stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        
     } catch (Exception $e) {
         // Silent fail - don't break the page if this fails
         error_log("Failed to update last_active: " . $e->getMessage());

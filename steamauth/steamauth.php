@@ -141,6 +141,29 @@ if (isset($_GET['login'])){
 
 if (isset($_GET['logout'])){
 	require_once 'SteamConfig.php';
+	
+	// Update last_active to show user logged out (set to past time to avoid "online" status)
+	if (isset($_SESSION['character_id'])) {
+		try {
+			$pdo = new PDO(
+				"mysql:host=localhost;port=3306;dbname=serenity;charset=utf8mb4", 
+				"serenity", 
+				"Os~886go4",
+				[
+					PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+					PDO::ATTR_EMULATE_PREPARES => false,
+				]
+			);
+			
+			// Set last_active to 10 minutes ago to ensure it doesn't show as "online"
+			$stmt = $pdo->prepare("UPDATE roster SET last_active = DATE_SUB(NOW(), INTERVAL 10 MINUTE) WHERE id = ?");
+			$stmt->execute([$_SESSION['character_id']]);
+		} catch (Exception $e) {
+			// Silent fail - don't break logout if this fails
+		}
+	}
+	
 	session_unset();
 	session_destroy();
 	header('Location: '.$steamauth['logoutpage']);

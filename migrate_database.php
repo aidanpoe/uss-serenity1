@@ -15,125 +15,73 @@ try {
     $updates_applied = [];
     $errors = [];
     
-    // Migration 1: Add last_active field to roster table
-    try {
-        // Check if field exists
-        $stmt = $pdo->query("SHOW COLUMNS FROM roster LIKE 'last_active'");
-        $field_exists = $stmt->rowCount() > 0;
-        
-        if (!$field_exists) {
-            $pdo->exec("ALTER TABLE roster ADD COLUMN last_active TIMESTAMP NULL DEFAULT NULL");
-            $updates_applied[] = "✅ Added 'last_active' field to roster table";
-        } else {
-            $updates_applied[] = "ℹ️ Field 'last_active' already exists in roster table";
+    // Check current database status
+    $updates_applied[] = "ℹ️ Checking database schema against requirements...";
+    
+    // Verify all required fields are present
+    $required_fields = [
+        'roster' => ['last_active', 'user_id', 'character_name', 'is_active'],
+        'users' => ['steam_id', 'active_character_id', 'active', 'last_login']
+    ];
+    
+    $missing_fields = [];
+    
+    foreach ($required_fields as $table => $fields) {
+        foreach ($fields as $field) {
+            $stmt = $pdo->query("SHOW COLUMNS FROM `$table` LIKE '$field'");
+            if ($stmt->rowCount() == 0) {
+                $missing_fields[$table][] = $field;
+            }
         }
-    } catch (PDOException $e) {
-        $errors[] = "❌ Error adding last_active field: " . $e->getMessage();
     }
     
-    // Migration 2: Ensure user_id field exists in roster table (for character assignments)
-    try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM roster LIKE 'user_id'");
-        $field_exists = $stmt->rowCount() > 0;
-        
-        if (!$field_exists) {
-            $pdo->exec("ALTER TABLE roster ADD COLUMN user_id INT NULL, ADD FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL");
-            $updates_applied[] = "✅ Added 'user_id' field to roster table with foreign key";
-        } else {
-            $updates_applied[] = "ℹ️ Field 'user_id' already exists in roster table";
+    // Apply any missing migrations
+    if (empty($missing_fields)) {
+        $updates_applied[] = "✅ All required database fields are already present!";
+        $updates_applied[] = "📊 Database schema verification complete";
+    } else {
+        foreach ($missing_fields as $table => $fields) {
+            foreach ($fields as $field) {
+                try {
+                    switch ($table . '.' . $field) {
+                        case 'roster.last_active':
+                            $pdo->exec("ALTER TABLE roster ADD COLUMN last_active TIMESTAMP NULL DEFAULT NULL");
+                            $updates_applied[] = "✅ Added 'last_active' field to roster table";
+                            break;
+                        case 'roster.user_id':
+                            $pdo->exec("ALTER TABLE roster ADD COLUMN user_id INT NULL");
+                            $updates_applied[] = "✅ Added 'user_id' field to roster table";
+                            break;
+                        case 'roster.character_name':
+                            $pdo->exec("ALTER TABLE roster ADD COLUMN character_name VARCHAR(100) NULL");
+                            $updates_applied[] = "✅ Added 'character_name' field to roster table";
+                            break;
+                        case 'roster.is_active':
+                            $pdo->exec("ALTER TABLE roster ADD COLUMN is_active TINYINT(1) DEFAULT 1");
+                            $updates_applied[] = "✅ Added 'is_active' field to roster table";
+                            break;
+                        case 'users.steam_id':
+                            $pdo->exec("ALTER TABLE users ADD COLUMN steam_id VARCHAR(20) UNIQUE NULL");
+                            $updates_applied[] = "✅ Added 'steam_id' field to users table";
+                            break;
+                        case 'users.active_character_id':
+                            $pdo->exec("ALTER TABLE users ADD COLUMN active_character_id INT NULL");
+                            $updates_applied[] = "✅ Added 'active_character_id' field to users table";
+                            break;
+                        case 'users.active':
+                            $pdo->exec("ALTER TABLE users ADD COLUMN active TINYINT(1) DEFAULT 1");
+                            $updates_applied[] = "✅ Added 'active' field to users table";
+                            break;
+                        case 'users.last_login':
+                            $pdo->exec("ALTER TABLE users ADD COLUMN last_login DATETIME NULL DEFAULT NULL");
+                            $updates_applied[] = "✅ Added 'last_login' field to users table";
+                            break;
+                    }
+                } catch (PDOException $e) {
+                    $errors[] = "❌ Error adding $field to $table: " . $e->getMessage();
+                }
+            }
         }
-    } catch (PDOException $e) {
-        $errors[] = "❌ Error adding user_id field: " . $e->getMessage();
-    }
-    
-    // Migration 3: Ensure is_active field exists in roster table
-    try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM roster LIKE 'is_active'");
-        $field_exists = $stmt->rowCount() > 0;
-        
-        if (!$field_exists) {
-            $pdo->exec("ALTER TABLE roster ADD COLUMN is_active TINYINT(1) DEFAULT 1");
-            $updates_applied[] = "✅ Added 'is_active' field to roster table";
-        } else {
-            $updates_applied[] = "ℹ️ Field 'is_active' already exists in roster table";
-        }
-    } catch (PDOException $e) {
-        $errors[] = "❌ Error adding is_active field: " . $e->getMessage();
-    }
-    
-    // Migration 4: Ensure character_name field exists in roster table
-    try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM roster LIKE 'character_name'");
-        $field_exists = $stmt->rowCount() > 0;
-        
-        if (!$field_exists) {
-            $pdo->exec("ALTER TABLE roster ADD COLUMN character_name VARCHAR(100) NULL");
-            $updates_applied[] = "✅ Added 'character_name' field to roster table";
-        } else {
-            $updates_applied[] = "ℹ️ Field 'character_name' already exists in roster table";
-        }
-    } catch (PDOException $e) {
-        $errors[] = "❌ Error adding character_name field: " . $e->getMessage();
-    }
-    
-    // Migration 5: Ensure users table has required fields for Steam authentication
-    try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'steam_id'");
-        $field_exists = $stmt->rowCount() > 0;
-        
-        if (!$field_exists) {
-            $pdo->exec("ALTER TABLE users ADD COLUMN steam_id VARCHAR(20) UNIQUE NULL");
-            $updates_applied[] = "✅ Added 'steam_id' field to users table";
-        } else {
-            $updates_applied[] = "ℹ️ Field 'steam_id' already exists in users table";
-        }
-    } catch (PDOException $e) {
-        $errors[] = "❌ Error adding steam_id field: " . $e->getMessage();
-    }
-    
-    // Migration 6: Ensure active_character_id field exists in users table
-    try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'active_character_id'");
-        $field_exists = $stmt->rowCount() > 0;
-        
-        if (!$field_exists) {
-            $pdo->exec("ALTER TABLE users ADD COLUMN active_character_id INT NULL, ADD FOREIGN KEY (active_character_id) REFERENCES roster(id) ON DELETE SET NULL");
-            $updates_applied[] = "✅ Added 'active_character_id' field to users table with foreign key";
-        } else {
-            $updates_applied[] = "ℹ️ Field 'active_character_id' already exists in users table";
-        }
-    } catch (PDOException $e) {
-        $errors[] = "❌ Error adding active_character_id field: " . $e->getMessage();
-    }
-    
-    // Migration 7: Ensure active field exists in users table
-    try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'active'");
-        $field_exists = $stmt->rowCount() > 0;
-        
-        if (!$field_exists) {
-            $pdo->exec("ALTER TABLE users ADD COLUMN active TINYINT(1) DEFAULT 1");
-            $updates_applied[] = "✅ Added 'active' field to users table";
-        } else {
-            $updates_applied[] = "ℹ️ Field 'active' already exists in users table";
-        }
-    } catch (PDOException $e) {
-        $errors[] = "❌ Error adding active field: " . $e->getMessage();
-    }
-    
-    // Migration 8: Ensure last_login field exists in users table
-    try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'last_login'");
-        $field_exists = $stmt->rowCount() > 0;
-        
-        if (!$field_exists) {
-            $pdo->exec("ALTER TABLE users ADD COLUMN last_login TIMESTAMP NULL DEFAULT NULL");
-            $updates_applied[] = "✅ Added 'last_login' field to users table";
-        } else {
-            $updates_applied[] = "ℹ️ Field 'last_login' already exists in users table";
-        }
-    } catch (PDOException $e) {
-        $errors[] = "❌ Error adding last_login field: " . $e->getMessage();
     }
     
     // Display results

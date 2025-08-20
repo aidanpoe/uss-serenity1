@@ -175,8 +175,19 @@ try {
         $command_positions[$officer['position']] = $officer;
     }
     
-    // Get all crew members
-    $stmt = $pdo->prepare("SELECT *, last_active FROM roster ORDER BY department, rank, last_name, first_name");
+    // Get all crew members with current session info
+    $stmt = $pdo->prepare("
+        SELECT r.*, r.last_active,
+               u.last_login,
+               CASE 
+                   WHEN u.active_character_id = r.id AND u.last_login > DATE_SUB(NOW(), INTERVAL 30 MINUTE) 
+                   THEN 1 
+                   ELSE 0 
+               END as is_currently_online
+        FROM roster r 
+        LEFT JOIN users u ON r.user_id = u.id 
+        ORDER BY r.department, r.rank, r.last_name, r.first_name
+    ");
     $stmt->execute();
     $all_crew = $stmt->fetchAll();
     
@@ -1049,20 +1060,23 @@ $ranks = [
 							<div style="font-size: 0.8rem; color: var(--bluey); margin-top: 0.5rem; padding: 0.2rem; background: rgba(0,0,0,0.3); border-radius: 3px;">
 								<strong>Last Active:</strong><br>
 								<?php 
-								$last_active = new DateTime($crew_member['last_active']);
-								$now = new DateTime();
-								$interval = $now->diff($last_active);
-								
-								if ($interval->days == 0 && $interval->h == 0 && $interval->i < 5) {
+								// Check if user is currently online (has active session)
+								if ($crew_member['is_currently_online']) {
 									echo '<span style="color: var(--green);">Online</span>';
-								} elseif ($interval->days == 0) {
-									echo '<span style="color: var(--gold);">' . $interval->h . 'h ' . $interval->i . 'm ago</span>';
-								} elseif ($interval->days == 1) {
-									echo '<span style="color: var(--orange);">1 day ago</span>';
-								} elseif ($interval->days < 7) {
-									echo '<span style="color: var(--orange);">' . $interval->days . ' days ago</span>';
 								} else {
-									echo '<span style="color: var(--red);">' . $last_active->format('M j, Y') . '</span>';
+									$last_active = new DateTime($crew_member['last_active']);
+									$now = new DateTime();
+									$interval = $now->diff($last_active);
+									
+									if ($interval->days == 0) {
+										echo '<span style="color: var(--gold);">' . $interval->h . 'h ' . $interval->i . 'm ago</span>';
+									} elseif ($interval->days == 1) {
+										echo '<span style="color: var(--orange);">1 day ago</span>';
+									} elseif ($interval->days < 7) {
+										echo '<span style="color: var(--orange);">' . $interval->days . ' days ago</span>';
+									} else {
+										echo '<span style="color: var(--red);">' . $last_active->format('M j, Y') . '</span>';
+									}
 								}
 								?>
 							</div>
