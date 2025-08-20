@@ -14,12 +14,14 @@ require '../steamauth/userInfo.php';
 // Handle form submission
 if ($_POST) {
     $username = trim($_POST['username']);
-    $rank = trim($_POST['rank']);
+                <small style="color: var(--blue);">Your department assignment determines your system access permissions.</small>
+            </div>
+            
+            <div style="background: rgba(85, 102, 255, 0.2); padding: 1rem; border-radius: 5px; margin: 1rem 0; border: 1px solid var(--blue);")= trim($_POST['rank']);
     $first_name = trim($_POST['first_name']);
     $last_name = trim($_POST['last_name']);
     $species = trim($_POST['species']);
     $department = $_POST['department'];
-    $position = trim($_POST['position']);
     
     $errors = [];
     
@@ -38,9 +40,6 @@ if ($_POST) {
     }
     if (empty($department)) {
         $errors[] = "Department is required";
-    }
-    if (empty($position)) {
-        $errors[] = "Position is required";
     }
     
     // Check if username already exists
@@ -95,8 +94,8 @@ if ($_POST) {
             
             // Create roster entry and link to user
             $character_name = $first_name . ' ' . $last_name;
-            $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, user_id, character_name, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())");
-            $stmt->execute([$rank, $first_name, $last_name, $species, $department, $position, $user_id, $character_name]);
+            $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, user_id, character_name, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW())");
+            $stmt->execute([$rank, $first_name, $last_name, $species, $department, $user_id, $character_name]);
             $character_id = $pdo->lastInsertId();
             
             // Set this as the user's active character
@@ -113,7 +112,6 @@ if ($_POST) {
             $_SESSION['last_name'] = $last_name;
             $_SESSION['department'] = $user_department; // User permission department (MED/SCI, ENG/OPS, SEC/TAC)
             $_SESSION['roster_department'] = $department; // Roster display department
-            $_SESSION['position'] = $position;
             $_SESSION['steamid'] = $_SESSION['pending_steam_id']; // Set steamid for session
             
             // Update last login
@@ -316,6 +314,7 @@ if ($_POST) {
                     <option value="Crewman 2nd Class" <?php echo ($_POST['rank'] ?? '') == 'Crewman 2nd Class' ? 'selected' : ''; ?>>Crewman 2nd Class</option>
                     <option value="Crewman 1st Class" <?php echo ($_POST['rank'] ?? '') == 'Crewman 1st Class' ? 'selected' : ''; ?>>Crewman 1st Class</option>
                     <option value="Petty Officer 3rd Class" <?php echo ($_POST['rank'] ?? '') == 'Petty Officer 3rd Class' ? 'selected' : ''; ?>>Petty Officer 3rd Class</option>
+                    <option value="Petty Officer 2nd Class" <?php echo ($_POST['rank'] ?? '') == 'Petty Officer 2nd Class' ? 'selected' : ''; ?>>Petty Officer 2nd Class</option>
                     <option value="Petty Officer 1st Class" <?php echo ($_POST['rank'] ?? '') == 'Petty Officer 1st Class' ? 'selected' : ''; ?>>Petty Officer 1st Class</option>
                     <option value="Chief Petty Officer" <?php echo ($_POST['rank'] ?? '') == 'Chief Petty Officer' ? 'selected' : ''; ?>>Chief Petty Officer</option>
                     <option value="Senior Chief Petty Officer" <?php echo ($_POST['rank'] ?? '') == 'Senior Chief Petty Officer' ? 'selected' : ''; ?>>Senior Chief Petty Officer</option>
