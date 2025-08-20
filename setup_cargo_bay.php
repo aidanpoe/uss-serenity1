@@ -15,10 +15,10 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )";
     
-    if ($conn->query($sql) === TRUE) {
+    if ($pdo->exec($sql) !== FALSE) {
         echo "<p>✅ Table 'cargo_areas' created successfully</p>";
     } else {
-        echo "<p>❌ Error creating cargo_areas table: " . $conn->error . "</p>";
+        echo "<p>❌ Error creating cargo_areas table</p>";
     }
 
     // Create cargo_inventory table
@@ -36,10 +36,10 @@ try {
         FOREIGN KEY (area_id) REFERENCES cargo_areas(id) ON DELETE CASCADE
     )";
     
-    if ($conn->query($sql) === TRUE) {
+    if ($pdo->exec($sql) !== FALSE) {
         echo "<p>✅ Table 'cargo_inventory' created successfully</p>";
     } else {
-        echo "<p>❌ Error creating cargo_inventory table: " . $conn->error . "</p>";
+        echo "<p>❌ Error creating cargo_inventory table</p>";
     }
 
     // Create cargo_logs table
@@ -57,10 +57,10 @@ try {
         FOREIGN KEY (inventory_id) REFERENCES cargo_inventory(id) ON DELETE CASCADE
     )";
     
-    if ($conn->query($sql) === TRUE) {
+    if ($pdo->exec($sql) !== FALSE) {
         echo "<p>✅ Table 'cargo_logs' created successfully</p>";
     } else {
-        echo "<p>❌ Error creating cargo_logs table: " . $conn->error . "</p>";
+        echo "<p>❌ Error creating cargo_logs table</p>";
     }
 
     // Insert default cargo areas
@@ -74,13 +74,12 @@ try {
     ];
 
     foreach ($areas as $area) {
-        $stmt = $conn->prepare("INSERT IGNORE INTO cargo_areas (area_name, area_code, description, department_access) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $area[0], $area[1], $area[2], $area[3]);
+        $stmt = $pdo->prepare("INSERT IGNORE INTO cargo_areas (area_name, area_code, description, department_access) VALUES (?, ?, ?, ?)");
         
-        if ($stmt->execute()) {
+        if ($stmt->execute([$area[0], $area[1], $area[2], $area[3]])) {
             echo "<p>✅ Added cargo area: " . $area[0] . "</p>";
         } else {
-            echo "<p>❌ Error adding cargo area " . $area[0] . ": " . $stmt->error . "</p>";
+            echo "<p>❌ Error adding cargo area " . $area[0] . "</p>";
         }
     }
 
@@ -91,6 +90,4 @@ try {
 } catch (Exception $e) {
     echo "<p>❌ Setup failed: " . $e->getMessage() . "</p>";
 }
-
-$conn->close();
 ?>

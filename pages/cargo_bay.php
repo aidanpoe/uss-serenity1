@@ -33,50 +33,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $item_description = $_POST['item_description'];
                 $quantity = $_POST['quantity'];
                 
-                // Check if user can modify this area
-                $area_stmt = $conn->prepare("SELECT department_access FROM cargo_areas WHERE id = ?");
-                $area_stmt->bind_param("i", $area_id);
-                $area_stmt->execute();
-                $area_result = $area_stmt->get_result();
-                $area = $area_result->fetch_assoc();
-                
-                if (canModifyArea($area['department_access'], $user_department)) {
-                    // Check if item already exists in this area
-                    $check_stmt = $conn->prepare("SELECT id, quantity FROM cargo_inventory WHERE area_id = ? AND item_name = ?");
-                    $check_stmt->bind_param("is", $area_id, $item_name);
-                    $check_stmt->execute();
-                    $check_result = $check_stmt->get_result();
+                try {
+                    // Check if user can modify this area
+                    $area_stmt = $pdo->prepare("SELECT department_access FROM cargo_areas WHERE id = ?");
+                    $area_stmt->execute([$area_id]);
+                    $area = $area_stmt->fetch();
                     
-                    if ($check_result->num_rows > 0) {
-                        // Update existing item
-                        $existing = $check_result->fetch_assoc();
-                        $new_quantity = $existing['quantity'] + $quantity;
+                    if (canModifyArea($area['department_access'], $user_department)) {
+                        // Check if item already exists in this area
+                        $check_stmt = $pdo->prepare("SELECT id, quantity FROM cargo_inventory WHERE area_id = ? AND item_name = ?");
+                        $check_stmt->execute([$area_id, $item_name]);
+                        $existing = $check_stmt->fetch();
                         
-                        $update_stmt = $conn->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
-                        $update_stmt->bind_param("ii", $new_quantity, $existing['id']);
-                        $update_stmt->execute();
+                        if ($existing) {
+                            // Update existing item
+                            $new_quantity = $existing['quantity'] + $quantity;
+                            
+                            $update_stmt = $pdo->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
+                            $update_stmt->execute([$new_quantity, $existing['id']]);
+                            
+                            // Log the addition
+                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department) VALUES (?, 'ADD', ?, ?, ?, ?, ?)");
+                            $log_stmt->execute([$existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department]);
+                        } else {
+                            // Add new item
+                            $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?)");
+                            $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $user_name, $user_department]);
+                            
+                            $inventory_id = $pdo->lastInsertId();
+                            
+                            // Log the addition
+                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department) VALUES (?, 'ADD', ?, 0, ?, ?, ?)");
+                            $log_stmt->execute([$inventory_id, $quantity, $quantity, $user_name, $user_department]);
+                        }
                         
-                        // Log the addition
-                        $log_stmt = $conn->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department) VALUES (?, 'ADD', ?, ?, ?, ?, ?)");
-                        $log_stmt->bind_param("iiiiss", $existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department);
-                        $log_stmt->execute();
+                        $success_message = "Item added successfully!";
                     } else {
-                        // Add new item
-                        $insert_stmt = $conn->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?)");
-                        $insert_stmt->bind_param("ississ", $area_id, $item_name, $item_description, $quantity, $user_name, $user_department);
-                        $insert_stmt->execute();
-                        
-                        $inventory_id = $conn->insert_id;
-                        
-                        // Log the addition
-                        $log_stmt = $conn->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department) VALUES (?, 'ADD', ?, 0, ?, ?, ?)");
-                        $log_stmt->bind_param("iiiiss", $inventory_id, $quantity, $quantity, $user_name, $user_department);
-                        $log_stmt->execute();
+                        $error_message = "Access denied to this storage area.";
                     }
-                    
-                    $success_message = "Item added successfully!";
-                } else {
-                    $error_message = "Access denied to this storage area.";
+                } catch (Exception $e) {
+                    $error_message = "Error adding item: " . $e->getMessage();
                 }
                 break;
                 
@@ -85,44 +81,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $remove_quantity = $_POST['remove_quantity'];
                 $reason = $_POST['reason'] ?? '';
                 
-                // Get item details and check permissions
-                $item_stmt = $conn->prepare("
-                    SELECT ci.*, ca.department_access 
-                    FROM cargo_inventory ci 
-                    JOIN cargo_areas ca ON ci.area_id = ca.id 
-                    WHERE ci.id = ?
-                ");
-                $item_stmt->bind_param("i", $inventory_id);
-                $item_stmt->execute();
-                $item_result = $item_stmt->get_result();
-                $item = $item_result->fetch_assoc();
-                
-                if (canModifyArea($item['department_access'], $user_department)) {
-                    if ($remove_quantity <= $item['quantity']) {
-                        $new_quantity = $item['quantity'] - $remove_quantity;
-                        
-                        if ($new_quantity > 0) {
-                            $update_stmt = $conn->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
-                            $update_stmt->bind_param("ii", $new_quantity, $inventory_id);
-                            $update_stmt->execute();
+                try {
+                    // Get item details and check permissions
+                    $item_stmt = $pdo->prepare("
+                        SELECT ci.*, ca.department_access 
+                        FROM cargo_inventory ci 
+                        JOIN cargo_areas ca ON ci.area_id = ca.id 
+                        WHERE ci.id = ?
+                    ");
+                    $item_stmt->execute([$inventory_id]);
+                    $item = $item_stmt->fetch();
+                    
+                    if (canModifyArea($item['department_access'], $user_department)) {
+                        if ($remove_quantity <= $item['quantity']) {
+                            $new_quantity = $item['quantity'] - $remove_quantity;
+                            
+                            if ($new_quantity > 0) {
+                                $update_stmt = $pdo->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
+                                $update_stmt->execute([$new_quantity, $inventory_id]);
+                            } else {
+                                $delete_stmt = $pdo->prepare("DELETE FROM cargo_inventory WHERE id = ?");
+                                $delete_stmt->execute([$inventory_id]);
+                            }
+                            
+                            // Log the removal
+                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, 'REMOVE', ?, ?, ?, ?, ?, ?)");
+                            $negative_quantity = -$remove_quantity;
+                            $log_stmt->execute([$inventory_id, $negative_quantity, $item['quantity'], $new_quantity, $user_name, $user_department, $reason]);
+                            
+                            $success_message = "Item removed successfully!";
                         } else {
-                            $delete_stmt = $conn->prepare("DELETE FROM cargo_inventory WHERE id = ?");
-                            $delete_stmt->bind_param("i", $inventory_id);
-                            $delete_stmt->execute();
+                            $error_message = "Cannot remove more items than available in stock.";
                         }
-                        
-                        // Log the removal
-                        $log_stmt = $conn->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, 'REMOVE', ?, ?, ?, ?, ?, ?)");
-                        $negative_quantity = -$remove_quantity;
-                        $log_stmt->bind_param("iiiisss", $inventory_id, $negative_quantity, $item['quantity'], $new_quantity, $user_name, $user_department, $reason);
-                        $log_stmt->execute();
-                        
-                        $success_message = "Item removed successfully!";
                     } else {
-                        $error_message = "Cannot remove more items than available in stock.";
+                        $error_message = "Access denied to this storage area.";
                     }
-                } else {
-                    $error_message = "Access denied to this storage area.";
+                } catch (Exception $e) {
+                    $error_message = "Error removing item: " . $e->getMessage();
                 }
                 break;
                 
@@ -133,40 +128,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $item_description = $_POST['item_description'];
                     $quantity = $_POST['quantity'];
                     
-                    // Check if item exists
-                    $check_stmt = $conn->prepare("SELECT id, quantity FROM cargo_inventory WHERE area_id = ? AND item_name = ?");
-                    $check_stmt->bind_param("is", $area_id, $item_name);
-                    $check_stmt->execute();
-                    $check_result = $check_stmt->get_result();
-                    
-                    if ($check_result->num_rows > 0) {
-                        // Update existing
-                        $existing = $check_result->fetch_assoc();
-                        $new_quantity = $existing['quantity'] + $quantity;
+                    try {
+                        // Check if item exists
+                        $check_stmt = $pdo->prepare("SELECT id, quantity FROM cargo_inventory WHERE area_id = ? AND item_name = ?");
+                        $check_stmt->execute([$area_id, $item_name]);
+                        $existing = $check_stmt->fetch();
                         
-                        $update_stmt = $conn->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
-                        $update_stmt->bind_param("ii", $new_quantity, $existing['id']);
-                        $update_stmt->execute();
+                        if ($existing) {
+                            // Update existing
+                            $new_quantity = $existing['quantity'] + $quantity;
+                            
+                            $update_stmt = $pdo->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
+                            $update_stmt->execute([$new_quantity, $existing['id']]);
+                            
+                            // Log bulk delivery
+                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, 'BULK_DELIVERY', ?, ?, ?, ?, ?, 'Bulk delivery operation')");
+                            $log_stmt->execute([$existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department]);
+                        } else {
+                            // Add new item
+                            $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?)");
+                            $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $user_name, $user_department]);
+                            
+                            $inventory_id = $pdo->lastInsertId();
+                            
+                            // Log bulk delivery
+                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, 'BULK_DELIVERY', ?, 0, ?, ?, ?, 'Bulk delivery operation')");
+                            $log_stmt->execute([$inventory_id, $quantity, $quantity, $user_name, $user_department]);
+                        }
                         
-                        // Log bulk delivery
-                        $log_stmt = $conn->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, 'BULK_DELIVERY', ?, ?, ?, ?, ?, 'Bulk delivery operation')");
-                        $log_stmt->bind_param("iiiiss", $existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department);
-                        $log_stmt->execute();
-                    } else {
-                        // Add new item
-                        $insert_stmt = $conn->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?)");
-                        $insert_stmt->bind_param("ississ", $area_id, $item_name, $item_description, $quantity, $user_name, $user_department);
-                        $insert_stmt->execute();
-                        
-                        $inventory_id = $conn->insert_id;
-                        
-                        // Log bulk delivery
-                        $log_stmt = $conn->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, 'BULK_DELIVERY', ?, 0, ?, ?, ?, 'Bulk delivery operation')");
-                        $log_stmt->bind_param("iiiiss", $inventory_id, $quantity, $quantity, $user_name, $user_department);
-                        $log_stmt->execute();
+                        $success_message = "Bulk delivery completed successfully!";
+                    } catch (Exception $e) {
+                        $error_message = "Error with bulk delivery: " . $e->getMessage();
                     }
-                    
-                    $success_message = "Bulk delivery completed successfully!";
                 } else {
                     $error_message = "Only ENG/OPS and COMMAND can perform bulk deliveries.";
                 }
@@ -176,12 +169,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Get all cargo areas
-$areas_result = $conn->query("SELECT * FROM cargo_areas ORDER BY area_name");
+$areas_result = $pdo->query("SELECT * FROM cargo_areas ORDER BY area_name");
 
 // Get low stock warnings for user's department
 $warnings = [];
 if ($user_department) {
-    $warning_stmt = $conn->prepare("
+    $warning_stmt = $pdo->prepare("
         SELECT ci.item_name, ci.quantity, ci.min_quantity, ca.area_name 
         FROM cargo_inventory ci 
         JOIN cargo_areas ca ON ci.area_id = ca.id 
@@ -189,12 +182,8 @@ if ($user_department) {
         AND (ca.department_access LIKE ? OR ca.department_access LIKE '%COMMAND%')
     ");
     $dept_search = "%$user_department%";
-    $warning_stmt->bind_param("s", $dept_search);
-    $warning_stmt->execute();
-    $warning_result = $warning_stmt->get_result();
-    while ($warning = $warning_result->fetch_assoc()) {
-        $warnings[] = $warning;
-    }
+    $warning_stmt->execute([$dept_search]);
+    $warnings = $warning_stmt->fetchAll();
 }
 ?>
 
@@ -357,7 +346,7 @@ if ($user_department) {
                     <?php endif; ?>
                     
                     <!-- Storage Areas -->
-                    <?php while ($area = $areas_result->fetch_assoc()): ?>
+                    <?php foreach ($areas_result as $area): ?>
                         <?php
                         $area_class = '';
                         if (strpos($area['area_code'], 'MEDSCI') !== false) $area_class = 'medsci';
@@ -366,10 +355,9 @@ if ($user_department) {
                         else $area_class = 'misc';
                         
                         // Get inventory for this area
-                        $inventory_stmt = $conn->prepare("SELECT * FROM cargo_inventory WHERE area_id = ? ORDER BY item_name");
-                        $inventory_stmt->bind_param("i", $area['id']);
-                        $inventory_stmt->execute();
-                        $inventory_result = $inventory_stmt->get_result();
+                        $inventory_stmt = $pdo->prepare("SELECT * FROM cargo_inventory WHERE area_id = ? ORDER BY item_name");
+                        $inventory_stmt->execute([$area['id']]);
+                        $inventory_items = $inventory_stmt->fetchAll();
                         ?>
                         
                         <div class="cargo-area <?php echo $area_class; ?>">
@@ -378,8 +366,8 @@ if ($user_department) {
                             <p><strong>Access:</strong> <?php echo htmlspecialchars($area['department_access']); ?></p>
                             
                             <!-- Inventory Items -->
-                            <?php if ($inventory_result->num_rows > 0): ?>
-                                <?php while ($item = $inventory_result->fetch_assoc()): ?>
+                            <?php if (!empty($inventory_items)): ?>
+                                <?php foreach ($inventory_items as $item): ?>
                                     <div class="inventory-item <?php echo ($item['quantity'] <= $item['min_quantity']) ? 'low-stock' : ''; ?>">
                                         <div>
                                             <strong><?php echo htmlspecialchars($item['item_name']); ?></strong>
@@ -397,7 +385,7 @@ if ($user_department) {
                                             </div>
                                         <?php endif; ?>
                                     </div>
-                                <?php endwhile; ?>
+                                <?php endforeach; ?>
                             <?php else: ?>
                                 <p><em>No items in storage</em></p>
                             <?php endif; ?>
@@ -417,7 +405,7 @@ if ($user_department) {
                                 </div>
                             <?php endif; ?>
                         </div>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                     
                     <!-- Bulk Delivery Form -->
                     <?php if ($user_department === 'ENG/OPS' || $user_department === 'COMMAND'): ?>
@@ -431,11 +419,11 @@ if ($user_department) {
                                     <select name="area_id" required>
                                         <option value="">Select Storage Area</option>
                                         <?php
-                                        $areas_result2 = $conn->query("SELECT * FROM cargo_areas ORDER BY area_name");
-                                        while ($area = $areas_result2->fetch_assoc()):
+                                        $areas_result2 = $pdo->query("SELECT * FROM cargo_areas ORDER BY area_name");
+                                        foreach ($areas_result2 as $area):
                                         ?>
                                             <option value="<?php echo $area['id']; ?>"><?php echo htmlspecialchars($area['area_name']); ?></option>
-                                        <?php endwhile; ?>
+                                        <?php endforeach; ?>
                                     </select>
                                     <input type="text" name="item_name" placeholder="Item Name" required>
                                     <textarea name="item_description" placeholder="Item Description" rows="2"></textarea>
@@ -450,7 +438,7 @@ if ($user_department) {
                     <div class="cargo-area misc">
                         <h3>📋 RECENT ACTIVITY LOG</h3>
                         <?php
-                        $log_stmt = $conn->prepare("
+                        $log_stmt = $pdo->prepare("
                             SELECT cl.*, ci.item_name, ca.area_name 
                             FROM cargo_logs cl 
                             LEFT JOIN cargo_inventory ci ON cl.inventory_id = ci.id 
@@ -459,10 +447,10 @@ if ($user_department) {
                             LIMIT 10
                         ");
                         $log_stmt->execute();
-                        $log_result = $log_stmt->get_result();
+                        $log_items = $log_stmt->fetchAll();
                         ?>
                         
-                        <?php while ($log = $log_result->fetch_assoc()): ?>
+                        <?php foreach ($log_items as $log): ?>
                             <div class="inventory-item">
                                 <div>
                                     <strong><?php echo htmlspecialchars($log['action']); ?></strong>
@@ -478,7 +466,7 @@ if ($user_department) {
                                     <?php endif; ?>
                                 </div>
                             </div>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </div>
                 </main>
             </div>
