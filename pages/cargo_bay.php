@@ -34,13 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $reason = $_POST['reason'] ?? '';
                 
                 try {
-                    // Get current item details
-                    $item_stmt = $pdo->prepare("SELECT ci.*, ca.department_access FROM cargo_inventory ci JOIN cargo_areas ca ON ci.area_id = ca.id WHERE ci.id = ?");
+                    // Get current item details with a lock to prevent race conditions
+                    $item_stmt = $pdo->prepare("SELECT ci.*, ca.department_access FROM cargo_inventory ci JOIN cargo_areas ca ON ci.area_id = ca.id WHERE ci.id = ? FOR UPDATE");
                     $item_stmt->execute([$inventory_id]);
                     $item = $item_stmt->fetch();
                     
                     if (!$item) {
-                        $error_message = "Item not found.";
+                        $error_message = "Item not found or has been removed.";
                         break;
                     }
                     
@@ -66,22 +66,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $action_name = 'REMOVE';
                     }
                     
-                    // Update inventory
+                    // Update or delete inventory
                     if ($new_quantity > 0) {
                         $update_stmt = $pdo->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
                         $update_stmt->execute([$new_quantity, $inventory_id]);
+                        
+                        // Log the action (item still exists)
+                        // Log the update action with snapshot data
+                        $item_stmt = $pdo->prepare("
+                            SELECT ci.item_name, ca.area_name 
+                            FROM cargo_inventory ci 
+                            JOIN cargo_areas ca ON ci.area_id = ca.id 
+                            WHERE ci.id = ?
+                        ");
+                        $item_stmt->execute([$inventory_id]);
+                        $item_details = $item_stmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        $log_stmt = $pdo->prepare("
+                            INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason, item_name_snapshot, area_name_snapshot) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ");
+                        $log_stmt->execute([
+                            $inventory_id, 
+                            $action_name, 
+                            $quantity_change, 
+                            $previous_quantity, 
+                            $new_quantity, 
+                            $user_name, 
+                            $user_department, 
+                            $reason,
+                            $item_details['item_name'] ?? 'Unknown Item',
+                            $item_details['area_name'] ?? 'Unknown Area'
+                        ]);
                     } else {
-                        // Remove item completely if quantity reaches 0
+                        // Get item and area details for snapshot before deleting
+                        $item_stmt = $pdo->prepare("
+                            SELECT ci.item_name, ca.area_name 
+                            FROM cargo_inventory ci 
+                            JOIN cargo_areas ca ON ci.area_id = ca.id 
+                            WHERE ci.id = ?
+                        ");
+                        $item_stmt->execute([$inventory_id]);
+                        $item_details = $item_stmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        // Log the action BEFORE deleting the item, with snapshot data
+                        $log_stmt = $pdo->prepare("
+                            INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason, item_name_snapshot, area_name_snapshot) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ");
+                        $log_stmt->execute([
+                            $inventory_id, 
+                            $action_name, 
+                            $quantity_change, 
+                            $previous_quantity, 
+                            0, 
+                            $user_name, 
+                            $user_department, 
+                            $reason,
+                            $item_details['item_name'] ?? 'Unknown Item',
+                            $item_details['area_name'] ?? 'Unknown Area'
+                        ]);
+                        
+                        // Now delete the item (foreign key is now SET NULL instead of CASCADE)
                         $delete_stmt = $pdo->prepare("DELETE FROM cargo_inventory WHERE id = ?");
                         $delete_stmt->execute([$inventory_id]);
-                        $new_quantity = 0;
                     }
                     
-                    // Log the action
-                    $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                    $log_stmt->execute([$inventory_id, $action_name, $quantity_change, $previous_quantity, $new_quantity, $user_name, $user_department, $reason]);
-                    
                     $success_message = ucfirst($modify_action) . " operation completed successfully!";
+                    
                 } catch (Exception $e) {
                     $error_message = "Error modifying inventory: " . $e->getMessage();
                 }
@@ -114,9 +166,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $update_stmt = $pdo->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
                             $update_stmt->execute([$new_quantity, $existing['id']]);
                             
-                            // Log the addition
-                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department) VALUES (?, 'ADD', ?, ?, ?, ?, ?)");
-                            $log_stmt->execute([$existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department]);
+                            // Log the addition with snapshot data
+                            $area_stmt = $pdo->prepare("SELECT area_name FROM cargo_areas WHERE id = ?");
+                            $area_stmt->execute([$area_id]);
+                            $area_name = $area_stmt->fetchColumn();
+                            
+                            $log_stmt = $pdo->prepare("
+                                INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, item_name_snapshot, area_name_snapshot) 
+                                VALUES (?, 'ADD', ?, ?, ?, ?, ?, ?, ?)
+                            ");
+                            $log_stmt->execute([
+                                $existing['id'], 
+                                $quantity, 
+                                $existing['quantity'], 
+                                $new_quantity, 
+                                $user_name, 
+                                $user_department,
+                                $item_name,
+                                $area_name
+                            ]);
                         } else {
                             // Add new item with all fields
                             try {
@@ -134,9 +202,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             $inventory_id = $pdo->lastInsertId();
                             
-                            // Log the addition
-                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department) VALUES (?, 'ADD', ?, 0, ?, ?, ?)");
-                            $log_stmt->execute([$inventory_id, $quantity, $quantity, $user_name, $user_department]);
+                            // Log the addition with snapshot data
+                            $area_stmt = $pdo->prepare("SELECT area_name FROM cargo_areas WHERE id = ?");
+                            $area_stmt->execute([$area_id]);
+                            $area_name = $area_stmt->fetchColumn();
+                            
+                            $log_stmt = $pdo->prepare("
+                                INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, item_name_snapshot, area_name_snapshot) 
+                                VALUES (?, 'ADD', ?, 0, ?, ?, ?, ?, ?)
+                            ");
+                            $log_stmt->execute([
+                                $inventory_id, 
+                                $quantity, 
+                                $quantity, 
+                                $user_name, 
+                                $user_department,
+                                $item_name,
+                                $area_name
+                            ]);
                         }
                         
                         $success_message = "Item added successfully!";
@@ -168,18 +251,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($remove_quantity <= $item['quantity']) {
                             $new_quantity = $item['quantity'] - $remove_quantity;
                             
+                            // Get area name for logging
+                            $area_stmt = $pdo->prepare("SELECT area_name FROM cargo_areas WHERE id = ?");
+                            $area_stmt->execute([$item['area_id']]);
+                            $area_name = $area_stmt->fetchColumn();
+                            
                             if ($new_quantity > 0) {
                                 $update_stmt = $pdo->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
                                 $update_stmt->execute([$new_quantity, $inventory_id]);
+                                
+                                // Log the removal with snapshot data
+                                $log_stmt = $pdo->prepare("
+                                    INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason, item_name_snapshot, area_name_snapshot) 
+                                    VALUES (?, 'REMOVE', ?, ?, ?, ?, ?, ?, ?, ?)
+                                ");
+                                $negative_quantity = -$remove_quantity;
+                                $log_stmt->execute([
+                                    $inventory_id, 
+                                    $negative_quantity, 
+                                    $item['quantity'], 
+                                    $new_quantity, 
+                                    $user_name, 
+                                    $user_department, 
+                                    $reason,
+                                    $item['item_name'],
+                                    $area_name
+                                ]);
                             } else {
+                                // Log BEFORE deleting the item to preserve foreign key relationship
+                                $log_stmt = $pdo->prepare("
+                                    INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason, item_name_snapshot, area_name_snapshot) 
+                                    VALUES (?, 'REMOVE', ?, ?, ?, ?, ?, ?, ?, ?)
+                                ");
+                                $negative_quantity = -$remove_quantity;
+                                $log_stmt->execute([
+                                    $inventory_id, 
+                                    $negative_quantity, 
+                                    $item['quantity'], 
+                                    $new_quantity, 
+                                    $user_name, 
+                                    $user_department, 
+                                    $reason,
+                                    $item['item_name'],
+                                    $area_name
+                                ]);
+                                
+                                // Now delete the item
                                 $delete_stmt = $pdo->prepare("DELETE FROM cargo_inventory WHERE id = ?");
                                 $delete_stmt->execute([$inventory_id]);
                             }
-                            
-                            // Log the removal
-                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, 'REMOVE', ?, ?, ?, ?, ?, ?)");
-                            $negative_quantity = -$remove_quantity;
-                            $log_stmt->execute([$inventory_id, $negative_quantity, $item['quantity'], $new_quantity, $user_name, $user_department, $reason]);
                             
                             $success_message = "Item removed successfully!";
                         } else {
@@ -214,9 +334,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $update_stmt = $pdo->prepare("UPDATE cargo_inventory SET quantity = ?, last_modified = CURRENT_TIMESTAMP WHERE id = ?");
                             $update_stmt->execute([$new_quantity, $existing['id']]);
                             
-                            // Log bulk delivery
-                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, 'BULK_DELIVERY', ?, ?, ?, ?, ?, 'Bulk delivery operation')");
-                            $log_stmt->execute([$existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department]);
+                            // Log bulk delivery with snapshot data
+                            $area_stmt = $pdo->prepare("SELECT area_name FROM cargo_areas WHERE id = ?");
+                            $area_stmt->execute([$area_id]);
+                            $area_name = $area_stmt->fetchColumn();
+                            
+                            $log_stmt = $pdo->prepare("
+                                INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason, item_name_snapshot, area_name_snapshot) 
+                                VALUES (?, 'BULK_DELIVERY', ?, ?, ?, ?, ?, 'Bulk delivery operation', ?, ?)
+                            ");
+                            $log_stmt->execute([
+                                $existing['id'], 
+                                $quantity, 
+                                $existing['quantity'], 
+                                $new_quantity, 
+                                $user_name, 
+                                $user_department,
+                                $item_name,
+                                $area_name
+                            ]);
                         } else {
                             // Add new item
                             try {
@@ -234,9 +370,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             $inventory_id = $pdo->lastInsertId();
                             
-                            // Log bulk delivery
-                            $log_stmt = $pdo->prepare("INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason) VALUES (?, 'BULK_DELIVERY', ?, 0, ?, ?, ?, 'Bulk delivery operation')");
-                            $log_stmt->execute([$inventory_id, $quantity, $quantity, $user_name, $user_department]);
+                            // Log bulk delivery with snapshot data
+                            $area_stmt = $pdo->prepare("SELECT area_name FROM cargo_areas WHERE id = ?");
+                            $area_stmt->execute([$area_id]);
+                            $area_name = $area_stmt->fetchColumn();
+                            
+                            $log_stmt = $pdo->prepare("
+                                INSERT INTO cargo_logs (inventory_id, action, quantity_change, previous_quantity, new_quantity, performed_by, performer_department, reason, item_name_snapshot, area_name_snapshot) 
+                                VALUES (?, 'BULK_DELIVERY', ?, 0, ?, ?, ?, 'Bulk delivery operation', ?, ?)
+                            ");
+                            $log_stmt->execute([
+                                $inventory_id, 
+                                $quantity, 
+                                $quantity, 
+                                $user_name, 
+                                $user_department,
+                                $item_name,
+                                $area_name
+                            ]);
                         }
                         
                         $success_message = "Bulk delivery completed successfully!";
