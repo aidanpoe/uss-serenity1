@@ -227,7 +227,7 @@ function loginbutton($buttonstyle = "square") {
 									<a href="#" onclick="alert('Link coming soon'); return false;" style="color: var(--bluey);">→ Discord</a>
 								</li>
 								<li style="margin: 0.5rem 0;">
-									<a href="steam://connect/46.4.12.78:27015" style="color: var(--bluey);">→ Ship Boarding</a>
+									<a href="#" onclick="showShipBoardingConfirm(); return false;" style="color: var(--bluey);">→ Ship Boarding</a>
 								</li>
 							</ul>
 						</div>
@@ -239,7 +239,82 @@ function loginbutton($buttonstyle = "square") {
 				</footer> 
 			</div>
 		</div>
-	</section>	
+	</section>
+	
+	<!-- LCARS Ship Boarding Confirmation Modal -->
+	<div id="shipBoardingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+		<div style="background: linear-gradient(135deg, #000000, #1a1a2e); border: 3px solid var(--orange); border-radius: 15px; padding: 2rem; max-width: 500px; text-align: center; box-shadow: 0 0 30px rgba(255, 136, 0, 0.5);">
+			<div style="border-bottom: 2px solid var(--orange); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+				<h3 style="color: var(--orange); margin: 0; font-size: 1.3rem;">LCARS - TRANSPORT AUTHORIZATION</h3>
+			</div>
+			<div style="margin: 1.5rem 0; color: var(--bluey); font-size: 1rem; line-height: 1.5;">
+				<p style="margin: 0;">If you are already on the server, you will reconnect.</p>
+				<p style="margin: 0.5rem 0 0 0; font-weight: bold;">Are you sure you want to do this?</p>
+			</div>
+			<div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+				<button onclick="confirmShipBoarding()" style="background: var(--blue); color: black; border: none; padding: 0.8rem 2rem; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem;">YES - TRANSPORT</button>
+				<button onclick="cancelShipBoarding()" style="background: var(--red); color: black; border: none; padding: 0.8rem 2rem; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem;">NO - CANCEL</button>
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		function showShipBoardingConfirm() {
+			const modal = document.getElementById('shipBoardingModal');
+			modal.style.display = 'flex';
+			modal.style.opacity = '0';
+			setTimeout(() => {
+				modal.style.transition = 'opacity 0.3s ease';
+				modal.style.opacity = '1';
+			}, 10);
+		}
+		
+		function confirmShipBoarding() {
+			// Connect to GMOD server
+			window.location.href = 'steam://connect/46.4.12.78:27015';
+			// Close modal
+			cancelShipBoarding();
+		}
+		
+		function cancelShipBoarding() {
+			const modal = document.getElementById('shipBoardingModal');
+			const modalContent = modal.querySelector('div');
+			
+			// Change content to farewell message
+			modalContent.innerHTML = `
+				<div style="border-bottom: 2px solid var(--orange); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+					<h3 style="color: var(--orange); margin: 0; font-size: 1.3rem;">LCARS - TRANSPORT CANCELLED</h3>
+				</div>
+				<div style="margin: 1.5rem 0; color: var(--bluey); font-size: 1.2rem; font-weight: bold;">
+					<p style="margin: 0;">Enjoy your shift onboard!</p>
+				</div>
+			`;
+			
+			// Fade out after 2 seconds
+			setTimeout(() => {
+				modal.style.transition = 'opacity 0.5s ease';
+				modal.style.opacity = '0';
+				setTimeout(() => {
+					modal.style.display = 'none';
+					// Reset modal content for next time
+					modalContent.innerHTML = `
+						<div style="border-bottom: 2px solid var(--orange); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+							<h3 style="color: var(--orange); margin: 0; font-size: 1.3rem;">LCARS - TRANSPORT AUTHORIZATION</h3>
+						</div>
+						<div style="margin: 1.5rem 0; color: var(--bluey); font-size: 1rem; line-height: 1.5;">
+							<p style="margin: 0;">If you are already on the server, you will reconnect.</p>
+							<p style="margin: 0.5rem 0 0 0; font-weight: bold;">Are you sure you want to do this?</p>
+						</div>
+						<div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+							<button onclick="confirmShipBoarding()" style="background: var(--blue); color: black; border: none; padding: 0.8rem 2rem; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem;">YES - TRANSPORT</button>
+							<button onclick="cancelShipBoarding()" style="background: var(--red); color: black; border: none; padding: 0.8rem 2rem; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem;">NO - CANCEL</button>
+						</div>
+					`;
+				}, 500);
+			}, 2000);
+		}
+	</script>
+	
 	<script type="text/javascript" src="assets/lcars.js"></script>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
