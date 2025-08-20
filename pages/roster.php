@@ -216,96 +216,185 @@ $ranks = [
 	<meta name="format-detection" content="date=no">
 	<link rel="stylesheet" type="text/css" href="../assets/classic.css">
 	<style>
+		/* Command Structure Styles - Hierarchical Design */
 		.command-structure {
-			display: flex;
-			flex-direction: column;
-			gap: 2rem;
-			margin: 1.5rem 0;
-			max-width: 800px;
-			margin-left: auto;
-			margin-right: auto;
+			margin: 2rem 0;
 		}
-		.command-boxes {
-			display: grid;
-			grid-template-columns: 1fr 1fr 1fr;
-			grid-template-rows: auto auto auto;
-			gap: 1rem;
-		}
-		.department-box {
-			margin-bottom: 0.4rem;
-			color: #ccc;
-			font-size: 0.9rem;
-		}
-		.department-box {
-			background: rgba(0,0,0,0.7);
-			border: 2px solid;
-			border-radius: 8px;
-			padding: 0.75rem;
-			box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-		}
-		.command-department {
-			grid-column: 1 / -1; /* Spans full width of command boxes grid */
-			border-color: var(--red);
-			background: rgba(204, 68, 68, 0.1);
-		}
-		.med-sci-department {
-			border-color: var(--blue);
-			background: rgba(85, 102, 255, 0.1);
-		}
-		.eng-ops-department {
-			border-color: var(--orange);
-			background: rgba(255, 136, 0, 0.1);
-		}
-		.sec-tac-department {
-			border-color: var(--gold);
-			background: rgba(255, 215, 0, 0.1);
-		}
-		.department-title {
-			font-size: 0.7rem;
-			font-weight: bold;
-			margin-bottom: 0.75rem;
-			text-align: center;
-			padding: 0.25rem;
-			border-radius: 4px;
-		}
-		.command-title { color: var(--red); background: rgba(204, 68, 68, 0.2); }
-		.med-sci-title { color: var(--blue); background: rgba(85, 102, 255, 0.2); }
-		.eng-ops-title { color: var(--orange); background: rgba(255, 136, 0, 0.2); }
-		.sec-tac-title { color: var(--gold); background: rgba(255, 215, 0, 0.2); }
 		
-		.positions-grid {
-			display: flex;
-			flex-direction: column;
-			gap: 0.5rem;
+		.command-tier {
+			margin: 2rem 0;
 		}
-		.positions-row {
-			display: flex;
-			gap: 0.5rem;
-			justify-content: space-between;
+		
+		.tier-title {
+			font-size: 1.2rem;
+			font-weight: bold;
+			color: var(--orange);
+			text-align: center;
+			margin-bottom: 1.5rem;
+			padding: 0.75rem;
+			background: rgba(255, 136, 0, 0.15);
+			border-radius: 8px;
+			border: 1px solid var(--orange);
 		}
-		.positions-row.single {
+		
+		.command-row {
+			display: flex;
 			justify-content: center;
+			gap: 1.5rem;
+			margin-bottom: 1rem;
+			flex-wrap: wrap;
 		}
-		.positions-row.two-cols .officer-box {
-			flex: 1;
-		}
+		
 		.officer-box {
 			padding: 1.5rem;
-			border-radius: 10px;
+			border-radius: 12px;
 			text-align: center;
-			min-height: 120px;
-			min-width: 250px;
+			min-height: 140px;
+			min-width: 200px;
+			max-width: 300px;
 			position: relative;
-			box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+			box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 			word-wrap: break-word;
 			display: flex;
 			flex-direction: column;
-			justify-content: flex-start;
+			justify-content: space-between;
+			transition: transform 0.2s ease;
 		}
-		.command-box { border-color: var(--red); background: rgba(204, 68, 68, 0.2); }
-		.eng-ops-box { border-color: var(--orange); background: rgba(255, 136, 0, 0.2); }
-		.med-sci-box { border-color: var(--blue); background: rgba(85, 102, 255, 0.2); }
-		.sec-tac-box { border-color: var(--gold); background: rgba(255, 170, 0, 0.2); }
+		
+		.officer-box:hover {
+			transform: translateY(-2px);
+		}
+		
+		.position-title {
+			font-size: 0.85rem;
+			font-weight: bold;
+			color: var(--orange);
+			margin-bottom: 0.75rem;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+		}
+		
+		.officer-name {
+			font-size: 1rem;
+			color: var(--bluey);
+			font-weight: bold;
+			margin-bottom: 1rem;
+			flex-grow: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		
+		.edit-btn {
+			background-color: var(--bluey);
+			color: black;
+			border: none;
+			padding: 0.5rem 1rem;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 0.8rem;
+			font-weight: bold;
+			transition: background-color 0.2s ease;
+		}
+		
+		.edit-btn:hover {
+			background-color: var(--blue);
+		}
+		
+		/* Command Staff - Red Theme */
+		.command-senior .officer-box {
+			background: linear-gradient(135deg, rgba(204, 68, 68, 0.25), rgba(204, 68, 68, 0.15));
+			border: 2px solid var(--red);
+		}
+		
+		.command-co {
+			border: 3px solid var(--red) !important;
+			box-shadow: 0 0 15px rgba(204, 68, 68, 0.5) !important;
+		}
+		
+		.command-co .position-title {
+			color: var(--red);
+			font-size: 1rem;
+		}
+		
+		/* Department Heads - Multi-colored */
+		.department-heads .medical {
+			background: linear-gradient(135deg, rgba(85, 102, 255, 0.25), rgba(85, 102, 255, 0.15));
+			border: 2px solid var(--blue);
+		}
+		
+		.department-heads .science {
+			background: linear-gradient(135deg, rgba(85, 102, 255, 0.25), rgba(85, 102, 255, 0.15));
+			border: 2px solid var(--blue);
+		}
+		
+		.department-heads .engineering {
+			background: linear-gradient(135deg, rgba(255, 136, 0, 0.25), rgba(255, 136, 0, 0.15));
+			border: 2px solid var(--orange);
+		}
+		
+		.department-heads .operations {
+			background: linear-gradient(135deg, rgba(255, 136, 0, 0.25), rgba(255, 136, 0, 0.15));
+			border: 2px solid var(--orange);
+		}
+		
+		.department-heads .security {
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.15));
+			border: 2px solid var(--gold);
+		}
+		
+		.department-heads .tactical {
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.15));
+			border: 2px solid var(--gold);
+		}
+		
+		.department-heads .command {
+			background: linear-gradient(135deg, rgba(204, 68, 68, 0.25), rgba(204, 68, 68, 0.15));
+			border: 2px solid var(--red);
+		}
+		
+		/* Senior Staff - Purple/Gray Theme */
+		.senior-staff .officer-box {
+			background: linear-gradient(135deg, rgba(136, 136, 136, 0.25), rgba(136, 136, 136, 0.15));
+			border: 2px solid #888;
+		}
+		
+		.senior-staff .position-title {
+			color: #ccc;
+		}
+		
+		/* Offline Status */
+		.offline {
+			opacity: 0.6;
+			background: linear-gradient(135deg, rgba(136, 68, 68, 0.25), rgba(136, 68, 68, 0.15)) !important;
+			border: 2px solid #664444 !important;
+		}
+		
+		.offline-status {
+			color: var(--red) !important;
+		}
+		
+		/* Responsive Design */
+		@media (max-width: 1200px) {
+			.command-row {
+				gap: 1rem;
+			}
+			.officer-box {
+				min-width: 180px;
+				max-width: 280px;
+			}
+		}
+		
+		@media (max-width: 768px) {
+			.command-row {
+				flex-direction: column;
+				align-items: center;
+			}
+			.officer-box {
+				max-width: 400px;
+				width: 100%;
+			}
+		}
 		
 		.crew-grid {
 			display: grid;
@@ -410,227 +499,202 @@ $ranks = [
 					</div>
 					<?php endif; ?>
 					<div class="command-structure">
-						<!-- Command Boxes -->
-						<div class="command-boxes">
-							<!-- Command Department Box -->
-							<div class="department-box command-department">
-								<div class="department-title command-title">COMMAND</div>
-								<div class="positions-grid">
-									<!-- All Command Positions in Vertical Layout -->
-									<?php 
-									$command_positions_list = ['Commanding Officer', 'First Officer', 'Second Officer', 'Third Officer'];
-									foreach ($command_positions_list as $position): 
-										$person = $command_positions[$position];
-									?>
-									<div class="positions-row single">
-										<div class="officer-box command-box">
-											<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;"><?php echo htmlspecialchars($position); ?></div>
-											<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem;">
-												<?php if ($person): ?>
-													<?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?>
-												<?php else: ?>
-													Position Vacant
-												<?php endif; ?>
-											</div>
-											<?php if (hasPermission('Captain')): ?>
-											<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
-											<?php endif; ?>
-										</div>
+						<!-- Senior Command Staff -->
+						<div class="command-tier command-senior">
+							<div class="tier-title">SENIOR COMMAND STAFF</div>
+							<div class="command-row">
+								<!-- Commanding Officer - Center -->
+								<div class="officer-box command-co">
+									<div class="position-title">COMMANDING OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Commanding Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Commanding Officer']['rank'] . ' ' . $command_positions['Commanding Officer']['first_name'] . ' ' . $command_positions['Commanding Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
 									</div>
-									<?php endforeach; ?>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
 								</div>
 							</div>
-						
-						<!-- MED/SCI Department Box -->
-						<div class="department-box med-sci-department">
-							<div class="department-title med-sci-title">MEDICAL / SCIENCE</div>
-							<div class="positions-grid">
-								<!-- Head of MED/SCI (Top) -->
-								<div class="positions-row single">
-									<div class="officer-box med-sci-box">
-										<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">Head of MED/SCI</div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem;">
-											<?php if ($command_positions['Head of MED/SCI']): ?>
-												<?php echo htmlspecialchars($command_positions['Head of MED/SCI']['rank'] . ' ' . $command_positions['Head of MED/SCI']['first_name'] . ' ' . $command_positions['Head of MED/SCI']['last_name']); ?>
-											<?php else: ?>
-												Position Vacant
-											<?php endif; ?>
-										</div>
-										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
+							<div class="command-row">
+								<!-- First Officer - Left, Second Officer - Right -->
+								<div class="officer-box command-xo">
+									<div class="position-title">FIRST OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['First Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['First Officer']['rank'] . ' ' . $command_positions['First Officer']['first_name'] . ' ' . $command_positions['First Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
 										<?php endif; ?>
 									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
 								</div>
-								
-								<!-- CMO and CSO (Same Line) -->
-								<div class="positions-row two-cols">
-									<?php 
-									$medsci_positions = ['Chief Medical Officer', 'Chief Science Officer'];
-									foreach ($medsci_positions as $position): 
-										$person = $command_positions[$position];
-									?>
-									<div class="officer-box med-sci-box">
-										<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;"><?php echo htmlspecialchars($position); ?></div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem;">
-											<?php if ($person): ?>
-												<?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?>
-											<?php else: ?>
-												Position Vacant
-											<?php endif; ?>
-										</div>
-										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
+								<div class="officer-box command-2o">
+									<div class="position-title">SECOND OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Second Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Second Officer']['rank'] . ' ' . $command_positions['Second Officer']['first_name'] . ' ' . $command_positions['Second Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
 										<?php endif; ?>
 									</div>
-									<?php endforeach; ?>
-								</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
 								</div>
 							</div>
 						</div>
-						
-						<!-- ENG/OPS Department Box -->
-						<div class="department-box eng-ops-department">
-							<div class="department-title eng-ops-title">ENGINEERING / OPERATIONS</div>
-							<div class="positions-grid">
-								<!-- Head of ENG/OPS (Top) -->
-								<div class="positions-row single">
-									<div class="officer-box eng-ops-box">
-										<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">Head of ENG/OPS</div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem;">
-											<?php if ($command_positions['Head of ENG/OPS']): ?>
-												<?php echo htmlspecialchars($command_positions['Head of ENG/OPS']['rank'] . ' ' . $command_positions['Head of ENG/OPS']['first_name'] . ' ' . $command_positions['Head of ENG/OPS']['last_name']); ?>
-											<?php else: ?>
-												Position Vacant
-											<?php endif; ?>
-										</div>
-										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
+
+						<!-- Department Heads -->
+						<div class="command-tier department-heads">
+							<div class="tier-title">DEPARTMENT HEADS</div>
+							<div class="command-row">
+								<!-- Chief Medical Officer -->
+								<div class="officer-box dept-head medical">
+									<div class="position-title">CHIEF MEDICAL OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Chief Medical Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Chief Medical Officer']['rank'] . ' ' . $command_positions['Chief Medical Officer']['first_name'] . ' ' . $command_positions['Chief Medical Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
 										<?php endif; ?>
 									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
 								</div>
 								
-								<!-- Chief Engineer and Operations Officer (Same Line) -->
-								<div class="positions-row two-cols">
-									<?php 
-									$engops_top_positions = ['Chief Engineer', 'Operations Officer'];
-									foreach ($engops_top_positions as $position): 
-										$person = $command_positions[$position];
-									?>
-									<div class="officer-box eng-ops-box">
-										<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;"><?php echo htmlspecialchars($position); ?></div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem;">
-											<?php if ($person): ?>
-												<?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?>
-											<?php else: ?>
-												Position Vacant
-											<?php endif; ?>
-										</div>
-										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
+								<!-- Chief Science Officer -->
+								<div class="officer-box dept-head science">
+									<div class="position-title">CHIEF SCIENCE OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Chief Science Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Chief Science Officer']['rank'] . ' ' . $command_positions['Chief Science Officer']['first_name'] . ' ' . $command_positions['Chief Science Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
 										<?php endif; ?>
 									</div>
-									<?php endforeach; ?>
-								</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
 								</div>
 								
-								<!-- Helm Officer (Center, Below) -->
-								<div class="positions-row single">
-									<div class="officer-box eng-ops-box" style="max-width: 48%;">
-										<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">Helm Officer</div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem;">
-											<?php if ($command_positions['Helm Officer']): ?>
-												<?php echo htmlspecialchars($command_positions['Helm Officer']['rank'] . ' ' . $command_positions['Helm Officer']['first_name'] . ' ' . $command_positions['Helm Officer']['last_name']); ?>
-											<?php else: ?>
-												Position Vacant
-											<?php endif; ?>
-										</div>
-										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
+								<!-- Chief Engineer -->
+								<div class="officer-box dept-head engineering">
+									<div class="position-title">CHIEF ENGINEER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Chief Engineer']): ?>
+											<?php echo htmlspecialchars($command_positions['Chief Engineer']['rank'] . ' ' . $command_positions['Chief Engineer']['first_name'] . ' ' . $command_positions['Chief Engineer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
 										<?php endif; ?>
 									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Operations Officer -->
+								<div class="officer-box dept-head operations">
+									<div class="position-title">OPERATIONS OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Operations Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Operations Officer']['rank'] . ' ' . $command_positions['Operations Officer']['first_name'] . ' ' . $command_positions['Operations Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+							</div>
+							<div class="command-row">
+								<!-- Security Chief -->
+								<div class="officer-box dept-head security">
+									<div class="position-title">SECURITY CHIEF</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Security Chief']): ?>
+											<?php echo htmlspecialchars($command_positions['Security Chief']['rank'] . ' ' . $command_positions['Security Chief']['first_name'] . ' ' . $command_positions['Security Chief']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Tactical Officer -->
+								<div class="officer-box dept-head tactical">
+									<div class="position-title">TACTICAL OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Tactical Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Tactical Officer']['rank'] . ' ' . $command_positions['Tactical Officer']['first_name'] . ' ' . $command_positions['Tactical Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Third Officer -->
+								<div class="officer-box dept-head command">
+									<div class="position-title">THIRD OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Third Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Third Officer']['rank'] . ' ' . $command_positions['Third Officer']['first_name'] . ' ' . $command_positions['Third Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
 								</div>
 							</div>
 						</div>
-						
-						<!-- SEC/TAC Department Box -->
-						<div class="department-box sec-tac-department">
-							<div class="department-title sec-tac-title">SECURITY / TACTICAL</div>
-							<div class="positions-grid">
-								<!-- Head of SEC/TAC (Top) -->
-								<div class="positions-row single">
-									<div class="officer-box sec-tac-box">
-										<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">Head of SEC/TAC</div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem;">
-											<?php if ($command_positions['Head of SEC/TAC']): ?>
-												<?php echo htmlspecialchars($command_positions['Head of SEC/TAC']['rank'] . ' ' . $command_positions['Head of SEC/TAC']['first_name'] . ' ' . $command_positions['Head of SEC/TAC']['last_name']); ?>
-											<?php else: ?>
-												Position Vacant
-											<?php endif; ?>
-										</div>
-										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
+
+						<!-- Senior Staff & Specialized Positions -->
+						<div class="command-tier senior-staff">
+							<div class="tier-title">SENIOR STAFF & SPECIALIZED POSITIONS</div>
+							<div class="command-row">
+								<!-- Intelligence Officer -->
+								<div class="officer-box senior-staff intelligence">
+									<div class="position-title">INTELLIGENCE OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Intelligence Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Intelligence Officer']['rank'] . ' ' . $command_positions['Intelligence Officer']['first_name'] . ' ' . $command_positions['Intelligence Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
 										<?php endif; ?>
 									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
 								</div>
 								
-								<!-- First Row: Security Chief and Tactical Officer -->
-								<div class="positions-row two-cols">
-									<?php 
-									$sectac_first_row = ['Security Chief', 'Tactical Officer'];
-									foreach ($sectac_first_row as $position): 
-										$person = $command_positions[$position];
-									?>
-									<div class="officer-box sec-tac-box">
-										<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;"><?php echo htmlspecialchars($position); ?></div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem;">
-											<?php if ($person): ?>
-												<?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?>
-											<?php else: ?>
-												Position Vacant
-											<?php endif; ?>
-										</div>
-										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
+								<!-- S.R.T. Leader (Offline) -->
+								<div class="officer-box senior-staff srt offline">
+									<div class="position-title">S.R.T. LEADER</div>
+									<div class="officer-name offline-status">
+										<?php if ($command_positions['S.R.T. Leader']): ?>
+											<?php echo htmlspecialchars($command_positions['S.R.T. Leader']['rank'] . ' ' . $command_positions['S.R.T. Leader']['first_name'] . ' ' . $command_positions['S.R.T. Leader']['last_name']); ?> - OFFLINE
+										<?php else: ?>
+											Position Vacant - OFFLINE
 										<?php endif; ?>
 									</div>
-									<?php endforeach; ?>
-								</div>
-								</div>
-								
-								<!-- Second Row: Intelligence Officer and S.R.T. Leader -->
-								<div class="positions-row two-cols">
-									<!-- Intelligence Officer -->
-									<div class="officer-box sec-tac-box">
-										<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">Intelligence Officer</div>
-										<div style="color: var(--bluey); font-weight: bold; margin-bottom: 0.5rem;">
-											<?php if ($command_positions['Intelligence Officer']): ?>
-												<?php echo htmlspecialchars($command_positions['Intelligence Officer']['rank'] . ' ' . $command_positions['Intelligence Officer']['first_name'] . ' ' . $command_positions['Intelligence Officer']['last_name']); ?>
-											<?php else: ?>
-												Position Vacant
-											<?php endif; ?>
-										</div>
-										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
-										<?php endif; ?>
-									</div>
-									
-									<!-- S.R.T. Leader (Special - marked as offline) -->
-									<div class="officer-box sec-tac-box" style="opacity: 0.6;">
-										<div style="color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem;">S.R.T. Leader</div>
-										<div style="color: var(--red); font-weight: bold; margin-bottom: 0.5rem;">
-											<?php if ($command_positions['S.R.T. Leader']): ?>
-												<?php echo htmlspecialchars($command_positions['S.R.T. Leader']['rank'] . ' ' . $command_positions['S.R.T. Leader']['first_name'] . ' ' . $command_positions['S.R.T. Leader']['last_name']); ?> - OFFLINE
-											<?php else: ?>
-												Position Vacant - OFFLINE
-											<?php endif; ?>
-										</div>
-										<?php if (hasPermission('Captain')): ?>
-										<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" style="background-color: var(--bluey); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Edit Assignment</button>
-										<?php endif; ?>
-									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
 								</div>
 							</div>
-						</div>
 						</div>
 					</div>
 
