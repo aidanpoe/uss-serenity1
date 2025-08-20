@@ -245,16 +245,15 @@ $ranks = [
 			border-radius: 12px;
 			border: 3px solid;
 			text-align: justify;
-			height: 140px;
+			min-height: 120px;
 			width: 280px;
 			flex: 0 0 auto;
 			position: relative;
 			box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-			overflow: hidden;
 			word-wrap: break-word;
 			display: flex;
 			flex-direction: column;
-			justify-content: center;
+			justify-content: flex-start;
 		}
 		.command-box { border-color: var(--red); background: rgba(204, 68, 68, 0.2); }
 		.eng-ops-box { border-color: var(--orange); background: rgba(255, 136, 0, 0.2); }
