@@ -1,9 +1,7 @@
 <?php
-require_once 'includes/config.php';		/* LCARS Quick Access Button Hover Effects */
-		.lcars-quick-btn:hover {
-			transform: scale(1.05);
-			box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-		} Steam login functions
+require_once 'includes/config.php';
+
+// Steam login functions
 function loginbutton($buttonstyle = "square") {
 	echo "<a href='steamauth/steamauth.php?login' class='lcars-steam-button' onclick='playSoundAndRedirect(\"audio2\", \"steamauth/steamauth.php?login\")'>Sign in through Steam</a>";
 }
@@ -45,8 +43,8 @@ function loginbutton($buttonstyle = "square") {
 		
 		/* LCARS Quick Access Button Hover Effects */
 		.lcars-quick-btn:hover {
-			transform: translateX(5px);
-			box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+			transform: scale(1.05);
+			box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 		}
 	</style>
 </head>
