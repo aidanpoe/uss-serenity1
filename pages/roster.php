@@ -244,7 +244,7 @@ $ranks = [
 			padding: 2rem 1.5rem;
 			border-radius: 12px;
 			border: 3px solid;
-			text-align: center;
+			text-align: justify;
 			min-height: 140px;
 			min-width: 280px;
 			flex: 0 0 auto;
