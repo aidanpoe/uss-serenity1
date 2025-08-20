@@ -384,6 +384,11 @@ $ranks = [
 			border: 2px solid var(--orange);
 		}
 		
+		.senior-staff .helm {
+			background: linear-gradient(135deg, rgba(255, 136, 0, 0.25), rgba(255, 136, 0, 0.15));
+			border: 2px solid var(--orange);
+		}
+		
 		.senior-staff .security {
 			background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.15));
 			border: 2px solid var(--gold);
@@ -724,6 +729,22 @@ $ranks = [
 									<div class="officer-name">
 										<?php if ($command_positions['Operations Officer']): ?>
 											<?php echo htmlspecialchars($command_positions['Operations Officer']['rank'] . ' ' . $command_positions['Operations Officer']['first_name'] . ' ' . $command_positions['Operations Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Head of Helm -->
+								<div class="officer-box senior-staff helm">
+									<div class="department-label">ENG/OPS</div>
+									<div class="position-title">HEAD OF HELM</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Head of Helm']): ?>
+											<?php echo htmlspecialchars($command_positions['Head of Helm']['rank'] . ' ' . $command_positions['Head of Helm']['first_name'] . ' ' . $command_positions['Head of Helm']['last_name']); ?>
 										<?php else: ?>
 											Position Vacant
 										<?php endif; ?>
