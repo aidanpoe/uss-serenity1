@@ -274,7 +274,7 @@ try {
     $pdo = getConnection();
     
     // Get training files by department
-    $departments = ['MED/SCI', 'SEC/TAC', 'Command'];
+    $departments = ['MED/SCI', 'ENG/OPS', 'SEC/TAC', 'Command'];
     $training_files = [];
     
     foreach ($departments as $dept) {
@@ -328,6 +328,7 @@ try {
 			background: rgba(0,0,0,0.7);
 		}
 		.med-sci { border-color: var(--blue); }
+		.eng-ops { border-color: var(--orange); }
 		.sec-tac { border-color: var(--gold); }
 		.command { border-color: var(--red); }
 		
@@ -632,6 +633,10 @@ try {
 							<div class="stat-number" style="color: var(--blue);"><?php echo count($training_files['MED/SCI']); ?></div>
 							<div>Medical/Science Files</div>
 						</div>
+						<div class="stat-card orange">
+							<div class="stat-number" style="color: var(--orange);"><?php echo count($training_files['ENG/OPS']); ?></div>
+							<div>Engineering/Ops Files</div>
+						</div>
 						<div class="stat-card gold">
 							<div class="stat-number" style="color: var(--gold);"><?php echo count($training_files['SEC/TAC']); ?></div>
 							<div>Security/Tactical Files</div>
@@ -658,6 +663,9 @@ try {
 										<option value="">Select Department</option>
 										<?php if (canManageTrainingFiles('MED/SCI')): ?>
 										<option value="MED/SCI">Medical/Science</option>
+										<?php endif; ?>
+										<?php if (canManageTrainingFiles('ENG/OPS')): ?>
+										<option value="ENG/OPS">Engineering/Operations</option>
 										<?php endif; ?>
 										<?php if (canManageTrainingFiles('SEC/TAC')): ?>
 										<option value="SEC/TAC">Security/Tactical</option>
@@ -737,6 +745,46 @@ try {
 										<a href="?download=<?php echo $file['id']; ?>" class="btn-download">⬇️ Download</a>
 										<?php endif; ?>
 										<?php if (canManageTrainingFiles('MED/SCI')): ?>
+										<form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this file? It will be moved to deleted folder and permanently removed in 90 days.');">
+											<input type="hidden" name="action" value="delete_file">
+											<input type="hidden" name="file_id" value="<?php echo $file['id']; ?>">
+											<button type="submit" class="btn-delete">🗑️ Delete</button>
+										</form>
+										<?php endif; ?>
+									</div>
+								</div>
+								<?php endforeach; ?>
+								<?php endif; ?>
+							</div>
+							
+							<!-- Engineering/Operations Department -->
+							<div class="department-section eng-ops">
+								<h3 style="color: var(--orange);">⚙️ Engineering/Operations Department</h3>
+								<?php if (empty($training_files['ENG/OPS'])): ?>
+								<p style="color: var(--orange);"><em>No training files available.</em></p>
+								<?php else: ?>
+								<?php foreach ($training_files['ENG/OPS'] as $file): ?>
+								<div class="file-card">
+									<h4>📄 <?php echo htmlspecialchars($file['title']); ?></h4>
+									<?php if ($file['description']): ?>
+									<p style="opacity: 0.9; margin: 0.5rem 0;"><?php echo htmlspecialchars($file['description']); ?></p>
+									<?php endif; ?>
+									<div class="file-meta">
+										<div>
+											<strong>Uploaded by:</strong> <?php echo htmlspecialchars(($file['first_name'] ?? 'Unknown') . ' ' . ($file['last_name'] ?? 'User')); ?><br>
+											<strong>Date:</strong> <?php echo date('M j, Y H:i', strtotime($file['upload_date'])); ?>
+										</div>
+										<div>
+											<strong>File:</strong> <?php echo htmlspecialchars($file['original_filename']); ?><br>
+											<strong>Size:</strong> <?php echo number_format($file['file_size'] / 1024, 1); ?> KB | 
+											<strong>Downloads:</strong> <?php echo $file['download_count']; ?>
+										</div>
+									</div>
+									<div class="file-actions">
+										<?php if (getUserDepartment() === 'Command' || getUserDepartment() === 'ENG/OPS'): ?>
+										<a href="?download=<?php echo $file['id']; ?>" class="btn-download">⬇️ Download</a>
+										<?php endif; ?>
+										<?php if (canManageTrainingFiles('ENG/OPS')): ?>
 										<form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this file? It will be moved to deleted folder and permanently removed in 90 days.');">
 											<input type="hidden" name="action" value="delete_file">
 											<input type="hidden" name="file_id" value="<?php echo $file['id']; ?>">
