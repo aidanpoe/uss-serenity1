@@ -124,12 +124,12 @@ try {
                 exit;
             }
             
-            // Check if user owns the message or has admin privileges
-            $user_dept = getUserDepartment();
-            $is_admin = ($user_dept === 'Command' || $_SESSION['rank'] === 'Captain' || $_SESSION['rank'] === 'Commander');
+            // Check if user owns the message or has command privileges
+            $user_dept = $_SESSION['department'] ?? '';
+            $is_command = (strtolower($user_dept) === 'command');
             
-            if ($is_admin) {
-                // Admins can delete any message
+            if ($is_command) {
+                // Command department can delete any message
                 $stmt = $pdo->prepare("UPDATE crew_messages SET is_deleted = 1 WHERE id = ?");
                 $stmt->execute([$message_id]);
             } else {

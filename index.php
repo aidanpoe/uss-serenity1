@@ -451,6 +451,10 @@ function loginbutton($buttonstyle = "square") {
 		let onlineUsersList = null;
 		let onlineCount = null;
 		
+		// User department for delete permissions
+		const userDepartment = '<?php echo isset($_SESSION['department']) ? strtolower($_SESSION['department']) : ''; ?>';
+		const isCommand = (userDepartment === 'command');
+		
 		// Initialize messaging system when page loads
 		document.addEventListener('DOMContentLoaded', function() {
 			messagesContainer = document.getElementById('messages-container');
@@ -612,7 +616,7 @@ function loginbutton($buttonstyle = "square") {
 							</div>
 							<div style="display: flex; align-items: center; gap: 0.5rem;">
 								<span style="color: var(--bluey); font-size: 0.8rem;">${msg.timestamp}</span>
-								${isOwnMessage ? `<button onclick="deleteMessage(${msg.id})" style="background: var(--red); color: black; border: none; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem; cursor: pointer;" title="Delete message">🗑️</button>` : ''}
+								${(isOwnMessage || isCommand) ? `<button onclick="deleteMessage(${msg.id})" style="background: var(--red); color: black; border: none; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem; cursor: pointer;" title="Delete message">🗑️</button>` : ''}
 							</div>
 						</div>
 						<div style="color: white; line-height: 1.4; word-wrap: break-word;">
@@ -647,7 +651,16 @@ function loginbutton($buttonstyle = "square") {
 		}
 		
 		async function deleteMessage(messageId) {
-			if (!confirm('Are you sure you want to delete this message?')) return;
+			// Get the message element to check if it's the user's own message
+			const messageElement = event.target.closest('div[style*="background:"]');
+			const isOwnMsg = messageElement && messageElement.style.background.includes('85, 102, 255');
+			
+			let confirmText = 'Are you sure you want to delete this message?';
+			if (isCommand && !isOwnMsg) {
+				confirmText = 'As Command staff, you are about to delete another crew member\'s message. Are you sure?';
+			}
+			
+			if (!confirm(confirmText)) return;
 			
 			try {
 				const formData = new FormData();
