@@ -1,7 +1,9 @@
 <?php
-require_once 'includes/config.php';
-
-// Steam login functions
+require_once 'includes/config.php';		/* LCARS Quick Access Button Hover Effects */
+		.lcars-quick-btn:hover {
+			transform: scale(1.05);
+			box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+		} Steam login functions
 function loginbutton($buttonstyle = "square") {
 	echo "<a href='steamauth/steamauth.php?login' class='lcars-steam-button' onclick='playSoundAndRedirect(\"audio2\", \"steamauth/steamauth.php?login\")'>Sign in through Steam</a>";
 }
@@ -216,25 +218,43 @@ function loginbutton($buttonstyle = "square") {
 						
 						<div style="margin: 2rem 0;">
 							<h4>Quick Access:</h4>
-							<div style="display: grid; gap: 0.75rem; margin-top: 1rem;">
-								<button onclick="playSoundAndRedirect('audio2', 'pages/roster.php')" class="lcars-quick-btn" style="background: linear-gradient(90deg, var(--blue), var(--bluey)); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 8px 25px 25px 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: left; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-									<span style="margin-right: 1rem; color: #000;">→</span>SHIP'S ROSTER
-								</button>
-								<button onclick="playSoundAndRedirect('audio2', 'pages/reports.php')" class="lcars-quick-btn" style="background: linear-gradient(90deg, var(--orange), var(--gold)); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 8px 25px 25px 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: left; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-									<span style="margin-right: 1rem; color: #000;">→</span>DEPARTMENT REPORTS
-								</button>
-								<button onclick="playSoundAndRedirect('audio2', 'pages/training.php')" class="lcars-quick-btn" style="background: linear-gradient(90deg, var(--african-violet), #9966CC); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 8px 25px 25px 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: left; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-									<span style="margin-right: 1rem; color: #000;">→</span>TRAINING DOCUMENTS
-								</button>
-								<button onclick="window.open('https://docs.google.com/document/d/1MwVJZp0NW9SL85EVUFxCENwIrHGyL5uFuWvKGRoO6Sg/edit?tab=t.0', '_blank')" class="lcars-quick-btn" style="background: linear-gradient(90deg, var(--red), #FF6B6B); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 8px 25px 25px 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: left; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-									<span style="margin-right: 1rem; color: #000;">→</span>RULES OF PLAY
-								</button>
-								<button onclick="showDiscordModal(); return false;" class="lcars-quick-btn" style="background: linear-gradient(90deg, #7289DA, #5865F2); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px 25px 25px 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: left; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-									<span style="margin-right: 1rem; color: #fff;">→</span>DISCORD
-								</button>
-								<button onclick="showShipBoardingConfirm(); return false;" class="lcars-quick-btn" style="background: linear-gradient(90deg, var(--gold), var(--orange)); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 8px 25px 25px 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: left; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-									<span style="margin-right: 1rem; color: #000;">→</span>SHIP BOARDING
-								</button>
+							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0;">
+								<div style="background: rgba(85, 102, 255, 0.2); padding: 1rem; border-radius: 10px; border: 2px solid var(--blue);">
+									<h5 style="color: var(--blue); margin: 0 0 0.5rem 0;">Ship's Roster</h5>
+									<button onclick="playSoundAndRedirect('audio2', 'pages/roster.php')" class="lcars-quick-btn" style="background-color: var(--blue); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
+										ACCESS
+									</button>
+								</div>
+								<div style="background: rgba(255, 136, 0, 0.2); padding: 1rem; border-radius: 10px; border: 2px solid var(--orange);">
+									<h5 style="color: var(--orange); margin: 0 0 0.5rem 0;">Department Reports</h5>
+									<button onclick="playSoundAndRedirect('audio2', 'pages/reports.php')" class="lcars-quick-btn" style="background-color: var(--orange); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
+										ACCESS
+									</button>
+								</div>
+								<div style="background: rgba(153, 102, 204, 0.2); padding: 1rem; border-radius: 10px; border: 2px solid var(--african-violet);">
+									<h5 style="color: var(--african-violet); margin: 0 0 0.5rem 0;">Training Documents</h5>
+									<button onclick="playSoundAndRedirect('audio2', 'pages/training.php')" class="lcars-quick-btn" style="background-color: var(--african-violet); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
+										ACCESS
+									</button>
+								</div>
+								<div style="background: rgba(204, 68, 68, 0.2); padding: 1rem; border-radius: 10px; border: 2px solid var(--red);">
+									<h5 style="color: var(--red); margin: 0 0 0.5rem 0;">Rules of Play</h5>
+									<button onclick="window.open('https://docs.google.com/document/d/1MwVJZp0NW9SL85EVUFxCENwIrHGyL5uFuWvKGRoO6Sg/edit?tab=t.0', '_blank')" class="lcars-quick-btn" style="background-color: var(--red); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
+										ACCESS
+									</button>
+								</div>
+								<div style="background: rgba(114, 137, 218, 0.2); padding: 1rem; border-radius: 10px; border: 2px solid #7289DA;">
+									<h5 style="color: #7289DA; margin: 0 0 0.5rem 0;">Discord</h5>
+									<button onclick="showDiscordModal(); return false;" class="lcars-quick-btn" style="background-color: #7289DA; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
+										ACCESS
+									</button>
+								</div>
+								<div style="background: rgba(255, 170, 0, 0.2); padding: 1rem; border-radius: 10px; border: 2px solid var(--gold);">
+									<h5 style="color: var(--gold); margin: 0 0 0.5rem 0;">Ship Boarding</h5>
+									<button onclick="showShipBoardingConfirm(); return false;" class="lcars-quick-btn" style="background-color: var(--gold); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
+										ACCESS
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
