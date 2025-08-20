@@ -119,8 +119,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $log_stmt->execute([$existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department]);
                         } else {
                             // Add new item with all fields
-                            $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, min_quantity, unit_type, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                            $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $min_quantity, $unit_type, $user_name, $user_department]);
+                            try {
+                                $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, min_quantity, unit_type, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                                $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $min_quantity, $unit_type, $user_name, $user_department]);
+                            } catch (PDOException $e) {
+                                if (strpos($e->getMessage(), "Unknown column 'unit_type'") !== false) {
+                                    // Fallback for databases without unit_type column
+                                    $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, min_quantity, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                                    $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $min_quantity, $user_name, $user_department]);
+                                } else {
+                                    throw $e;
+                                }
+                            }
                             
                             $inventory_id = $pdo->lastInsertId();
                             
@@ -209,8 +219,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $log_stmt->execute([$existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department]);
                         } else {
                             // Add new item
-                            $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, unit_type, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                            $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $unit_type, $user_name, $user_department]);
+                            try {
+                                $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, unit_type, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                                $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $unit_type, $user_name, $user_department]);
+                            } catch (PDOException $e) {
+                                if (strpos($e->getMessage(), "Unknown column 'unit_type'") !== false) {
+                                    // Fallback for databases without unit_type column
+                                    $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?)");
+                                    $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $user_name, $user_department]);
+                                } else {
+                                    throw $e;
+                                }
+                            }
                             
                             $inventory_id = $pdo->lastInsertId();
                             
@@ -759,7 +779,7 @@ if ($user_department) {
                                                 <div class="inventory-card <?php echo ($item['quantity'] <= $item['min_quantity']) ? 'low-stock' : ''; ?>">
                                                     <div class="item-header">
                                                         <h4 class="item-name"><?php echo htmlspecialchars($item['item_name']); ?></h4>
-                                                        <span class="item-quantity"><?php echo $item['quantity']; ?> <?php echo htmlspecialchars($item['unit_type']); ?></span>
+                                                        <span class="item-quantity"><?php echo $item['quantity']; ?><?php echo isset($item['unit_type']) ? ' ' . htmlspecialchars($item['unit_type']) : ''; ?></span>
                                                     </div>
                                                     
                                                     <?php if (!empty($item['item_description'])): ?>

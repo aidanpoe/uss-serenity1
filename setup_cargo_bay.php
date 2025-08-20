@@ -29,6 +29,7 @@ try {
         item_description TEXT,
         quantity INT DEFAULT 0,
         min_quantity INT DEFAULT 5,
+        unit_type VARCHAR(50) DEFAULT 'pieces',
         added_by VARCHAR(255),
         added_department VARCHAR(100),
         date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -40,6 +41,18 @@ try {
         echo "<p>✅ Table 'cargo_inventory' created successfully</p>";
     } else {
         echo "<p>❌ Error creating cargo_inventory table</p>";
+    }
+    
+    // Add unit_type column if it doesn't exist (for existing databases)
+    try {
+        $pdo->exec("ALTER TABLE cargo_inventory ADD COLUMN unit_type VARCHAR(50) DEFAULT 'pieces'");
+        echo "<p>✅ Added 'unit_type' column to cargo_inventory table</p>";
+    } catch (PDOException $e) {
+        if (strpos($e->getMessage(), 'Duplicate column name') !== false) {
+            echo "<p>ℹ️ Column 'unit_type' already exists in cargo_inventory table</p>";
+        } else {
+            echo "<p>⚠️ Note: Could not add unit_type column - " . $e->getMessage() . "</p>";
+        }
     }
 
     // Create cargo_logs table
