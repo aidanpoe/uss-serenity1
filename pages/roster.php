@@ -363,14 +363,49 @@ $ranks = [
 			border: 2px solid var(--red);
 		}
 		
-		/* Senior Staff - Purple/Gray Theme */
-		.senior-staff .officer-box {
-			background: linear-gradient(135deg, rgba(136, 136, 136, 0.25), rgba(136, 136, 136, 0.15));
-			border: 2px solid #888;
+		/* Senior Staff - Department-based colors */
+		.senior-staff .medical {
+			background: linear-gradient(135deg, rgba(85, 102, 255, 0.25), rgba(85, 102, 255, 0.15));
+			border: 2px solid var(--blue);
+		}
+		
+		.senior-staff .science {
+			background: linear-gradient(135deg, rgba(85, 102, 255, 0.25), rgba(85, 102, 255, 0.15));
+			border: 2px solid var(--blue);
+		}
+		
+		.senior-staff .engineering {
+			background: linear-gradient(135deg, rgba(255, 136, 0, 0.25), rgba(255, 136, 0, 0.15));
+			border: 2px solid var(--orange);
+		}
+		
+		.senior-staff .operations {
+			background: linear-gradient(135deg, rgba(255, 136, 0, 0.25), rgba(255, 136, 0, 0.15));
+			border: 2px solid var(--orange);
+		}
+		
+		.senior-staff .security {
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.15));
+			border: 2px solid var(--gold);
+		}
+		
+		.senior-staff .tactical {
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.15));
+			border: 2px solid var(--gold);
+		}
+		
+		.senior-staff .intelligence {
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.15));
+			border: 2px solid var(--gold);
+		}
+		
+		.senior-staff .srt {
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.15));
+			border: 2px solid var(--gold);
 		}
 		
 		.senior-staff .position-title {
-			color: #ccc;
+			color: var(--orange);
 		}
 		
 		/* Offline Status */
@@ -636,7 +671,7 @@ $ranks = [
 							<div class="command-row">
 								<!-- Chief Medical Officer -->
 								<div class="officer-box senior-staff medical">
-									<div class="department-label">MEDICAL</div>
+									<div class="department-label">MED/SCI</div>
 									<div class="position-title">CHIEF MEDICAL OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Chief Medical Officer']): ?>
@@ -652,7 +687,7 @@ $ranks = [
 								
 								<!-- Chief Science Officer -->
 								<div class="officer-box senior-staff science">
-									<div class="department-label">SCIENCE</div>
+									<div class="department-label">MED/SCI</div>
 									<div class="position-title">CHIEF SCIENCE OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Chief Science Officer']): ?>
@@ -668,7 +703,7 @@ $ranks = [
 								
 								<!-- Chief Engineer -->
 								<div class="officer-box senior-staff engineering">
-									<div class="department-label">ENGINEERING</div>
+									<div class="department-label">ENG/OPS</div>
 									<div class="position-title">CHIEF ENGINEER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Chief Engineer']): ?>
@@ -684,7 +719,7 @@ $ranks = [
 								
 								<!-- Chief Operations Officer -->
 								<div class="officer-box senior-staff operations">
-									<div class="department-label">OPERATIONS</div>
+									<div class="department-label">ENG/OPS</div>
 									<div class="position-title">CHIEF OPERATIONS OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Operations Officer']): ?>
@@ -701,7 +736,7 @@ $ranks = [
 							<div class="command-row">
 								<!-- Security Chief -->
 								<div class="officer-box senior-staff security">
-									<div class="department-label">SECURITY</div>
+									<div class="department-label">SEC/TAC</div>
 									<div class="position-title">SECURITY CHIEF</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Security Chief']): ?>
@@ -717,7 +752,7 @@ $ranks = [
 								
 								<!-- Tactical Officer -->
 								<div class="officer-box senior-staff tactical">
-									<div class="department-label">TACTICAL</div>
+									<div class="department-label">SEC/TAC</div>
 									<div class="position-title">TACTICAL OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Tactical Officer']): ?>
@@ -733,7 +768,7 @@ $ranks = [
 								
 								<!-- Intelligence Officer -->
 								<div class="officer-box senior-staff intelligence">
-									<div class="department-label">INTELLIGENCE</div>
+									<div class="department-label">SEC/TAC</div>
 									<div class="position-title">INTELLIGENCE OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Intelligence Officer']): ?>
@@ -749,7 +784,7 @@ $ranks = [
 								
 								<!-- S.R.T. Leader (Offline) -->
 								<div class="officer-box senior-staff srt offline">
-									<div class="department-label">SPECIAL RESPONSE</div>
+									<div class="department-label">SEC/TAC</div>
 									<div class="position-title">S.R.T. LEADER</div>
 									<div class="officer-name offline-status">
 										<?php if ($command_positions['S.R.T. Leader']): ?>
