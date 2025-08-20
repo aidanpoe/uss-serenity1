@@ -398,6 +398,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error_message = "Only ENG/OPS and COMMAND can perform bulk deliveries.";
                 }
                 break;
+                
+            case 'clear_audit_logs':
+                // Only Command can clear audit logs
+                if ($user_department === 'Command') {
+                    try {
+                        $clear_before = $_POST['clear_before'] ?? '';
+                        if (!empty($clear_before)) {
+                            // Clear logs before specific date
+                            $clear_stmt = $pdo->prepare("DELETE FROM cargo_logs WHERE timestamp < ?");
+                            $clear_stmt->execute([$clear_before]);
+                            $deleted_count = $clear_stmt->rowCount();
+                            $success_message = "Cleared {$deleted_count} audit log entries before {$clear_before}.";
+                        } else {
+                            // Clear all logs (with confirmation)
+                            if (isset($_POST['confirm_clear_all']) && $_POST['confirm_clear_all'] === 'yes') {
+                                $clear_stmt = $pdo->prepare("DELETE FROM cargo_logs");
+                                $clear_stmt->execute();
+                                $deleted_count = $clear_stmt->rowCount();
+                                $success_message = "Cleared all {$deleted_count} audit log entries.";
+                            } else {
+                                $error_message = "Clear all confirmation required.";
+                            }
+                        }
+                    } catch (Exception $e) {
+                        $error_message = "Error clearing audit logs: " . $e->getMessage();
+                    }
+                } else {
+                    $error_message = "Access denied. Only Command personnel can clear audit logs.";
+                }
+                break;
         }
     }
 }
@@ -419,6 +449,24 @@ if ($user_department) {
     $dept_search = "%$user_department%";
     $warning_stmt->execute([$dept_search]);
     $warnings = $warning_stmt->fetchAll();
+}
+
+// Get audit log data for the modal
+$audit_logs = [];
+try {
+    $audit_stmt = $pdo->query("
+        SELECT 
+            cl.*,
+            COALESCE(cl.item_name_snapshot, 'Unknown Item') as item_name,
+            COALESCE(cl.area_name_snapshot, 'Unknown Area') as area_name
+        FROM cargo_logs cl 
+        ORDER BY cl.timestamp DESC 
+        LIMIT 100
+    ");
+    $audit_logs = $audit_stmt->fetchAll();
+} catch (Exception $e) {
+    // If audit log query fails, just set empty array
+    $audit_logs = [];
 }
 ?>
 
@@ -740,6 +788,38 @@ if ($user_department) {
             padding: 1rem;
         }
         
+        /* Audit Log Modal Specific Styles */
+        #auditModal .modal-content {
+            background: #000;
+            border: 2px solid var(--orange);
+        }
+        
+        #auditModal table {
+            font-size: 0.9rem;
+        }
+        
+        #auditModal th {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+        
+        #auditModal tr:hover {
+            background: rgba(255, 153, 0, 0.1);
+        }
+        
+        #clearLogsForm input[type="datetime-local"] {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--orange);
+            color: var(--orange);
+            padding: 0.3rem;
+            border-radius: 3px;
+        }
+        
+        #clearLogsForm input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        
         .debug-panel {
             background: var(--african-violet);
             color: #000;
@@ -887,7 +967,7 @@ if ($user_department) {
                                     Bulk Delivery
                                 </button>
                                 <button class="btn gold" onclick="showActivityLog()" style="width: 100%;">
-                                    Activity Log
+                                    🗂️ Audit Log
                                 </button>
                             </div>
                             <?php endif; ?>
@@ -1101,6 +1181,148 @@ if ($user_department) {
         </div>
     </div>
 
+    <!-- Audit Log Modal -->
+    <div id="auditModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px; max-height: 90vh; overflow-y: auto;">
+            <h3 style="color: var(--orange); border-bottom: 2px solid var(--orange); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                🗂️ CARGO BAY AUDIT LOG
+            </h3>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.3); border-radius: 5px;">
+                <div style="color: var(--blue);">
+                    📊 Showing last 100 entries | Total logs: <?php echo count($audit_logs); ?>
+                </div>
+                <?php if ($user_department === 'Command'): ?>
+                <div>
+                    <button class="btn red" onclick="showClearLogsForm()" style="margin-right: 0.5rem;">🗑️ Clear Logs</button>
+                    <button class="btn blue" onclick="refreshAuditLog()">🔄 Refresh</button>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Clear Logs Form (Hidden by default) -->
+            <?php if ($user_department === 'Command'): ?>
+            <div id="clearLogsForm" style="display: none; margin-bottom: 1rem; padding: 1rem; background: rgba(139, 0, 0, 0.2); border: 1px solid var(--red); border-radius: 5px;">
+                <h4 style="color: var(--red); margin-bottom: 0.5rem;">⚠️ CLEAR AUDIT LOGS</h4>
+                <form method="POST" onsubmit="return confirmClearLogs(event)">
+                    <input type="hidden" name="action" value="clear_audit_logs">
+                    <div style="margin-bottom: 0.5rem;">
+                        <label style="color: var(--orange);">Clear logs before date (optional):</label>
+                        <input type="datetime-local" name="clear_before" style="margin-left: 0.5rem;">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--red);">
+                            <input type="checkbox" name="confirm_clear_all" value="yes" id="confirmClearAll">
+                            Clear ALL audit logs (if no date specified)
+                        </label>
+                    </div>
+                    <button type="submit" class="btn red" style="margin-right: 0.5rem;">🗑️ Execute Clear</button>
+                    <button type="button" class="btn" onclick="hideClearLogsForm()">Cancel</button>
+                </form>
+            </div>
+            <?php endif; ?>
+
+            <!-- Audit Log Table -->
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.3);">
+                    <thead>
+                        <tr style="background: var(--orange); color: black;">
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">Timestamp</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">Action</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">Item</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">Area</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">Quantity Change</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">Previous</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">New</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">Performed By</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">Department</th>
+                            <th style="padding: 0.5rem; border: 1px solid var(--orange);">Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($audit_logs)): ?>
+                        <tr>
+                            <td colspan="10" style="padding: 1rem; text-align: center; color: var(--blue);">
+                                📝 No audit log entries found
+                            </td>
+                        </tr>
+                        <?php else: ?>
+                        <?php foreach ($audit_logs as $log): ?>
+                        <tr style="border-bottom: 1px solid var(--orange);">
+                            <td style="padding: 0.5rem; color: var(--blue); font-size: 0.9rem;">
+                                <?php 
+                                $timestamp = strtotime($log['timestamp']);
+                                $formatted_date = date('Y-m-d', $timestamp);
+                                $formatted_time = date('H:i:s', $timestamp);
+                                ?>
+                                <div><?php echo $formatted_date; ?></div>
+                                <div style="color: var(--orange); font-size: 0.8rem;"><?php echo $formatted_time; ?></div>
+                            </td>
+                            <td style="padding: 0.5rem; text-align: center;">
+                                <?php 
+                                $action_color = 'var(--blue)';
+                                $action_icon = '📝';
+                                if ($log['action'] === 'ADD') {
+                                    $action_color = 'var(--green)';
+                                    $action_icon = '➕';
+                                } elseif ($log['action'] === 'REMOVE') {
+                                    $action_color = 'var(--red)';
+                                    $action_icon = '➖';
+                                } elseif ($log['action'] === 'BULK_DELIVERY') {
+                                    $action_color = 'var(--orange)';
+                                    $action_icon = '🚚';
+                                }
+                                ?>
+                                <span style="color: <?php echo $action_color; ?>">
+                                    <?php echo $action_icon . ' ' . $log['action']; ?>
+                                </span>
+                            </td>
+                            <td style="padding: 0.5rem; color: var(--orange);">
+                                <?php echo htmlspecialchars($log['item_name']); ?>
+                            </td>
+                            <td style="padding: 0.5rem; color: var(--blue);">
+                                <?php echo htmlspecialchars($log['area_name']); ?>
+                            </td>
+                            <td style="padding: 0.5rem; text-align: center; color: <?php echo $log['quantity_change'] > 0 ? 'var(--green)' : 'var(--red)'; ?>">
+                                <?php echo ($log['quantity_change'] > 0 ? '+' : '') . $log['quantity_change']; ?>
+                            </td>
+                            <td style="padding: 0.5rem; text-align: center; color: var(--blue);">
+                                <?php echo $log['previous_quantity']; ?>
+                            </td>
+                            <td style="padding: 0.5rem; text-align: center; color: var(--blue);">
+                                <?php echo $log['new_quantity']; ?>
+                            </td>
+                            <td style="padding: 0.5rem; color: var(--orange);">
+                                <?php echo htmlspecialchars($log['performed_by']); ?>
+                            </td>
+                            <td style="padding: 0.5rem; text-align: center;">
+                                <?php 
+                                $dept_color = 'var(--blue)';
+                                if ($log['performer_department'] === 'Command') $dept_color = 'var(--red)';
+                                elseif ($log['performer_department'] === 'ENG/OPS') $dept_color = 'var(--orange)';
+                                elseif ($log['performer_department'] === 'MED/SCI') $dept_color = 'var(--blue)';
+                                elseif ($log['performer_department'] === 'SEC/TAC') $dept_color = 'var(--red)';
+                                ?>
+                                <span style="color: <?php echo $dept_color; ?>">
+                                    <?php echo htmlspecialchars($log['performer_department']); ?>
+                                </span>
+                            </td>
+                            <td style="padding: 0.5rem; color: var(--blue); font-size: 0.9rem; max-width: 200px;">
+                                <?php echo htmlspecialchars($log['reason'] ?? ''); ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 1rem; text-align: right;">
+                <button type="button" class="btn red" onclick="closeModal('auditModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function modifyInventory(inventoryId, action, itemName) {
             document.getElementById('modifyInventoryId').value = inventoryId;
@@ -1117,13 +1339,52 @@ if ($user_department) {
         }
 
         function showActivityLog() {
-            // This could open a modal with detailed activity log
-            window.location.href = '#activity-log';
-            alert('Activity log feature - would show detailed logs in a modal');
+            document.getElementById('auditModal').style.display = 'block';
         }
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Audit log functions
+        function showClearLogsForm() {
+            document.getElementById('clearLogsForm').style.display = 'block';
+        }
+
+        function hideClearLogsForm() {
+            document.getElementById('clearLogsForm').style.display = 'none';
+        }
+
+        function confirmClearLogs(event) {
+            const clearBefore = event.target.clear_before.value;
+            const confirmClearAll = event.target.confirm_clear_all.checked;
+            
+            if (!clearBefore && !confirmClearAll) {
+                alert('⚠️ Please specify a date to clear logs before, or check the "Clear ALL" confirmation.');
+                event.preventDefault();
+                return false;
+            }
+            
+            if (!clearBefore && confirmClearAll) {
+                const confirmed = confirm('⚠️ WARNING: This will permanently delete ALL audit log entries.\n\nThis action cannot be undone.\n\nAre you sure you want to proceed?');
+                if (!confirmed) {
+                    event.preventDefault();
+                    return false;
+                }
+            } else if (clearBefore) {
+                const confirmed = confirm(`⚠️ This will permanently delete all audit log entries before ${clearBefore}.\n\nThis action cannot be undone.\n\nAre you sure you want to proceed?`);
+                if (!confirmed) {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function refreshAuditLog() {
+            // Reload the page to refresh audit log data
+            window.location.reload();
         }
 
         // Close modal when clicking outside
