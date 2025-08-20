@@ -172,6 +172,49 @@ function loginbutton($buttonstyle = "square") {
 									<?php endif; ?>
 								</div>
 							</div>
+							
+							<!-- Crew Messaging System -->
+							<div style="background: linear-gradient(135deg, rgba(85, 102, 255, 0.2), rgba(0,0,0,0.8)); padding: 1.5rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--blue);">
+								<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--blue); padding-bottom: 1rem;">
+									<h4 style="color: var(--blue); margin: 0;">🚀 Crew Communications</h4>
+									<div style="display: flex; align-items: center; gap: 1rem;">
+										<button onclick="toggleOnlineUsers()" style="background: var(--orange); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">
+											<span id="online-count">0</span> Online
+										</button>
+										<button onclick="refreshMessages()" style="background: var(--blue); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">
+											↻ Refresh
+										</button>
+									</div>
+								</div>
+								
+								<!-- Online Users Panel -->
+								<div id="online-users-panel" style="display: none; background: rgba(0,0,0,0.5); border: 1px solid var(--orange); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+									<h5 style="color: var(--orange); margin: 0 0 0.5rem 0;">Crew Members Online:</h5>
+									<div id="online-users-list" style="color: var(--white); font-size: 0.9rem;"></div>
+								</div>
+								
+								<!-- Messages Display -->
+								<div id="messages-container" style="background: rgba(0,0,0,0.6); border: 2px solid var(--blue); border-radius: 10px; height: 300px; overflow-y: auto; padding: 1rem; margin-bottom: 1rem;">
+									<div id="messages-loading" style="text-align: center; color: var(--blue); padding: 2rem;">
+										🔄 Loading messages...
+									</div>
+									<div id="messages-list"></div>
+								</div>
+								
+								<!-- Message Input -->
+								<div style="display: flex; gap: 0.5rem;">
+									<input type="text" id="message-input" placeholder="Type your message to the crew..." 
+										   style="flex: 1; padding: 0.75rem; border: 2px solid var(--blue); border-radius: 5px; background: rgba(0,0,0,0.8); color: white; font-size: 1rem;"
+										   maxlength="500">
+									<button onclick="sendMessage()" id="send-button" 
+											style="background: var(--blue); color: black; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem;">
+										SEND
+									</button>
+								</div>
+								<div style="text-align: right; margin-top: 0.5rem;">
+									<small style="color: var(--bluey);">Max 500 characters | Auto-refresh every 10 seconds</small>
+								</div>
+							</div>
 						<?php endif; ?>
 						
 
@@ -393,6 +436,300 @@ function loginbutton($buttonstyle = "square") {
 			}, 2000);
 		}
 	</script>
+	
+	<?php if (isLoggedIn()): ?>
+	<!-- Crew Messaging System JavaScript -->
+	<script>
+		let messagesContainer = null;
+		let messagesList = null;
+		let messagesLoading = null;
+		let messageInput = null;
+		let sendButton = null;
+		let lastMessageId = 0;
+		let autoRefreshInterval = null;
+		let onlineUsersPanel = null;
+		let onlineUsersList = null;
+		let onlineCount = null;
+		
+		// Initialize messaging system when page loads
+		document.addEventListener('DOMContentLoaded', function() {
+			messagesContainer = document.getElementById('messages-container');
+			messagesList = document.getElementById('messages-list');
+			messagesLoading = document.getElementById('messages-loading');
+			messageInput = document.getElementById('message-input');
+			sendButton = document.getElementById('send-button');
+			onlineUsersPanel = document.getElementById('online-users-panel');
+			onlineUsersList = document.getElementById('online-users-list');
+			onlineCount = document.getElementById('online-count');
+			
+			if (messageInput && sendButton) {
+				// Load initial messages
+				loadMessages();
+				
+				// Set up auto-refresh
+				autoRefreshInterval = setInterval(function() {
+					loadMessages(false); // Don't show loading indicator for auto-refresh
+					loadOnlineUsers();
+				}, 10000); // Refresh every 10 seconds
+				
+				// Load online users initially
+				loadOnlineUsers();
+				
+				// Enter key to send message
+				messageInput.addEventListener('keypress', function(e) {
+					if (e.key === 'Enter' && !e.shiftKey) {
+						e.preventDefault();
+						sendMessage();
+					}
+				});
+				
+				// Character counter
+				messageInput.addEventListener('input', function() {
+					const remaining = 500 - this.value.length;
+					const color = remaining < 50 ? 'var(--red)' : 'var(--bluey)';
+					
+					let counterElement = document.getElementById('char-counter');
+					if (!counterElement) {
+						counterElement = document.createElement('small');
+						counterElement.id = 'char-counter';
+						counterElement.style.position = 'absolute';
+						counterElement.style.right = '0';
+						counterElement.style.bottom = '-1.5rem';
+						counterElement.style.fontSize = '0.8rem';
+						
+						// Make input container relative positioned
+						this.parentElement.style.position = 'relative';
+						this.parentElement.appendChild(counterElement);
+					}
+					
+					counterElement.style.color = color;
+					counterElement.textContent = remaining + ' characters remaining';
+				});
+			}
+		});
+		
+		// Clean up interval when page unloads
+		window.addEventListener('beforeunload', function() {
+			if (autoRefreshInterval) {
+				clearInterval(autoRefreshInterval);
+			}
+		});
+		
+		async function sendMessage() {
+			if (!messageInput || !sendButton) return;
+			
+			const message = messageInput.value.trim();
+			if (!message) return;
+			
+			// Disable send button temporarily
+			sendButton.disabled = true;
+			sendButton.textContent = 'SENDING...';
+			
+			try {
+				const formData = new FormData();
+				formData.append('action', 'send_message');
+				formData.append('message', message);
+				
+				const response = await fetch('api/messaging.php', {
+					method: 'POST',
+					body: formData
+				});
+				
+				const data = await response.json();
+				
+				if (data.success) {
+					messageInput.value = '';
+					loadMessages(false); // Refresh messages without loading indicator
+					
+					// Remove character counter
+					const counter = document.getElementById('char-counter');
+					if (counter) counter.remove();
+				} else {
+					alert('Error: ' + (data.error || 'Failed to send message'));
+				}
+			} catch (error) {
+				console.error('Error sending message:', error);
+				alert('Network error. Please try again.');
+			} finally {
+				sendButton.disabled = false;
+				sendButton.textContent = 'SEND';
+			}
+		}
+		
+		async function loadMessages(showLoading = true) {
+			if (!messagesList || !messagesLoading) return;
+			
+			if (showLoading) {
+				messagesLoading.style.display = 'block';
+				messagesList.style.display = 'none';
+			}
+			
+			try {
+				const response = await fetch('api/messaging.php?action=get_messages&limit=25');
+				const data = await response.json();
+				
+				if (data.messages) {
+					displayMessages(data.messages);
+					if (showLoading) {
+						messagesLoading.style.display = 'none';
+						messagesList.style.display = 'block';
+					}
+				} else {
+					throw new Error(data.error || 'Failed to load messages');
+				}
+			} catch (error) {
+				console.error('Error loading messages:', error);
+				if (showLoading) {
+					messagesLoading.innerHTML = '❌ Error loading messages. <button onclick="loadMessages()" style="background: var(--red); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer;">Retry</button>';
+				}
+			}
+		}
+		
+		function displayMessages(messages) {
+			if (!messagesList) return;
+			
+			if (messages.length === 0) {
+				messagesList.innerHTML = '<div style="text-align: center; color: var(--bluey); padding: 2rem; font-style: italic;">No messages yet. Be the first to say something!</div>';
+				return;
+			}
+			
+			let html = '';
+			messages.forEach(msg => {
+				const isOwnMessage = msg.is_own_message;
+				const bgColor = isOwnMessage ? 'rgba(85, 102, 255, 0.3)' : 'rgba(255, 255, 255, 0.05)';
+				const borderColor = isOwnMessage ? 'var(--blue)' : 'rgba(255, 255, 255, 0.1)';
+				
+				html += `
+					<div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem;">
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+							<div style="display: flex; align-items: center; gap: 0.5rem;">
+								<span style="color: var(--orange); font-weight: bold; font-size: 0.9rem;">
+									${msg.sender_rank ? msg.sender_rank + ' ' : ''}${msg.sender_name}
+								</span>
+								<span style="background: var(--${getDepartmentColor(msg.sender_department)}); color: black; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem; font-weight: bold;">
+									${msg.sender_department || 'CREW'}
+								</span>
+							</div>
+							<div style="display: flex; align-items: center; gap: 0.5rem;">
+								<span style="color: var(--bluey); font-size: 0.8rem;">${msg.timestamp}</span>
+								${isOwnMessage ? `<button onclick="deleteMessage(${msg.id})" style="background: var(--red); color: black; border: none; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem; cursor: pointer;" title="Delete message">🗑️</button>` : ''}
+							</div>
+						</div>
+						<div style="color: white; line-height: 1.4; word-wrap: break-word;">
+							${escapeHtml(msg.message)}
+						</div>
+					</div>
+				`;
+			});
+			
+			messagesList.innerHTML = html;
+			
+			// Auto-scroll to bottom
+			if (messagesContainer) {
+				messagesContainer.scrollTop = messagesContainer.scrollHeight;
+			}
+		}
+		
+		function getDepartmentColor(dept) {
+			switch(dept) {
+				case 'MED/SCI': return 'blue';
+				case 'ENG/OPS': return 'orange';
+				case 'SEC/TAC': return 'gold';
+				case 'Command': return 'red';
+				default: return 'bluey';
+			}
+		}
+		
+		function escapeHtml(text) {
+			const div = document.createElement('div');
+			div.textContent = text;
+			return div.innerHTML;
+		}
+		
+		async function deleteMessage(messageId) {
+			if (!confirm('Are you sure you want to delete this message?')) return;
+			
+			try {
+				const formData = new FormData();
+				formData.append('action', 'delete_message');
+				formData.append('message_id', messageId);
+				
+				const response = await fetch('api/messaging.php', {
+					method: 'POST',
+					body: formData
+				});
+				
+				const data = await response.json();
+				
+				if (data.success) {
+					loadMessages(false);
+				} else {
+					alert('Error: ' + (data.error || 'Failed to delete message'));
+				}
+			} catch (error) {
+				console.error('Error deleting message:', error);
+				alert('Network error. Please try again.');
+			}
+		}
+		
+		function refreshMessages() {
+			loadMessages(true);
+			loadOnlineUsers();
+		}
+		
+		async function loadOnlineUsers() {
+			try {
+				const response = await fetch('api/messaging.php?action=get_online_users');
+				const data = await response.json();
+				
+				if (data.online_users) {
+					displayOnlineUsers(data.online_users);
+				}
+			} catch (error) {
+				console.error('Error loading online users:', error);
+			}
+		}
+		
+		function displayOnlineUsers(users) {
+			if (!onlineUsersList || !onlineCount) return;
+			
+			onlineCount.textContent = users.length;
+			
+			if (users.length === 0) {
+				onlineUsersList.innerHTML = '<em>No other crew members currently online</em>';
+			} else {
+				let html = '';
+				users.forEach(user => {
+					html += `
+						<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+							<div>
+								<span style="color: var(--orange); font-weight: bold;">
+									${user.rank_name ? user.rank_name + ' ' : ''}${user.character_name}
+								</span>
+								<span style="background: var(--${getDepartmentColor(user.department)}); color: black; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem; font-weight: bold; margin-left: 0.5rem;">
+									${user.department || 'CREW'}
+								</span>
+							</div>
+							<span style="color: var(--bluey); font-size: 0.8rem;">Active ${user.last_seen}</span>
+						</div>
+					`;
+				});
+				onlineUsersList.innerHTML = html;
+			}
+		}
+		
+		function toggleOnlineUsers() {
+			if (!onlineUsersPanel) return;
+			
+			if (onlineUsersPanel.style.display === 'none') {
+				onlineUsersPanel.style.display = 'block';
+				loadOnlineUsers(); // Refresh when opening
+			} else {
+				onlineUsersPanel.style.display = 'none';
+			}
+		}
+	</script>
+	<?php endif; ?>
 	
 	<script type="text/javascript" src="assets/lcars.js"></script>
 	<div class="headtrim"> </div>
