@@ -37,8 +37,11 @@ try {
     $current_user = getCurrentCharacter();
     
     if (!$current_user) {
-        throw new Exception("No active character found. Please create a character first.");
+        throw new Exception("User account not found. Please try logging out and back in.");
     }
+    
+    // Check if user has any characters
+    $has_character = !empty($current_user['character_id']);
     
     // Get all characters for this user
     $user_characters = getUserCharacters();
