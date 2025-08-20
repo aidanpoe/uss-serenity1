@@ -220,6 +220,12 @@ function loginbutton($buttonstyle = "square") {
 								<li style="margin: 0.5rem 0;">
 									<a href="pages/training.php" style="color: var(--bluey);">→ Training Documents</a>
 								</li>
+								<li style="margin: 0.5rem 0;">
+									<a href="https://docs.google.com/document/d/1MwVJZp0NW9SL85EVUFxCENwIrHGyL5uFuWvKGRoO6Sg/edit?tab=t.0" target="_blank" style="color: var(--bluey);">→ Rules of Play</a>
+								</li>
+								<li style="margin: 0.5rem 0;">
+									<a href="#" onclick="alert('Link coming soon'); return false;" style="color: var(--bluey);">→ Discord</a>
+								</li>
 							</ul>
 						</div>
 					</div>
