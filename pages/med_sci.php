@@ -3,33 +3,49 @@ require_once '../includes/config.php';
 
 // Handle medical report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'medical_report') {
-    try {
-        $pdo = getConnection();
-        $stmt = $pdo->prepare("INSERT INTO medical_records (roster_id, condition_description, reported_by) VALUES (?, ?, ?)");
-        $stmt->execute([
-            $_POST['roster_id'],
-            $_POST['condition_description'],
-            $_POST['reported_by']
-        ]);
-        $success = "Medical report submitted successfully.";
-    } catch (Exception $e) {
-        $error = "Error submitting report: " . $e->getMessage();
+    if (!isLoggedIn()) {
+        $error = "You must be logged in to submit medical reports.";
+    } else {
+        try {
+            // Auto-populate reported_by with current user's character
+            $reported_by = ($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '');
+            $reported_by = trim($reported_by); // Remove extra spaces
+            
+            $pdo = getConnection();
+            $stmt = $pdo->prepare("INSERT INTO medical_records (roster_id, condition_description, reported_by) VALUES (?, ?, ?)");
+            $stmt->execute([
+                $_POST['roster_id'],
+                $_POST['condition_description'],
+                $reported_by
+            ]);
+            $success = "Medical report submitted successfully.";
+        } catch (Exception $e) {
+            $error = "Error submitting report: " . $e->getMessage();
+        }
     }
 }
 
 // Handle science report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'science_report') {
-    try {
-        $pdo = getConnection();
-        $stmt = $pdo->prepare("INSERT INTO science_reports (title, description, reported_by) VALUES (?, ?, ?)");
-        $stmt->execute([
-            $_POST['title'],
-            $_POST['description'],
-            $_POST['reported_by']
-        ]);
-        $success = "Science report submitted successfully.";
-    } catch (Exception $e) {
-        $error = "Error submitting report: " . $e->getMessage();
+    if (!isLoggedIn()) {
+        $error = "You must be logged in to submit science reports.";
+    } else {
+        try {
+            // Auto-populate reported_by with current user's character
+            $reported_by = ($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '');
+            $reported_by = trim($reported_by); // Remove extra spaces
+            
+            $pdo = getConnection();
+            $stmt = $pdo->prepare("INSERT INTO science_reports (title, description, reported_by) VALUES (?, ?, ?)");
+            $stmt->execute([
+                $_POST['title'],
+                $_POST['description'],
+                $reported_by
+            ]);
+            $success = "Science report submitted successfully.";
+        } catch (Exception $e) {
+            $error = "Error submitting report: " . $e->getMessage();
+        }
     }
 }
 
@@ -193,6 +209,7 @@ try {
 					</div>
 					
 					<!-- Public Forms -->
+					<?php if (isLoggedIn()): ?>
 					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
 						<!-- Medical Report Form -->
 						<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 2px solid var(--blue);">
@@ -215,7 +232,11 @@ try {
 								</div>
 								<div style="margin-bottom: 1rem;">
 									<label style="color: var(--blue);">Reported By:</label>
-									<input type="text" name="reported_by" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
+									<?php 
+									$current_user = trim(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
+									?>
+									<input type="text" value="<?php echo htmlspecialchars($current_user); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--blue); border: 1px solid var(--blue); cursor: not-allowed;">
+									<small style="color: var(--blue); font-size: 0.8rem;">Auto-filled from your current character profile</small>
 								</div>
 								<button type="submit" style="background-color: var(--blue); color: black; border: none; padding: 1rem; border-radius: 5px; width: 100%;">Submit Medical Report</button>
 							</form>
@@ -236,12 +257,25 @@ try {
 								</div>
 								<div style="margin-bottom: 1rem;">
 									<label style="color: var(--ice);">Reported By:</label>
-									<input type="text" name="reported_by" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--ice);">
+									<?php 
+									$current_user = trim(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
+									?>
+									<input type="text" value="<?php echo htmlspecialchars($current_user); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--ice); border: 1px solid var(--ice); cursor: not-allowed;">
+									<small style="color: var(--ice); font-size: 0.8rem;">Auto-filled from your current character profile</small>
 								</div>
 								<button type="submit" style="background-color: var(--ice); color: black; border: none; padding: 1rem; border-radius: 5px; width: 100%;">Submit Science Inquiry</button>
 							</form>
 						</div>
 					</div>
+					<?php else: ?>
+					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 2px solid var(--blue); margin: 2rem 0;">
+						<h4>Medical & Science Reporting</h4>
+						<p style="color: var(--blue); text-align: center;">You must be logged in to submit medical reports or science inquiries.</p>
+						<div style="text-align: center; margin-top: 1rem;">
+							<a href="../index.php" style="background-color: var(--blue); color: black; padding: 1rem 2rem; border-radius: 5px; text-decoration: none; display: inline-block;">Return to Login</a>
+						</div>
+					</div>
+					<?php endif; ?>
 					
 					<?php if (hasPermission('MED/SCI')): ?>
 					<!-- Medical Staff Backend -->
