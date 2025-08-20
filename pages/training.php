@@ -325,6 +325,18 @@ try {
 			background-color: black !important;
 		}
 		
+		/* Override any violet/purple backgrounds */
+		* {
+			--violet-creme: black !important;
+			--african-violet: var(--orange) !important;
+		}
+		
+		/* Override main content areas */
+		.wrap, .content, main, section {
+			background: black !important;
+			background-color: black !important;
+		}
+		
 		.department-section {
 			margin: 2rem 0;
 			border-radius: 15px;
