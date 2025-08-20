@@ -438,56 +438,514 @@ function loginbutton($buttonstyle = "square") {
 	</script>
 	
 	<?php if (isLoggedIn()): ?>
-	<!-- Crew Messaging System JavaScript -->
+	<!-- Fully Async Crew Messaging System JavaScript -->
 	<script>
-		let messagesContainer = null;
-		let messagesList = null;
-		let messagesLoading = null;
-		let messageInput = null;
-		let sendButton = null;
-		let lastMessageId = 0;
-		let autoRefreshInterval = null;
-		let onlineUsersPanel = null;
-		let onlineUsersList = null;
-		let onlineCount = null;
-		
-		// User department for delete permissions
-		const userDepartment = '<?php echo isset($_SESSION['department']) ? strtolower($_SESSION['department']) : ''; ?>';
-		const isCommand = (userDepartment === 'command');
-		
-		// Initialize messaging system when page loads
-		document.addEventListener('DOMContentLoaded', function() {
-			messagesContainer = document.getElementById('messages-container');
-			messagesList = document.getElementById('messages-list');
-			messagesLoading = document.getElementById('messages-loading');
-			messageInput = document.getElementById('message-input');
-			sendButton = document.getElementById('send-button');
-			onlineUsersPanel = document.getElementById('online-users-panel');
-			onlineUsersList = document.getElementById('online-users-list');
-			onlineCount = document.getElementById('online-count');
+		class AsyncMessagingSystem {
+			constructor() {
+				this.messagesContainer = null;
+				this.messagesList = null;
+				this.messagesLoading = null;
+				this.messageInput = null;
+				this.sendButton = null;
+				this.onlineUsersPanel = null;
+				this.onlineUsersList = null;
+				this.onlineCount = null;
+				
+				this.lastMessageId = 0;
+				this.eventSource = null;
+				this.reconnectAttempts = 0;
+				this.maxReconnectAttempts = 5;
+				this.reconnectDelay = 1000;
+				this.isConnected = false;
+				this.messageQueue = [];
+				this.sendingMessage = false;
+				
+				// User department for delete permissions
+				this.userDepartment = '<?php echo isset($_SESSION['department']) ? strtolower($_SESSION['department']) : ''; ?>';
+				this.isCommand = (this.userDepartment === 'command');
+				
+				this.init();
+			}
 			
-			if (messageInput && sendButton) {
-				// Load initial messages
-				loadMessages();
+			async init() {
+				// Wait for DOM to be ready
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', () => this.setupElements());
+				} else {
+					this.setupElements();
+				}
+			}
+			
+			setupElements() {
+				this.messagesContainer = document.getElementById('messages-container');
+				this.messagesList = document.getElementById('messages-list');
+				this.messagesLoading = document.getElementById('messages-loading');
+				this.messageInput = document.getElementById('message-input');
+				this.sendButton = document.getElementById('send-button');
+				this.onlineUsersPanel = document.getElementById('online-users-panel');
+				this.onlineUsersList = document.getElementById('online-users-list');
+				this.onlineCount = document.getElementById('online-count');
 				
-				// Set up auto-refresh
-				autoRefreshInterval = setInterval(function() {
-					loadMessages(false); // Don't show loading indicator for auto-refresh
-					loadOnlineUsers();
-				}, 10000); // Refresh every 10 seconds
-				
-				// Load online users initially
-				loadOnlineUsers();
-				
+				if (this.messageInput && this.sendButton) {
+					this.setupEventListeners();
+					this.loadInitialMessages();
+					this.startRealTimeConnection();
+				}
+			}
+			
+			setupEventListeners() {
 				// Enter key to send message
-				messageInput.addEventListener('keypress', function(e) {
+				this.messageInput.addEventListener('keypress', (e) => {
 					if (e.key === 'Enter' && !e.shiftKey) {
 						e.preventDefault();
-						sendMessage();
+						this.sendMessage();
 					}
 				});
 				
+				// Send button click
+				this.sendButton.addEventListener('click', () => this.sendMessage());
+				
 				// Character counter
+				this.messageInput.addEventListener('input', () => {
+					const remaining = 500 - this.messageInput.value.length;
+					const color = remaining < 50 ? 'var(--red)' : 'var(--bluey)';
+					
+					let counter = document.getElementById('char-counter');
+					if (!counter) {
+						counter = document.createElement('span');
+						counter.id = 'char-counter';
+						counter.style.cssText = 'position: absolute; right: 1rem; bottom: 0.5rem; font-size: 0.8rem;';
+						this.messageInput.parentNode.style.position = 'relative';
+						this.messageInput.parentNode.appendChild(counter);
+					}
+					counter.style.color = color;
+					counter.textContent = remaining;
+				});
+				
+				// Handle page visibility changes
+				document.addEventListener('visibilitychange', () => {
+					if (document.hidden) {
+						this.pauseConnection();
+					} else {
+						this.resumeConnection();
+					}
+				});
+				
+				// Handle page unload
+				window.addEventListener('beforeunload', () => {
+					this.disconnect();
+				});
+			}
+			
+			async loadInitialMessages() {
+				try {
+					this.showLoading('Loading messages...');
+					
+					const response = await fetch('api/messaging.php?action=get_messages&limit=25');
+					const data = await response.json();
+					
+					if (data.messages) {
+						this.displayMessages(data.messages);
+						if (data.messages.length > 0) {
+							this.lastMessageId = Math.max(...data.messages.map(m => m.id));
+						}
+					}
+					
+					this.hideLoading();
+				} catch (error) {
+					console.error('Error loading initial messages:', error);
+					this.showError('Failed to load messages. <button onclick="messagingSystem.loadInitialMessages()">Retry</button>');
+				}
+			}
+			
+			startRealTimeConnection() {
+				if (this.eventSource) {
+					this.eventSource.close();
+				}
+				
+				this.showConnectionStatus('Connecting...', 'orange');
+				
+				try {
+					this.eventSource = new EventSource(`api/message_stream.php?lastMessageId=${this.lastMessageId}`);
+					
+					this.eventSource.onopen = () => {
+						this.isConnected = true;
+						this.reconnectAttempts = 0;
+						this.showConnectionStatus('Live', 'green');
+						console.log('Real-time messaging connected');
+					};
+					
+					this.eventSource.addEventListener('connected', (e) => {
+						const data = JSON.parse(e.data);
+						console.log('Connected to message stream:', data);
+					});
+					
+					this.eventSource.addEventListener('new_messages', (e) => {
+						const messages = JSON.parse(e.data);
+						this.handleNewMessages(messages);
+					});
+					
+					this.eventSource.addEventListener('online_users', (e) => {
+						const users = JSON.parse(e.data);
+						this.updateOnlineUsers(users);
+					});
+					
+					this.eventSource.addEventListener('heartbeat', (e) => {
+						const data = JSON.parse(e.data);
+						this.lastMessageId = Math.max(this.lastMessageId, data.last_message_id || 0);
+					});
+					
+					this.eventSource.addEventListener('error', (e) => {
+						const data = JSON.parse(e.data);
+						console.error('Stream error:', data);
+						this.showError(data.message);
+					});
+					
+					this.eventSource.onerror = (e) => {
+						this.isConnected = false;
+						this.showConnectionStatus('Disconnected', 'red');
+						console.error('EventSource error:', e);
+						this.attemptReconnect();
+					};
+					
+					this.eventSource.addEventListener('disconnected', (e) => {
+						this.isConnected = false;
+						this.showConnectionStatus('Disconnected', 'red');
+						this.attemptReconnect();
+					});
+					
+				} catch (error) {
+					console.error('Failed to start real-time connection:', error);
+					this.attemptReconnect();
+				}
+			}
+			
+			attemptReconnect() {
+				if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+					this.showConnectionStatus('Connection Failed', 'red');
+					this.showError('Real-time connection failed. <button onclick="messagingSystem.startRealTimeConnection()">Reconnect</button>');
+					return;
+				}
+				
+				this.reconnectAttempts++;
+				const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1); // Exponential backoff
+				
+				this.showConnectionStatus(`Reconnecting... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`, 'orange');
+				
+				setTimeout(() => {
+					if (!this.isConnected) {
+						this.startRealTimeConnection();
+					}
+				}, delay);
+			}
+			
+			handleNewMessages(messages) {
+				messages.forEach(msg => {
+					this.addMessageToDisplay(msg);
+					this.lastMessageId = Math.max(this.lastMessageId, msg.id);
+				});
+				
+				// Auto-scroll to bottom
+				if (this.messagesContainer) {
+					this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+				}
+				
+				// Flash notification if page is hidden
+				if (document.hidden) {
+					this.showNotification(`New message from ${messages[0].sender_name}`);
+				}
+			}
+			
+			async sendMessage() {
+				if (this.sendingMessage) return;
+				
+				const message = this.messageInput.value.trim();
+				if (!message) return;
+				
+				if (message.length > 500) {
+					this.showError('Message too long (max 500 characters)');
+					return;
+				}
+				
+				this.sendingMessage = true;
+				this.sendButton.disabled = true;
+				this.sendButton.textContent = 'SENDING...';
+				
+				try {
+					const formData = new FormData();
+					formData.append('action', 'send_message');
+					formData.append('message', message);
+					
+					const response = await fetch('api/messaging.php', {
+						method: 'POST',
+						body: formData
+					});
+					
+					const data = await response.json();
+					
+					if (data.success) {
+						this.messageInput.value = '';
+						this.messageInput.dispatchEvent(new Event('input')); // Update character counter
+					} else {
+						this.showError('Error: ' + (data.error || 'Failed to send message'));
+					}
+					
+				} catch (error) {
+					console.error('Error sending message:', error);
+					this.showError('Network error. Please try again.');
+				} finally {
+					this.sendingMessage = false;
+					this.sendButton.disabled = false;
+					this.sendButton.textContent = 'SEND';
+				}
+			}
+			
+			async deleteMessage(messageId) {
+				// Get the message element to check if it's the user's own message
+				const messageElement = event.target.closest('div[style*="background:"]');
+				const isOwnMsg = messageElement && messageElement.style.background.includes('85, 102, 255');
+				
+				let confirmText = 'Are you sure you want to delete this message?';
+				if (this.isCommand && !isOwnMsg) {
+					confirmText = 'As Command staff, you are about to delete another crew member\'s message. Are you sure?';
+				}
+				
+				if (!confirm(confirmText)) return;
+				
+				try {
+					const formData = new FormData();
+					formData.append('action', 'delete_message');
+					formData.append('message_id', messageId);
+					
+					const response = await fetch('api/messaging.php', {
+						method: 'POST',
+						body: formData
+					});
+					
+					const data = await response.json();
+					
+					if (data.success) {
+						// Remove message from display immediately
+						const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
+						if (msgElement) {
+							msgElement.style.opacity = '0.5';
+							msgElement.style.textDecoration = 'line-through';
+							setTimeout(() => msgElement.remove(), 1000);
+						}
+					} else {
+						this.showError('Error: ' + (data.error || 'Failed to delete message'));
+					}
+				} catch (error) {
+					console.error('Error deleting message:', error);
+					this.showError('Network error. Please try again.');
+				}
+			}
+			
+			displayMessages(messages) {
+				if (!this.messagesList) return;
+				
+				if (messages.length === 0) {
+					this.messagesList.innerHTML = '<div style="text-align: center; color: var(--bluey); padding: 2rem; font-style: italic;">No messages yet. Be the first to say something!</div>';
+					return;
+				}
+				
+				let html = '';
+				messages.forEach(msg => {
+					html += this.generateMessageHTML(msg);
+				});
+				
+				this.messagesList.innerHTML = html;
+				
+				// Auto-scroll to bottom
+				if (this.messagesContainer) {
+					this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+				}
+			}
+			
+			addMessageToDisplay(msg) {
+				if (!this.messagesList) return;
+				
+				// Check if message already exists
+				if (document.querySelector(`[data-message-id="${msg.id}"]`)) return;
+				
+				const messageHTML = this.generateMessageHTML(msg);
+				this.messagesList.insertAdjacentHTML('beforeend', messageHTML);
+			}
+			
+			generateMessageHTML(msg) {
+				const isOwnMessage = msg.is_own_message;
+				const bgColor = isOwnMessage ? 'rgba(85, 102, 255, 0.3)' : 'rgba(255, 255, 255, 0.05)';
+				const borderColor = isOwnMessage ? 'var(--blue)' : 'rgba(255, 255, 255, 0.1)';
+				
+				return `
+					<div data-message-id="${msg.id}" style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; transition: all 0.3s ease;">
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+							<div style="display: flex; align-items: center; gap: 0.5rem;">
+								<span style="color: var(--orange); font-weight: bold; font-size: 0.9rem;">
+									${msg.sender_rank ? msg.sender_rank + ' ' : ''}${this.escapeHtml(msg.sender_name)}
+								</span>
+								<span style="background: var(--${this.getDepartmentColor(msg.sender_department)}); color: black; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem; font-weight: bold;">
+									${msg.sender_department || 'CREW'}
+								</span>
+							</div>
+							<div style="display: flex; align-items: center; gap: 0.5rem;">
+								<span style="color: var(--bluey); font-size: 0.8rem;">${msg.timestamp}</span>
+								<span style="color: var(--orange); font-size: 0.7rem;" title="Message expires on ${msg.expires_at}">
+									${msg.days_until_expiry}d
+								</span>
+								${(isOwnMessage || this.isCommand) ? `<button onclick="messagingSystem.deleteMessage(${msg.id})" style="background: var(--red); color: black; border: none; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem; cursor: pointer;" title="Delete message">🗑️</button>` : ''}
+							</div>
+						</div>
+						<div style="color: white; line-height: 1.4; word-wrap: break-word;">
+							${this.escapeHtml(msg.message)}
+						</div>
+					</div>
+				`;
+			}
+			
+			updateOnlineUsers(users) {
+				if (!this.onlineUsersList) return;
+				
+				if (users.length === 0) {
+					this.onlineUsersList.innerHTML = '<div style="color: var(--bluey); font-style: italic; text-align: center; padding: 1rem;">No other crew members online</div>';
+					if (this.onlineCount) this.onlineCount.textContent = '0';
+					return;
+				}
+				
+				let html = '';
+				users.forEach(user => {
+					html += `
+						<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+							<div>
+								<div style="color: var(--orange); font-weight: bold; font-size: 0.9rem;">
+									${user.rank_name ? user.rank_name + ' ' : ''}${this.escapeHtml(user.character_name)}
+								</div>
+								<div style="color: var(--${this.getDepartmentColor(user.department)}); font-size: 0.8rem;">
+									${user.department || 'CREW'}
+								</div>
+							</div>
+							<div style="color: var(--bluey); font-size: 0.8rem;">
+								${user.last_seen}
+							</div>
+						</div>
+					`;
+				});
+				
+				this.onlineUsersList.innerHTML = html;
+				if (this.onlineCount) this.onlineCount.textContent = users.length.toString();
+			}
+			
+			getDepartmentColor(department) {
+				const colors = {
+					'command': 'red',
+					'engineering': 'orange', 
+					'operations': 'orange',
+					'medical': 'blue',
+					'science': 'blue',
+					'security': 'gold',
+					'tactical': 'gold'
+				};
+				return colors[department?.toLowerCase()] || 'bluey';
+			}
+			
+			escapeHtml(text) {
+				const div = document.createElement('div');
+				div.textContent = text;
+				return div.innerHTML;
+			}
+			
+			showLoading(message = 'Loading...') {
+				if (this.messagesLoading) {
+					this.messagesLoading.innerHTML = `
+						<div style="text-align: center; color: var(--bluey); padding: 1rem;">
+							<div style="display: inline-block; width: 20px; height: 20px; border: 2px solid var(--blue); border-radius: 50%; border-top: 2px solid transparent; animation: spin 1s linear infinite; margin-right: 0.5rem;"></div>
+							${message}
+						</div>
+					`;
+				}
+			}
+			
+			hideLoading() {
+				if (this.messagesLoading) {
+					this.messagesLoading.innerHTML = '';
+				}
+			}
+			
+			showError(message) {
+				if (this.messagesLoading) {
+					this.messagesLoading.innerHTML = `
+						<div style="text-align: center; color: var(--red); padding: 1rem; background: rgba(204, 68, 68, 0.1); border: 1px solid var(--red); border-radius: 5px; margin: 0.5rem 0;">
+							❌ ${message}
+						</div>
+					`;
+				}
+			}
+			
+			showConnectionStatus(status, color) {
+				let statusElement = document.getElementById('connection-status');
+				if (!statusElement && this.onlineUsersPanel) {
+					statusElement = document.createElement('div');
+					statusElement.id = 'connection-status';
+					statusElement.style.cssText = 'text-align: center; padding: 0.25rem; font-size: 0.8rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);';
+					this.onlineUsersPanel.insertBefore(statusElement, this.onlineUsersPanel.firstChild);
+				}
+				
+				if (statusElement) {
+					const colors = { green: 'var(--blue)', orange: 'var(--orange)', red: 'var(--red)' };
+					statusElement.style.color = colors[color] || color;
+					statusElement.innerHTML = `● ${status}`;
+				}
+			}
+			
+			showNotification(message) {
+				if (Notification.permission === 'granted') {
+					new Notification('USS Serenity Communications', {
+						body: message,
+						icon: 'assets/lcars-icon.png'
+					});
+				}
+			}
+			
+			pauseConnection() {
+				if (this.eventSource && this.eventSource.readyState === EventSource.OPEN) {
+					this.eventSource.close();
+				}
+			}
+			
+			resumeConnection() {
+				if (!this.isConnected) {
+					this.startRealTimeConnection();
+				}
+			}
+			
+			disconnect() {
+				if (this.eventSource) {
+					this.eventSource.close();
+					this.eventSource = null;
+				}
+				this.isConnected = false;
+			}
+		}
+		
+		// Initialize the async messaging system
+		const messagingSystem = new AsyncMessagingSystem();
+		
+		// Request notification permissions
+		if ('Notification' in window && Notification.permission === 'default') {
+			Notification.requestPermission();
+		}
+		
+		// CSS for loading animation
+		const style = document.createElement('style');
+		style.textContent = `
+			@keyframes spin {
+				0% { transform: rotate(0deg); }
+				100% { transform: rotate(360deg); }
+			}
+		`;
+		document.head.appendChild(style);
+	</script>
+	<?php endif; ?>
 				messageInput.addEventListener('input', function() {
 					const remaining = 500 - this.value.length;
 					const color = remaining < 50 ? 'var(--red)' : 'var(--bluey)';
@@ -512,236 +970,14 @@ function loginbutton($buttonstyle = "square") {
 			}
 		});
 		
-		// Clean up interval when page unloads
-		window.addEventListener('beforeunload', function() {
-			if (autoRefreshInterval) {
-				clearInterval(autoRefreshInterval);
-			}
-		});
-		
-		async function sendMessage() {
-			if (!messageInput || !sendButton) return;
-			
-			const message = messageInput.value.trim();
-			if (!message) return;
-			
-			// Disable send button temporarily
-			sendButton.disabled = true;
-			sendButton.textContent = 'SENDING...';
-			
-			try {
-				const formData = new FormData();
-				formData.append('action', 'send_message');
-				formData.append('message', message);
-				
-				const response = await fetch('api/messaging.php', {
-					method: 'POST',
-					body: formData
-				});
-				
-				const data = await response.json();
-				
-				if (data.success) {
-					messageInput.value = '';
-					loadMessages(false); // Refresh messages without loading indicator
-					
-					// Remove character counter
-					const counter = document.getElementById('char-counter');
-					if (counter) counter.remove();
-				} else {
-					alert('Error: ' + (data.error || 'Failed to send message'));
-				}
-			} catch (error) {
-				console.error('Error sending message:', error);
-				alert('Network error. Please try again.');
-			} finally {
-				sendButton.disabled = false;
-				sendButton.textContent = 'SEND';
-			}
-		}
-		
-		async function loadMessages(showLoading = true) {
-			if (!messagesList || !messagesLoading) return;
-			
-			if (showLoading) {
-				messagesLoading.style.display = 'block';
-				messagesList.style.display = 'none';
-			}
-			
-			try {
-				const response = await fetch('api/messaging.php?action=get_messages&limit=25');
-				const data = await response.json();
-				
-				if (data.messages) {
-					displayMessages(data.messages);
-					if (showLoading) {
-						messagesLoading.style.display = 'none';
-						messagesList.style.display = 'block';
-					}
-				} else {
-					throw new Error(data.error || 'Failed to load messages');
-				}
-			} catch (error) {
-				console.error('Error loading messages:', error);
-				if (showLoading) {
-					messagesLoading.innerHTML = '❌ Error loading messages. <button onclick="loadMessages()" style="background: var(--red); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer;">Retry</button>';
-				}
-			}
-		}
-		
-		function displayMessages(messages) {
-			if (!messagesList) return;
-			
-			if (messages.length === 0) {
-				messagesList.innerHTML = '<div style="text-align: center; color: var(--bluey); padding: 2rem; font-style: italic;">No messages yet. Be the first to say something!</div>';
-				return;
-			}
-			
-			let html = '';
-			messages.forEach(msg => {
-				const isOwnMessage = msg.is_own_message;
-				const bgColor = isOwnMessage ? 'rgba(85, 102, 255, 0.3)' : 'rgba(255, 255, 255, 0.05)';
-				const borderColor = isOwnMessage ? 'var(--blue)' : 'rgba(255, 255, 255, 0.1)';
-				
-				html += `
-					<div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem;">
-						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-							<div style="display: flex; align-items: center; gap: 0.5rem;">
-								<span style="color: var(--orange); font-weight: bold; font-size: 0.9rem;">
-									${msg.sender_rank ? msg.sender_rank + ' ' : ''}${msg.sender_name}
-								</span>
-								<span style="background: var(--${getDepartmentColor(msg.sender_department)}); color: black; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem; font-weight: bold;">
-									${msg.sender_department || 'CREW'}
-								</span>
-							</div>
-							<div style="display: flex; align-items: center; gap: 0.5rem;">
-								<span style="color: var(--bluey); font-size: 0.8rem;">${msg.timestamp}</span>
-								<span style="color: var(--orange); font-size: 0.7rem;" title="Message expires on ${msg.expires_at}">
-									${msg.days_until_expiry}d
-								</span>
-								${(isOwnMessage || isCommand) ? `<button onclick="deleteMessage(${msg.id})" style="background: var(--red); color: black; border: none; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem; cursor: pointer;" title="Delete message">🗑️</button>` : ''}
-							</div>
-						</div>
-						<div style="color: white; line-height: 1.4; word-wrap: break-word;">
-							${escapeHtml(msg.message)}
-						</div>
-					</div>
-				`;
-			});
-			
-			messagesList.innerHTML = html;
-			
-			// Auto-scroll to bottom
-			if (messagesContainer) {
-				messagesContainer.scrollTop = messagesContainer.scrollHeight;
-			}
-		}
-		
-		function getDepartmentColor(dept) {
-			switch(dept) {
-				case 'MED/SCI': return 'blue';
-				case 'ENG/OPS': return 'orange';
-				case 'SEC/TAC': return 'gold';
-				case 'Command': return 'red';
-				default: return 'bluey';
-			}
-		}
-		
-		function escapeHtml(text) {
-			const div = document.createElement('div');
-			div.textContent = text;
-			return div.innerHTML;
-		}
-		
-		async function deleteMessage(messageId) {
-			// Get the message element to check if it's the user's own message
-			const messageElement = event.target.closest('div[style*="background:"]');
-			const isOwnMsg = messageElement && messageElement.style.background.includes('85, 102, 255');
-			
-			let confirmText = 'Are you sure you want to delete this message?';
-			if (isCommand && !isOwnMsg) {
-				confirmText = 'As Command staff, you are about to delete another crew member\'s message. Are you sure?';
-			}
-			
-			if (!confirm(confirmText)) return;
-			
-			try {
-				const formData = new FormData();
-				formData.append('action', 'delete_message');
-				formData.append('message_id', messageId);
-				
-				const response = await fetch('api/messaging.php', {
-					method: 'POST',
-					body: formData
-				});
-				
-				const data = await response.json();
-				
-				if (data.success) {
-					loadMessages(false);
-				} else {
-					alert('Error: ' + (data.error || 'Failed to delete message'));
-				}
-			} catch (error) {
-				console.error('Error deleting message:', error);
-				alert('Network error. Please try again.');
-			}
-		}
-		
-		function refreshMessages() {
-			loadMessages(true);
-			loadOnlineUsers();
-		}
-		
-		async function loadOnlineUsers() {
-			try {
-				const response = await fetch('api/messaging.php?action=get_online_users');
-				const data = await response.json();
-				
-				if (data.online_users) {
-					displayOnlineUsers(data.online_users);
-				}
-			} catch (error) {
-				console.error('Error loading online users:', error);
-			}
-		}
-		
-		function displayOnlineUsers(users) {
-			if (!onlineUsersList || !onlineCount) return;
-			
-			onlineCount.textContent = users.length;
-			
-			if (users.length === 0) {
-				onlineUsersList.innerHTML = '<em>No other crew members currently online</em>';
-			} else {
-				let html = '';
-				users.forEach(user => {
-					html += `
-						<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-							<div>
-								<span style="color: var(--orange); font-weight: bold;">
-									${user.rank_name ? user.rank_name + ' ' : ''}${user.character_name}
-								</span>
-								<span style="background: var(--${getDepartmentColor(user.department)}); color: black; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem; font-weight: bold; margin-left: 0.5rem;">
-									${user.department || 'CREW'}
-								</span>
-							</div>
-							<span style="color: var(--bluey); font-size: 0.8rem;">Active ${user.last_seen}</span>
-						</div>
-					`;
-				});
-				onlineUsersList.innerHTML = html;
-			}
-		}
-		
+		// Global function for compatibility
 		function toggleOnlineUsers() {
-			if (!onlineUsersPanel) return;
+			if (!messagingSystem.onlineUsersPanel) return;
 			
-			if (onlineUsersPanel.style.display === 'none') {
-				onlineUsersPanel.style.display = 'block';
-				loadOnlineUsers(); // Refresh when opening
+			if (messagingSystem.onlineUsersPanel.style.display === 'none') {
+				messagingSystem.onlineUsersPanel.style.display = 'block';
 			} else {
-				onlineUsersPanel.style.display = 'none';
+				messagingSystem.onlineUsersPanel.style.display = 'none';
 			}
 		}
 	</script>
