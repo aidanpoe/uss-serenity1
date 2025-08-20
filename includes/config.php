@@ -173,18 +173,37 @@ function getUserDepartment() {
 
 // Update last_active timestamp for current character and user session
 function updateLastActive() {
-    if (!isLoggedIn() || !isset($_SESSION['character_id'])) return;
+    if (!isLoggedIn()) return;
     
     try {
         $pdo = getConnection();
         
-        // Update character's last_active timestamp
-        $stmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
-        $stmt->execute([$_SESSION['character_id']]);
+        // If we have a character_id, update the character's last_active
+        if (isset($_SESSION['character_id']) && $_SESSION['character_id']) {
+            $stmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
+            $stmt->execute([$_SESSION['character_id']]);
+        } else {
+            // If no character_id in session, try to get it from the database
+            if (isset($_SESSION['user_id'])) {
+                $stmt = $pdo->prepare("SELECT active_character_id FROM users WHERE id = ?");
+                $stmt->execute([$_SESSION['user_id']]);
+                $user = $stmt->fetch();
+                
+                if ($user && $user['active_character_id']) {
+                    $_SESSION['character_id'] = $user['active_character_id']; // Set it in session for future use
+                    
+                    // Update the character's last_active
+                    $stmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
+                    $stmt->execute([$user['active_character_id']]);
+                }
+            }
+        }
         
-        // Update user's last_login to track active session
-        $stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
-        $stmt->execute([$_SESSION['user_id']]);
+        // Always update user's last_login to track active session
+        if (isset($_SESSION['user_id'])) {
+            $stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+        }
         
     } catch (Exception $e) {
         // Silent fail - don't break the page if this fails
