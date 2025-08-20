@@ -292,7 +292,6 @@ $ranks = [
 		.officer-box {
 			padding: 1.5rem;
 			border-radius: 10px;
-			border: 2px solid;
 			text-align: center;
 			min-height: 120px;
 			min-width: 250px;
