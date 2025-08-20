@@ -593,10 +593,11 @@ try {
         
         .inventory-card {
             background: var(--african-violet);
-            color: #000;
+            color: var(--orange);
             border-radius: 10px;
             padding: 1rem;
             border: 2px solid transparent;
+            position: relative;
         }
         
         .inventory-card.low-stock {
@@ -620,6 +621,7 @@ try {
             font-weight: bold;
             font-size: 1rem;
             margin: 0;
+            color: var(--orange);
         }
         
         .item-quantity {
@@ -632,7 +634,7 @@ try {
         }
         
         .item-description {
-            color: #000;
+            color: var(--blue);
             font-size: 0.85rem;
             margin: 0.5rem 0;
             opacity: 0.8;
@@ -960,14 +962,19 @@ try {
                             </div>
                             <?php endif; ?>
 
+                            <!-- Audit Log - Available to All Users -->
+                            <div class="sidebar-section">
+                                <h3 class="sidebar-title">Audit Log</h3>
+                                <button class="btn gold" onclick="showActivityLog()" style="width: 100%;">
+                                    🗂️ View Activity Log
+                                </button>
+                            </div>
+
                             <?php if ($user_department === 'Command' || $user_department === 'ENG/OPS'): ?>
                             <div class="sidebar-section">
                                 <h3 class="sidebar-title">Operations</h3>
                                 <button class="btn orange" onclick="showBulkModal()" style="width: 100%; margin-bottom: 0.5rem;">
                                     Bulk Delivery
-                                </button>
-                                <button class="btn gold" onclick="showActivityLog()" style="width: 100%;">
-                                    🗂️ Audit Log
                                 </button>
                             </div>
                             <?php endif; ?>
