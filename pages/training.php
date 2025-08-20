@@ -325,6 +325,16 @@ try {
 			background-color: black !important;
 		}
 		
+		/* Override LCARS bar colors to black */
+		.bar-1, .bar-2, .bar-3, .bar-4, .bar-5,
+		.bar-6, .bar-7, .bar-8, .bar-9, .bar-10 {
+			background: black !important;
+		}
+		
+		.bar-panel {
+			background: black !important;
+		}
+		
 		.department-section {
 			margin: 2rem 0;
 			border-radius: 15px;
