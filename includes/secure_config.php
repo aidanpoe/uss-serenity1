@@ -5,10 +5,14 @@
 // Load environment variables from .env file if available
 if (file_exists(__DIR__ . '/../.env')) {
     $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
-            list($name, $value) = explode('=', $line, 2);
-            $_ENV[trim($name)] = trim($value);
+    if ($lines !== false) {
+        foreach ($lines as $line) {
+            if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
+                $parts = explode('=', $line, 2);
+                if (count($parts) === 2) {
+                    $_ENV[trim($parts[0])] = trim($parts[1]);
+                }
+            }
         }
     }
 }
