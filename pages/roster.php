@@ -878,7 +878,7 @@ $ranks = [
 									<div style="margin-bottom: 0.5rem;"><strong>Ensign (ENS)</strong></div>
 									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Junior Grade (LT. JG)</strong></div>
 									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant (LT)</strong></div>
-									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Commander (LT. CMD)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Commander (LT. CMD)</strong> - Head of Departments</div>
 									<div style="margin-bottom: 0.5rem;"><strong>Commander (CMD)</strong></div>
 									<div><strong>Captain (CPT)</strong></div>
 								</div>
@@ -894,11 +894,14 @@ $ranks = [
 									<div style="margin-bottom: 0.75rem;"><strong style="color: var(--red);">First Officer (XO)</strong><br>
 									<span style="font-size: 0.85rem; color: var(--orange);">Second in command, manages daily operations and crew assignments.</span></div>
 									
-									<div style="margin-bottom: 0.75rem;"><strong style="color: var(--red);">Second Officer (2O)</strong><br>
+									<div style="margin-bottom: 0.75rem;"><strong style="color: var(--red);">Second Officer (SO)</strong><br>
 									<span style="font-size: 0.85rem; color: var(--orange);">Third in command, often department head with command training.</span></div>
 									
-									<div><strong style="color: var(--red);">Third Officer (3O)</strong><br>
+									<div style="margin-bottom: 0.75rem;"><strong style="color: var(--red);">Third Officer (TO)</strong><br>
 									<span style="font-size: 0.85rem; color: var(--orange);">Fourth in command, senior officer with bridge watch capabilities.</span></div>
+									
+									<div><strong style="color: var(--orange);">Heads of Departments</strong><br>
+									<span style="font-size: 0.85rem; color: var(--bluey);">Department leaders with authority over personnel advancement, departmental operations, and specialized mission assignments within their respective areas.</span></div>
 								</div>
 							</div>
 						</div>
