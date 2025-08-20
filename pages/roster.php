@@ -86,10 +86,9 @@ function handleImageUpload($file) {
     }
 }
 
-// Handle adding new personnel (Captain only - full command positions) OR (MED/SCI - limited ranks for patients)
+// Handle adding new personnel (Captain only - full command positions)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
     if (hasPermission('Captain')) {
-        // Captain can add anyone with any rank and position
         try {
             $image_path = '';
             if (isset($_FILES['crew_image']) && $_FILES['crew_image']['error'] === UPLOAD_ERR_OK) {
@@ -111,52 +110,8 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
         } catch (Exception $e) {
             $error = "Error adding personnel: " . $e->getMessage();
         }
-    } elseif (hasPermission('MED/SCI')) {
-        // MED/SCI can add patients with limited ranks (no command positions)
-        try {
-            // Check if person already exists (by name only, species can be shared)
-            $pdo = getConnection();
-            $check_stmt = $pdo->prepare("SELECT id FROM roster WHERE first_name = ? AND last_name = ?");
-            $check_stmt->execute([$_POST['first_name'], $_POST['last_name']]);
-            
-            if ($check_stmt->fetch()) {
-                $error = "A crew member with this name already exists in the roster.";
-            } else {
-                // MED/SCI limited to ranks below Commander for patient addition
-                $allowed_patient_ranks = [
-                    'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class', 
-                    'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petter Officer',
-                    'Senior Chief Petty Officer', 'Master Chief Petty Officer', 
-                    'Command Master Chief Petty Officer', 'Warrant officer', 'Ensign',
-                    'Lieutenant Junior Grade', 'Lieutenant', 'Lieutenant Commander'
-                ];
-                
-                if (!in_array($_POST['rank'], $allowed_patient_ranks)) {
-                    $error = "Medical personnel can only add patients with ranks below Commander.";
-                } else {
-                    $image_path = '';
-                    if (isset($_FILES['crew_image']) && $_FILES['crew_image']['error'] === UPLOAD_ERR_OK) {
-                        $image_path = handleImageUpload($_FILES['crew_image']);
-                    }
-                    
-                    $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                    $stmt->execute([
-                        $_POST['rank'],
-                        $_POST['first_name'],
-                        $_POST['last_name'],
-                        $_POST['species'],
-                        $_POST['department'],
-                        '', // No special positions for patient addition
-                        $image_path
-                    ]);
-                    $success = "New patient added to roster successfully." . ($image_path ? " Image uploaded successfully." : "");
-                }
-            }
-        } catch (Exception $e) {
-            $error = "Error adding patient: " . $e->getMessage();
-        }
     } else {
-        $error = "Access denied. Captain or Medical/Science authorization required.";
+        $error = "Access denied. Captain authorization required.";
     }
 }
 
@@ -533,68 +488,7 @@ $ranks = [
 					</div>
 					<?php endif; ?>
 					
-					<?php if (hasPermission('MED/SCI')): ?>
-					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
-						<h4>Add New Patient (Medical/Science Personnel)</h4>
-						<p style="color: var(--blue); font-size: 0.9rem;">Medical/Science staff can add new patients to the roster for medical tracking.</p>
-						<form method="POST" action="" enctype="multipart/form-data">
-							<input type="hidden" name="action" value="add_personnel">
-							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-								<div>
-									<label style="color: var(--blue);">Rank:</label>
-									<select name="rank" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
-										<option value="Crewman 3rd Class">Crewman 3rd Class</option>
-										<option value="Crewman 2nd Class">Crewman 2nd Class</option>
-										<option value="Crewman 1st Class">Crewman 1st Class</option>
-										<option value="Petty Officer 3rd class">Petty Officer 3rd class</option>
-										<option value="Petty Officer 1st class">Petty Officer 1st class</option>
-										<option value="Chief Petter Officer">Chief Petter Officer</option>
-										<option value="Senior Chief Petty Officer">Senior Chief Petty Officer</option>
-										<option value="Master Chief Petty Officer">Master Chief Petty Officer</option>
-										<option value="Command Master Chief Petty Officer">Command Master Chief Petty Officer</option>
-										<option value="Warrant officer">Warrant officer</option>
-										<option value="Ensign">Ensign</option>
-										<option value="Lieutenant Junior Grade">Lieutenant Junior Grade</option>
-										<option value="Lieutenant">Lieutenant</option>
-										<option value="Lieutenant Commander">Lieutenant Commander</option>
-									</select>
-								</div>
-								<div>
-									<label style="color: var(--blue);">First Name:</label>
-									<input type="text" name="first_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
-								</div>
-								<div>
-									<label style="color: var(--blue);">Last Name:</label>
-									<input type="text" name="last_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
-								</div>
-								<div>
-									<label style="color: var(--blue);">Species:</label>
-									<input type="text" name="species" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
-								</div>
-								<div>
-									<label style="color: var(--blue);">Department:</label>
-									<select name="department" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
-										<option value="Command">Command</option>
-										<option value="MED/SCI">MED/SCI</option>
-										<option value="ENG/OPS">ENG/OPS</option>
-										<option value="SEC/TAC">SEC/TAC</option>
-									</select>
-								</div>
-								<div>
-									<label style="color: var(--blue);">Position:</label>
-									<input type="text" name="position" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
-								</div>
-								<div style="grid-column: span 2;">
-									<label style="color: var(--blue);">Patient Photo:</label>
-									<input type="file" name="crew_image" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
-									<small style="color: var(--orange);">Optional. JPEG, PNG, GIF, or WebP. Max 5MB.</small>
-								</div>
-							</div>
-							<button type="submit" style="background-color: var(--blue); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem;">Add New Patient</button>
-						</form>
-					</div>
-					<?php endif; ?>
-					
+					<?php if (!isLoggedIn()): ?>
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
 						<h4>Need Access to Ship Systems?</h4>
 						<p style="color: var(--orange);">All new crew members should create a personal account to access department systems.</p>
@@ -608,6 +502,7 @@ $ranks = [
 						</div>
 						<p style="color: var(--bluey); font-size: 0.9rem; text-align: center;">Account creation automatically adds you to the ship's roster.</p>
 					</div>
+					<?php endif; ?>
 					
 					<!-- Department Filter Section -->
 					<div style="background: rgba(0,0,0,0.5); padding: 1.5rem; border-radius: 15px; margin: 2rem 0;">
