@@ -283,7 +283,7 @@ $ranks = [
 			padding: 0.75rem;
 			border-radius: 6px;
 			border: 1px solid;
-			text-align: justify;
+			text-align: center;
 			min-height: 50px;
 			width: 100%;
 			position: relative;
