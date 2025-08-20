@@ -1,4 +1,6 @@
 <?php
+// Include security headers
+require_once 'includes/security_headers.php';
 require_once 'includes/config.php';
 
 // Update last active timestamp for current character

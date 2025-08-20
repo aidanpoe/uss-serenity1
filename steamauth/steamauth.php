@@ -38,10 +38,11 @@ if (isset($_GET['login'])){
 				
 				// Database connection for Steam authentication
 				try {
+					require_once '../includes/secure_config.php';
 					$pdo = new PDO(
-						"mysql:host=localhost;port=3306;dbname=serenity;charset=utf8mb4", 
-						"serenity", 
-						"Os~886go4",
+						"mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4", 
+						DB_USERNAME, 
+						DB_PASSWORD,
 						[
 							PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 							PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -49,7 +50,8 @@ if (isset($_GET['login'])){
 						]
 					);
 				} catch(PDOException $e) {
-					die("Connection failed: " . $e->getMessage());
+					error_log("Steam auth database connection failed: " . $e->getMessage());
+					die("Authentication service unavailable. Please try again later.");
 				}
 				
 				// Check if user exists in USS Serenity database
@@ -145,10 +147,11 @@ if (isset($_GET['logout'])){
 	// Update last_active to show user logged out (set to past time to avoid "online" status)
 	if (isset($_SESSION['character_id'])) {
 		try {
+			require_once '../includes/secure_config.php';
 			$pdo = new PDO(
-				"mysql:host=localhost;port=3306;dbname=serenity;charset=utf8mb4", 
-				"serenity", 
-				"Os~886go4",
+				"mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4", 
+				DB_USERNAME, 
+				DB_PASSWORD,
 				[
 					PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

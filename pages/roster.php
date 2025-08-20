@@ -4,7 +4,7 @@ require_once '../includes/config.php';
 // Update last active timestamp for current character
 updateLastActive();
 
-// Handle image upload
+// Handle image upload with enhanced security
 function handleImageUpload($file) {
     if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
         if (isset($file['error'])) {
@@ -28,9 +28,9 @@ function handleImageUpload($file) {
     }
     
     // Check file size (5MB limit)
-    $max_size = 5 * 1024 * 1024; // 5MB
+    $max_size = MAX_UPLOAD_SIZE;
     if ($file['size'] > $max_size) {
-        throw new Exception("Image file size must be less than 5MB. Your file is " . round($file['size'] / 1024 / 1024, 2) . "MB.");
+        throw new Exception("Image file size must be less than " . ($max_size / 1024 / 1024) . "MB. Your file is " . round($file['size'] / 1024 / 1024, 2) . "MB.");
     }
     
     // Get file extension and normalize it
@@ -64,6 +64,12 @@ function handleImageUpload($file) {
         throw new Exception("File is not a valid image or is corrupted.");
     }
     
+    // Additional security: Check for embedded PHP code in image
+    $file_content = file_get_contents($file['tmp_name']);
+    if (preg_match('/<\?php|<script|javascript:/i', $file_content)) {
+        throw new Exception("Security violation: Invalid file content detected.");
+    }
+    
     // Create upload directory if it doesn't exist
     $upload_dir = '../assets/crew_photos/';
     if (!is_dir($upload_dir)) {
@@ -77,12 +83,14 @@ function handleImageUpload($file) {
         throw new Exception("Upload directory is not writable.");
     }
     
-    // Generate unique filename
-    $filename = uniqid('crew_') . '.' . $file_extension;
+    // Generate secure filename using random bytes
+    $filename = bin2hex(random_bytes(16)) . '_crew.' . $file_extension;
     $upload_path = $upload_dir . $filename;
     
     // Move uploaded file
     if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+        // Set secure file permissions
+        chmod($upload_path, 0644);
         return 'assets/crew_photos/' . $filename;
     } else {
         throw new Exception("Failed to save uploaded image file.");
@@ -91,7 +99,10 @@ function handleImageUpload($file) {
 
 // Handle adding new personnel (Captain only - full command positions)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
-    if (hasPermission('Captain')) {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (hasPermission('Captain')) {
         try {
             $image_path = '';
             if (isset($_FILES['crew_image']) && $_FILES['crew_image']['error'] === UPLOAD_ERR_OK) {
@@ -101,12 +112,12 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_personnel') {
             $pdo = getConnection();
             $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $_POST['rank'],
-                $_POST['first_name'],
-                $_POST['last_name'],
-                $_POST['species'],
-                $_POST['department'],
-                $_POST['position'] ?? '',
+                sanitizeInput($_POST['rank']),
+                sanitizeInput($_POST['first_name']),
+                sanitizeInput($_POST['last_name']),
+                sanitizeInput($_POST['species']),
+                sanitizeInput($_POST['department']),
+                sanitizeInput($_POST['position'] ?? ''),
                 $image_path
             ]);
             $success = "Personnel added successfully." . ($image_path ? " Image uploaded successfully." : "");
@@ -933,6 +944,7 @@ $ranks = [
 						<h4>Add New Personnel (Captain Only)</h4>
 						<form method="POST" action="" enctype="multipart/form-data">
 							<input type="hidden" name="action" value="add_personnel">
+							<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
 								<div>
 									<label style="color: var(--bluey);">Rank:</label>

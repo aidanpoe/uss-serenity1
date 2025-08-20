@@ -6,7 +6,10 @@ updateLastActive();
 
 // Handle fault report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'fault_report') {
-    if (!isLoggedIn()) {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (!isLoggedIn()) {
         $error = "You must be logged in to submit fault reports.";
     } else {
         try {
@@ -21,21 +24,21 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'fault_report') {
             }
             
             // Prepare location data based on type
-            $location_type = $_POST['location_type'];
+            $location_type = sanitizeInput($_POST['location_type']);
             $deck_number = null;
             $room = null;
             $jefferies_tube_number = null;
             $access_point = null;
             
             if ($location_type === 'Internal') {
-                $deck_number = $_POST['deck_number'] ?? null;
-                $room = $_POST['room'] ?? null;
+                $deck_number = filter_var($_POST['deck_number'], FILTER_VALIDATE_INT);
+                $room = sanitizeInput($_POST['room'] ?? '');
             } elseif ($location_type === 'External') {
-                $hull_direction = $_POST['hull_direction'] ?? '';
-                $hull_position = $_POST['hull_position'] ?? '';
+                $hull_direction = sanitizeInput($_POST['hull_direction'] ?? '');
+                $hull_position = sanitizeInput($_POST['hull_position'] ?? '');
                 $room = $hull_direction . ($hull_position ? ' - ' . $hull_position : '');
             } elseif ($location_type === 'Jefferies Tube') {
-                $access_point = $_POST['access_point'] ?? null;
+                $access_point = sanitizeInput($_POST['access_point'] ?? '');
                 $jefferies_tube_number = 'Near: ' . $access_point;
             }
             
@@ -46,30 +49,35 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'fault_report') {
                 $room,
                 $jefferies_tube_number,
                 $access_point,
-                $_POST['fault_description'],
+                sanitizeInput($_POST['fault_description']),
                 $reported_by_roster_id
             ]);
             $success = "Fault report submitted successfully.";
         } catch (Exception $e) {
-            $error = "Error submitting report: " . $e->getMessage();
+            error_log("Error submitting fault report: " . $e->getMessage());
+            $error = "Error submitting report. Please try again.";
         }
     }
 }
 
 // Handle fault resolution (backend only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'resolve_fault') {
-    if (hasPermission('ENG/OPS')) {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (hasPermission('ENG/OPS')) {
         try {
             $pdo = getConnection();
             $stmt = $pdo->prepare("UPDATE fault_reports SET status = ?, resolution_description = ? WHERE id = ?");
             $stmt->execute([
-                $_POST['status'],
-                $_POST['resolution_description'],
-                $_POST['fault_id']
+                sanitizeInput($_POST['status']),
+                sanitizeInput($_POST['resolution_description']),
+                filter_var($_POST['fault_id'], FILTER_VALIDATE_INT)
             ]);
             $success = "Fault report updated successfully.";
         } catch (Exception $e) {
-            $error = "Error updating fault: " . $e->getMessage();
+            error_log("Error updating fault report: " . $e->getMessage());
+            $error = "Error updating fault. Please try again.";
         }
     }
 }
@@ -199,6 +207,7 @@ try {
 						<h4>System Fault Report</h4>
 						<form method="POST" action="" id="faultForm">
 							<input type="hidden" name="action" value="fault_report">
+							<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 							
 							<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
 								<div>
@@ -377,6 +386,7 @@ try {
 										<form method="POST" action="">
 											<input type="hidden" name="action" value="resolve_fault">
 											<input type="hidden" name="fault_id" value="<?php echo $fault['id']; ?>">
+											<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 											<select name="status" style="width: 100%; padding: 0.25rem; background: black; color: white; border: 1px solid var(--orange); margin-bottom: 0.5rem;">
 												<option value="Open" <?php echo $fault['status'] === 'Open' ? 'selected' : ''; ?>>Open</option>
 												<option value="In Progress" <?php echo $fault['status'] === 'In Progress' ? 'selected' : ''; ?>>In Progress</option>

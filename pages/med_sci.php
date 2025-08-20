@@ -6,12 +6,15 @@ updateLastActive();
 
 // Handle adding new patients (MED/SCI only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_patient') {
-    if (hasPermission('MED/SCI')) {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (hasPermission('MED/SCI')) {
         try {
             // Check if person already exists (by name only, species can be shared)
             $pdo = getConnection();
             $check_stmt = $pdo->prepare("SELECT id FROM roster WHERE first_name = ? AND last_name = ?");
-            $check_stmt->execute([$_POST['first_name'], $_POST['last_name']]);
+            $check_stmt->execute([sanitizeInput($_POST['first_name']), sanitizeInput($_POST['last_name'])]);
             
             if ($check_stmt->fetch()) {
                 $error = "A crew member with this name already exists in the roster.";
@@ -30,11 +33,11 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_patient') {
                 } else {
                     $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     $stmt->execute([
-                        $_POST['rank'],
-                        $_POST['first_name'],
-                        $_POST['last_name'],
-                        $_POST['species'],
-                        $_POST['department'],
+                        sanitizeInput($_POST['rank']),
+                        sanitizeInput($_POST['first_name']),
+                        sanitizeInput($_POST['last_name']),
+                        sanitizeInput($_POST['species']),
+                        sanitizeInput($_POST['department']),
                         '', // No special positions for patient addition
                         '' // No image upload in this simplified form
                     ]);
@@ -42,7 +45,8 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_patient') {
                 }
             }
         } catch (Exception $e) {
-            $error = "Error adding patient: " . $e->getMessage();
+            error_log("Error adding patient: " . $e->getMessage());
+            $error = "Error adding patient. Please try again.";
         }
     } else {
         $error = "Access denied. Medical/Science authorization required.";
@@ -51,66 +55,76 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_patient') {
 
 // Handle medical report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'medical_report') {
-    if (!isLoggedIn()) {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (!isLoggedIn()) {
         $error = "You must be logged in to submit medical reports.";
     } else {
         try {
             // Auto-populate reported_by with current user's character
-            $reported_by = ($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '');
-            $reported_by = trim($reported_by); // Remove extra spaces
+            $reported_by = sanitizeInput(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
             
             $pdo = getConnection();
             $stmt = $pdo->prepare("INSERT INTO medical_records (roster_id, condition_description, reported_by) VALUES (?, ?, ?)");
             $stmt->execute([
-                $_POST['roster_id'],
-                $_POST['condition_description'],
+                filter_var($_POST['roster_id'], FILTER_VALIDATE_INT),
+                sanitizeInput($_POST['condition_description']),
                 $reported_by
             ]);
             $success = "Medical report submitted successfully.";
         } catch (Exception $e) {
-            $error = "Error submitting report: " . $e->getMessage();
+            error_log("Error submitting medical report: " . $e->getMessage());
+            $error = "Error submitting report. Please try again.";
         }
     }
 }
 
 // Handle science report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'science_report') {
-    if (!isLoggedIn()) {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (!isLoggedIn()) {
         $error = "You must be logged in to submit science reports.";
     } else {
         try {
             // Auto-populate reported_by with current user's character
-            $reported_by = ($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '');
-            $reported_by = trim($reported_by); // Remove extra spaces
+            $reported_by = sanitizeInput(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
             
             $pdo = getConnection();
             $stmt = $pdo->prepare("INSERT INTO science_reports (title, description, reported_by) VALUES (?, ?, ?)");
             $stmt->execute([
-                $_POST['title'],
-                $_POST['description'],
+                sanitizeInput($_POST['title']),
+                sanitizeInput($_POST['description']),
                 $reported_by
             ]);
             $success = "Science report submitted successfully.";
         } catch (Exception $e) {
-            $error = "Error submitting report: " . $e->getMessage();
+            error_log("Error submitting science report: " . $e->getMessage());
+            $error = "Error submitting report. Please try again.";
         }
     }
 }
 
 // Handle medical record update (backend only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_medical') {
-    if (hasPermission('MED/SCI')) {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (hasPermission('MED/SCI')) {
         try {
             $pdo = getConnection();
             $stmt = $pdo->prepare("UPDATE medical_records SET status = ?, treatment = ? WHERE id = ?");
             $stmt->execute([
-                $_POST['status'],
-                $_POST['treatment'],
-                $_POST['record_id']
+                sanitizeInput($_POST['status']),
+                sanitizeInput($_POST['treatment']),
+                filter_var($_POST['record_id'], FILTER_VALIDATE_INT)
             ]);
             $success = "Medical record updated successfully.";
         } catch (Exception $e) {
-            $error = "Error updating record: " . $e->getMessage();
+            error_log("Error updating medical record: " . $e->getMessage());
+            $error = "Error updating record. Please try again.";
         }
     }
 }
@@ -252,6 +266,7 @@ try {
 						<h3 style="color: var(--blue); text-align: center; margin-bottom: 1.5rem;">🏥 Add New Patient</h3>
 						<form method="POST" action="">
 							<input type="hidden" name="action" value="add_patient">
+							<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
 								<div>
 									<label style="color: var(--blue);">Rank:</label>
@@ -320,6 +335,7 @@ try {
 							<h4>Medical Report</h4>
 							<form method="POST" action="">
 								<input type="hidden" name="action" value="medical_report">
+								<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 								<div style="margin-bottom: 1rem;">
 									<label style="color: var(--blue);">Patient:</label>
 									<select name="roster_id" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
@@ -351,6 +367,7 @@ try {
 							<h4>Science Inquiry</h4>
 							<form method="POST" action="">
 								<input type="hidden" name="action" value="science_report">
+								<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 								<div style="margin-bottom: 1rem;">
 									<label style="color: var(--ice);">Research Title:</label>
 									<input type="text" name="title" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--ice);">
@@ -414,6 +431,7 @@ try {
 										<form method="POST" action="" style="display: inline;">
 											<input type="hidden" name="action" value="update_medical">
 											<input type="hidden" name="record_id" value="<?php echo $record['id']; ?>">
+											<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 											<select name="status" style="width: 100%; padding: 0.25rem; background: black; color: white; border: 1px solid var(--blue); margin-bottom: 0.5rem;">
 												<option value="Open" <?php echo $record['status'] === 'Open' ? 'selected' : ''; ?>>Open</option>
 												<option value="In Progress" <?php echo $record['status'] === 'In Progress' ? 'selected' : ''; ?>>In Progress</option>

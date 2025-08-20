@@ -1,12 +1,35 @@
 <?php
-// Database configuration
-define('DB_HOST', 'localhost');
-define('DB_USERNAME', 'serenity');
-define('DB_PASSWORD', 'Os~886go4');
-define('DB_NAME', 'serenity');
-define('DB_PORT', 3306);
+// Include secure configuration
+require_once __DIR__ . '/secure_config.php';
 
-// Create connection
+// Start session with secure settings
+if (session_status() == PHP_SESSION_NONE) {
+    // Secure session configuration
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_secure', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_samesite', 'Strict');
+    
+    session_start();
+    
+    // Session timeout check
+    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT)) {
+        session_unset();
+        session_destroy();
+        session_start();
+    }
+    $_SESSION['last_activity'] = time();
+    
+    // Regenerate session ID periodically
+    if (!isset($_SESSION['created'])) {
+        $_SESSION['created'] = time();
+    } else if (time() - $_SESSION['created'] > 1800) { // 30 minutes
+        session_regenerate_id(true);
+        $_SESSION['created'] = time();
+    }
+}
+
+// Create connection with secure error handling
 function getConnection() {
     try {
         $pdo = new PDO(
@@ -17,11 +40,15 @@ function getConnection() {
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
             ]
         );
         return $pdo;
     } catch(PDOException $e) {
-        die("Connection failed: " . $e->getMessage());
+        // Log error securely, don't expose details to user
+        error_log("Database connection failed: " . $e->getMessage());
+        die("Connection failed. Please try again later.");
     }
 }
 
@@ -30,8 +57,13 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Create global PDO connection
-$pdo = getConnection();
+// Create global PDO connection with error handling
+try {
+    $pdo = getConnection();
+} catch (Exception $e) {
+    error_log("Failed to establish database connection: " . $e->getMessage());
+    die("Database connection error. Please contact administrator.");
+}
 
 // Check if user is logged in (Steam only)
 function isLoggedIn() {
