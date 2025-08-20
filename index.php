@@ -978,31 +978,6 @@ function loginbutton($buttonstyle = "square") {
 			}
 		`;
 		document.head.appendChild(style);
-	</script>
-	<?php endif; ?>
-				messageInput.addEventListener('input', function() {
-					const remaining = 500 - this.value.length;
-					const color = remaining < 50 ? 'var(--red)' : 'var(--bluey)';
-					
-					let counterElement = document.getElementById('char-counter');
-					if (!counterElement) {
-						counterElement = document.createElement('small');
-						counterElement.id = 'char-counter';
-						counterElement.style.position = 'absolute';
-						counterElement.style.right = '0';
-						counterElement.style.bottom = '-1.5rem';
-						counterElement.style.fontSize = '0.8rem';
-						
-						// Make input container relative positioned
-						this.parentElement.style.position = 'relative';
-						this.parentElement.appendChild(counterElement);
-					}
-					
-					counterElement.style.color = color;
-					counterElement.textContent = remaining + ' characters remaining';
-				});
-			}
-		});
 		
 		// Global function for compatibility
 		function toggleOnlineUsers() {
