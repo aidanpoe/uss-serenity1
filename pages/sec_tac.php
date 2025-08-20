@@ -6,42 +6,55 @@ updateLastActive();
 
 // Handle security report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'security_report') {
-    try {
-        $pdo = getConnection();
-        $stmt = $pdo->prepare("INSERT INTO security_reports (incident_type, description, involved_roster_id, reported_by) VALUES (?, ?, ?, ?)");
-        $stmt->execute([
-            $_POST['incident_type'],
-            $_POST['description'],
-            $_POST['involved_roster_id'] ?? null,
-            $_POST['reported_by']
-        ]);
-        $success = "Security report submitted successfully.";
-    } catch (Exception $e) {
-        $error = "Error submitting report: " . $e->getMessage();
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } else {
+        try {
+            $pdo = getConnection();
+            $stmt = $pdo->prepare("INSERT INTO security_reports (incident_type, description, involved_roster_id, reported_by) VALUES (?, ?, ?, ?)");
+            $stmt->execute([
+                sanitizeInput($_POST['incident_type']),
+                sanitizeInput($_POST['description']),
+                isset($_POST['involved_roster_id']) ? filter_var($_POST['involved_roster_id'], FILTER_VALIDATE_INT) : null,
+                sanitizeInput($_POST['reported_by'])
+            ]);
+            $success = "Security report submitted successfully.";
+        } catch (Exception $e) {
+            error_log("Error submitting security report: " . $e->getMessage());
+            $error = "Error submitting report. Please try again.";
+        }
     }
 }
 
 // Handle security report update (backend only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_security') {
-    if (hasPermission('SEC/TAC')) {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (hasPermission('SEC/TAC')) {
         try {
             $pdo = getConnection();
             $stmt = $pdo->prepare("UPDATE security_reports SET status = ?, resolution_notes = ? WHERE id = ?");
             $stmt->execute([
-                $_POST['status'],
-                $_POST['resolution_notes'],
-                $_POST['report_id']
+                sanitizeInput($_POST['status']),
+                sanitizeInput($_POST['resolution_notes']),
+                filter_var($_POST['report_id'], FILTER_VALIDATE_INT)
             ]);
             $success = "Security report updated successfully.";
         } catch (Exception $e) {
-            $error = "Error updating report: " . $e->getMessage();
+            error_log("Error updating security report: " . $e->getMessage());
+            $error = "Error updating report. Please try again.";
         }
     }
 }
 
 // Handle phaser training update (backend only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_phaser_training') {
-    if (hasPermission('SEC/TAC')) {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (hasPermission('SEC/TAC')) {
         try {
             $pdo = getConnection();
             $training_levels = [];
@@ -52,10 +65,11 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_phaser_tra
             $training_string = implode(', ', $training_levels);
             
             $stmt = $pdo->prepare("UPDATE roster SET phaser_training = ? WHERE id = ?");
-            $stmt->execute([$training_string, $_POST['roster_id']]);
+            $stmt->execute([$training_string, filter_var($_POST['roster_id'], FILTER_VALIDATE_INT)]);
             $success = "Phaser training record updated successfully.";
         } catch (Exception $e) {
-            $error = "Error updating training: " . $e->getMessage();
+            error_log("Error updating phaser training: " . $e->getMessage());
+            $error = "Error updating training. Please try again.";
         }
     }
 }
@@ -202,6 +216,7 @@ try {
 						<h4>Security Incident Report</h4>
 						<form method="POST" action="">
 							<input type="hidden" name="action" value="security_report">
+							<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 							
 							<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
 								<div>
@@ -250,6 +265,7 @@ try {
 							<h4>Phaser Training Management</h4>
 							<form method="POST" action="">
 								<input type="hidden" name="action" value="update_phaser_training">
+								<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 								<div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: end;">
 									<div>
 										<label style="color: var(--gold);">Select Personnel:</label>
@@ -305,6 +321,7 @@ try {
 										<form method="POST" action="">
 											<input type="hidden" name="action" value="update_security">
 											<input type="hidden" name="report_id" value="<?php echo $report['id']; ?>">
+											<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 											<select name="status" style="width: 100%; padding: 0.25rem; background: black; color: white; border: 1px solid var(--gold); margin-bottom: 0.5rem;">
 												<option value="Open" <?php echo $report['status'] === 'Open' ? 'selected' : ''; ?>>Open</option>
 												<option value="Under Investigation" <?php echo $report['status'] === 'Under Investigation' ? 'selected' : ''; ?>>Under Investigation</option>
