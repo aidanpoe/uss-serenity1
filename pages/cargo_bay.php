@@ -14,13 +14,13 @@ $user_name = ($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') .
 // Function to check if user can access area
 function canAccessArea($area_access, $user_dept) {
     $allowed_depts = explode(',', $area_access);
-    return in_array($user_dept, $allowed_depts) || $user_dept === 'COMMAND';
+    return in_array($user_dept, $allowed_depts) || $user_dept === 'Command';
 }
 
 // Function to check if user can modify area
 function canModifyArea($area_access, $user_dept) {
     $allowed_depts = explode(',', $area_access);
-    return in_array($user_dept, $allowed_depts) || $user_dept === 'COMMAND' || $user_dept === 'ENG/OPS';
+    return in_array($user_dept, $allowed_depts) || $user_dept === 'Command' || $user_dept === 'ENG/OPS';
 }
 
 // Handle form submissions
@@ -320,6 +320,20 @@ if ($user_department) {
                     <h1>Cargo Bay Management System</h1>
                     <h3>Department: <?php echo htmlspecialchars($user_department); ?></h3>
                     
+                    <!-- Permission Debug (remove this later) -->
+                    <?php if ($user_department): ?>
+                        <div style="background: rgba(0,100,200,0.2); border: 1px solid var(--blue); padding: 0.5rem; border-radius: 5px; margin: 1rem 0; font-size: 0.9rem;">
+                            <strong>Permission Debug:</strong> 
+                            <?php if ($user_department === 'ENG/OPS'): ?>
+                                ✅ ENG/OPS - Can modify ALL areas
+                            <?php elseif ($user_department === 'Command'): ?>
+                                ✅ COMMAND - Can modify ALL areas
+                            <?php else: ?>
+                                ⚠️ <?php echo $user_department; ?> - Limited to own department areas
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                    
                     <?php if (isset($success_message)): ?>
                         <div style="background: rgba(0,255,0,0.2); border: 1px solid var(--blue); padding: 1rem; border-radius: 5px; margin: 1rem 0;">
                             ✅ <?php echo htmlspecialchars($success_message); ?>
@@ -364,6 +378,13 @@ if ($user_department) {
                             <h3><?php echo htmlspecialchars($area['area_name']); ?></h3>
                             <p><?php echo htmlspecialchars($area['description']); ?></p>
                             <p><strong>Access:</strong> <?php echo htmlspecialchars($area['department_access']); ?></p>
+                            <p><strong>Your Permission:</strong> 
+                                <?php if (canModifyArea($area['department_access'], $user_department)): ?>
+                                    <span style="color: var(--blue);">✅ CAN MODIFY</span>
+                                <?php else: ?>
+                                    <span style="color: var(--red);">❌ VIEW ONLY</span>
+                                <?php endif; ?>
+                            </p>
                             
                             <!-- Inventory Items -->
                             <?php if (!empty($inventory_items)): ?>

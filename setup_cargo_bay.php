@@ -65,12 +65,12 @@ try {
 
     // Insert default cargo areas
     $areas = [
-        ['MED/SCI Shelf Unit', 'MEDSCI', 'Large shelf unit for medical and scientific supplies', 'MED/SCI,ENG/OPS,COMMAND'],
-        ['ENG/OPS Shelf Unit 1', 'ENGOPS1', 'Engineering and Operations storage shelf 1', 'ENG/OPS,COMMAND'],
-        ['ENG/OPS Shelf Unit 2', 'ENGOPS2', 'Engineering and Operations storage shelf 2', 'ENG/OPS,COMMAND'],
-        ['ENG/OPS Shelf Unit 3', 'ENGOPS3', 'Engineering and Operations storage shelf 3', 'ENG/OPS,COMMAND'],
-        ['SEC/TAC Upper Level', 'SECTAC', 'Security and Tactical storage area on upper level', 'SEC/TAC,ENG/OPS,COMMAND'],
-        ['Miscellaneous Items', 'MISC', 'General storage area for miscellaneous items', 'MED/SCI,ENG/OPS,SEC/TAC,COMMAND']
+        ['MED/SCI Shelf Unit', 'MEDSCI', 'Large shelf unit for medical and scientific supplies', 'MED/SCI'],
+        ['ENG/OPS Shelf Unit 1', 'ENGOPS1', 'Engineering and Operations storage shelf 1', 'ENG/OPS'],
+        ['ENG/OPS Shelf Unit 2', 'ENGOPS2', 'Engineering and Operations storage shelf 2', 'ENG/OPS'],
+        ['ENG/OPS Shelf Unit 3', 'ENGOPS3', 'Engineering and Operations storage shelf 3', 'ENG/OPS'],
+        ['SEC/TAC Upper Level', 'SECTAC', 'Security and Tactical storage area on upper level', 'SEC/TAC'],
+        ['Miscellaneous Items', 'MISC', 'General storage area for miscellaneous items', 'MED/SCI,ENG/OPS,SEC/TAC']
     ];
 
     foreach ($areas as $area) {
