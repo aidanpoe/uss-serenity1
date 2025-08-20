@@ -1,49 +1,13 @@
-# Basic security .htaccess for USS-Serenity
-# Simplified version that doesn't block PHP execution
+# Simple .htaccess for USS-Serenity
+# Compatible with most Apache servers
 
-# Hide sensitive files
+# Hide sensitive file types
 <FilesMatch "\.(md|log|sql|conf|ini|bak|old|tmp)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# Protect development and setup files
-<Files "migrate_database.php">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "setup_*.php">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "fix_*.php">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "test_*.php">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "debug_*.php">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "database_admin.php">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "update_*.php">
-    Order allow,deny
-    Deny from all
-</Files>
-
-# Protect specific sensitive files in includes directory
+# Protect specific sensitive files
 <Files "config.php">
     Order allow,deny
     Deny from all
@@ -57,16 +21,9 @@
 # Disable directory browsing
 Options -Indexes
 
-# Basic security headers
+# Basic security headers (if mod_headers is available)
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options nosniff
     Header always set X-Frame-Options DENY
     Header always set X-XSS-Protection "1; mode=block"
-    Header unset X-Powered-By
 </IfModule>
-
-# Basic file upload size limits
-<Files "upload*">
-    php_value upload_max_filesize 5M
-    php_value post_max_size 10M
-</Files>
