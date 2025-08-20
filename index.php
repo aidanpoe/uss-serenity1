@@ -226,6 +226,9 @@ function loginbutton($buttonstyle = "square") {
 								<li style="margin: 0.5rem 0;">
 									<a href="#" onclick="alert('Link coming soon'); return false;" style="color: var(--bluey);">→ Discord</a>
 								</li>
+								<li style="margin: 0.5rem 0;">
+									<a href="steam://connect/46.4.12.78:27015" style="color: var(--bluey);">→ Ship Boarding</a>
+								</li>
 							</ul>
 						</div>
 					</div>
