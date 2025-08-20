@@ -1,6 +1,51 @@
 <?php
 require_once '../includes/config.php';
 
+// Handle adding new patients (MED/SCI only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_patient') {
+    if (hasPermission('MED/SCI')) {
+        try {
+            // Check if person already exists (by name only, species can be shared)
+            $pdo = getConnection();
+            $check_stmt = $pdo->prepare("SELECT id FROM roster WHERE first_name = ? AND last_name = ?");
+            $check_stmt->execute([$_POST['first_name'], $_POST['last_name']]);
+            
+            if ($check_stmt->fetch()) {
+                $error = "A crew member with this name already exists in the roster.";
+            } else {
+                // MED/SCI limited to ranks below Commander for patient addition
+                $allowed_patient_ranks = [
+                    'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class', 
+                    'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petter Officer',
+                    'Senior Chief Petty Officer', 'Master Chief Petty Officer', 
+                    'Command Master Chief Petty Officer', 'Warrant officer', 'Ensign',
+                    'Lieutenant Junior Grade', 'Lieutenant', 'Lieutenant Commander'
+                ];
+                
+                if (!in_array($_POST['rank'], $allowed_patient_ranks)) {
+                    $error = "Medical personnel can only add patients with ranks below Commander.";
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([
+                        $_POST['rank'],
+                        $_POST['first_name'],
+                        $_POST['last_name'],
+                        $_POST['species'],
+                        $_POST['department'],
+                        '', // No special positions for patient addition
+                        '' // No image upload in this simplified form
+                    ]);
+                    $success = "New patient added to roster successfully.";
+                }
+            }
+        } catch (Exception $e) {
+            $error = "Error adding patient: " . $e->getMessage();
+        }
+    } else {
+        $error = "Access denied. Medical/Science authorization required.";
+    }
+}
+
 // Handle medical report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'medical_report') {
     if (!isLoggedIn()) {
@@ -197,6 +242,62 @@ try {
 							</button>
 						</div>
 					</div>
+					
+					<!-- Add New Patient Form (MED/SCI Only) -->
+					<?php if (hasPermission('MED/SCI')): ?>
+					<div style="background: rgba(85, 102, 255, 0.1); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--blue);">
+						<h3 style="color: var(--blue); text-align: center; margin-bottom: 1.5rem;">🏥 Add New Patient</h3>
+						<form method="POST" action="">
+							<input type="hidden" name="action" value="add_patient">
+							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+								<div>
+									<label style="color: var(--blue);">Rank:</label>
+									<select name="rank" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
+										<option value="Crewman 3rd Class">Crewman 3rd Class</option>
+										<option value="Crewman 2nd Class">Crewman 2nd Class</option>
+										<option value="Crewman 1st Class">Crewman 1st Class</option>
+										<option value="Petty Officer 3rd class">Petty Officer 3rd class</option>
+										<option value="Petty Officer 1st class">Petty Officer 1st class</option>
+										<option value="Chief Petter Officer">Chief Petter Officer</option>
+										<option value="Senior Chief Petty Officer">Senior Chief Petty Officer</option>
+										<option value="Master Chief Petty Officer">Master Chief Petty Officer</option>
+										<option value="Command Master Chief Petty Officer">Command Master Chief Petty Officer</option>
+										<option value="Warrant officer">Warrant officer</option>
+										<option value="Ensign">Ensign</option>
+										<option value="Lieutenant Junior Grade">Lieutenant Junior Grade</option>
+										<option value="Lieutenant">Lieutenant</option>
+										<option value="Lieutenant Commander">Lieutenant Commander</option>
+									</select>
+								</div>
+								<div>
+									<label style="color: var(--blue);">First Name:</label>
+									<input type="text" name="first_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
+								</div>
+								<div>
+									<label style="color: var(--blue);">Last Name:</label>
+									<input type="text" name="last_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
+								</div>
+								<div>
+									<label style="color: var(--blue);">Species:</label>
+									<input type="text" name="species" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
+								</div>
+								<div>
+									<label style="color: var(--blue);">Department:</label>
+									<select name="department" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--blue);">
+										<option value="Command">Command</option>
+										<option value="MED/SCI">MED/SCI</option>
+										<option value="ENG/OPS">ENG/OPS</option>
+										<option value="SEC/TAC">SEC/TAC</option>
+									</select>
+								</div>
+							</div>
+							<button type="submit" style="background-color: var(--blue); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem; width: 100%;">Add New Patient to Roster</button>
+						</form>
+						<p style="color: var(--blue); font-size: 0.9rem; text-align: center; margin-top: 1rem;">
+							<em>Medical personnel can add new patients to the ship's roster for medical tracking purposes.</em>
+						</p>
+					</div>
+					<?php endif; ?>
 					
 					<h3>Department Leadership</h3>
 					<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 2rem 0;">
