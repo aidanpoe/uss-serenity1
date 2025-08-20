@@ -116,11 +116,6 @@ if ($_POST) {
             $_SESSION['department'] = $user_department; // User permission department (MED/SCI, ENG/OPS, SEC/TAC)
             $_SESSION['roster_department'] = $roster_department; // Roster display department
             $_SESSION['steamid'] = $_SESSION['pending_steam_id']; // Set steamid for session
-            $_SESSION['character_id'] = $character_id; // IMPORTANT: Set character_id for last_active tracking
-            
-            // Set initial last_active timestamp for the new character
-            $stmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
-            $stmt->execute([$character_id]);
             
             // Update last login
             $updateStmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
