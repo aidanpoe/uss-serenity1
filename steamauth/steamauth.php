@@ -76,6 +76,7 @@ if (isset($_GET['login'])){
 						$_SESSION['position'] = $user['position'];
 						$_SESSION['image_path'] = $user['image_path'];
 						$_SESSION['roster_department'] = $user['roster_department'];
+						$_SESSION['character_id'] = $user['active_character_id']; // Store character ID for last_active tracking
 						
 						// Map roster department to proper permission group
 						$permission_dept = $user['department']; // Start with user's stored department
@@ -106,6 +107,12 @@ if (isset($_GET['login'])){
 						}
 						
 						$_SESSION['department'] = $permission_dept;
+						
+						// Update last_active timestamp for the character
+						if ($user['active_character_id']) {
+							$lastActiveStmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
+							$lastActiveStmt->execute([$user['active_character_id']]);
+						}
 					} else {
 						// No active character, just set the stored department
 						$_SESSION['department'] = $user['department'];

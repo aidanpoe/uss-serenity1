@@ -1,6 +1,9 @@
 <?php
 require_once 'includes/config.php';
 
+// Update last active timestamp for current character
+updateLastActive();
+
 // Steam login functions
 function loginbutton($buttonstyle = "square") {
 	echo "<a href='steamauth/steamauth.php?login' class='lcars-steam-button' onclick='playSoundAndRedirect(\"audio2\", \"steamauth/steamauth.php?login\")'>Sign in through Steam</a>";

@@ -1,6 +1,9 @@
 <?php
 require_once '../includes/config.php';
 
+// Update last active timestamp for current character
+updateLastActive();
+
 // Check if user is logged in
 if (!isLoggedIn()) {
     header("Location: ../steamauth/steamauth.php?login");
@@ -141,6 +144,10 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
             $stmt = $pdo->prepare("UPDATE users SET active_character_id = ? WHERE id = ?");
             $stmt->execute([$character_id, $_SESSION['user_id']]);
             
+            // Set initial last_active timestamp for new character
+            $stmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
+            $stmt->execute([$character_id]);
+            
             // Update session variables
             $_SESSION['first_name'] = $_POST['first_name'];
             $_SESSION['last_name'] = $_POST['last_name'];
@@ -148,6 +155,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
             $_SESSION['position'] = $_POST['position'];
             $_SESSION['department'] = $permission_group;
             $_SESSION['roster_department'] = $roster_department;
+            $_SESSION['character_id'] = $character_id; // Store character ID for tracking
         } else {
             // Ask if they want to switch to this new character
             $success = "Character '" . htmlspecialchars($_POST['character_name']) . "' created successfully! <a href='profile.php' style='color: var(--blue);'>Switch to this character</a> or continue with your current character.";

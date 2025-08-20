@@ -1,6 +1,9 @@
 <?php
 require_once '../includes/config.php';
 
+// Update last active timestamp for current character
+updateLastActive();
+
 // Handle adding new patients (MED/SCI only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_patient') {
     if (hasPermission('MED/SCI')) {

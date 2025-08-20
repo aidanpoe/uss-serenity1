@@ -134,6 +134,11 @@ function switchCharacter($character_id) {
         $_SESSION['position'] = $character['position'];
         $_SESSION['department'] = $user_department; // Use the mapped permission group
         $_SESSION['roster_department'] = $character['department']; // Store original department too
+        $_SESSION['character_id'] = $character_id; // Store character ID for tracking
+        
+        // Update last_active timestamp for the new character
+        $stmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
+        $stmt->execute([$character_id]);
         
         return true;
     } catch (Exception $e) {
@@ -164,6 +169,20 @@ function canCreateCharacter($user_id = null) {
 function getUserDepartment() {
     // Return the permission group from session (MED/SCI, ENG/OPS, SEC/TAC, Command)
     return $_SESSION['department'] ?? null;
+}
+
+// Update last_active timestamp for current character
+function updateLastActive() {
+    if (!isLoggedIn() || !isset($_SESSION['character_id'])) return;
+    
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
+        $stmt->execute([$_SESSION['character_id']]);
+    } catch (Exception $e) {
+        // Silent fail - don't break the page if this fails
+        error_log("Failed to update last_active: " . $e->getMessage());
+    }
 }
 
 // Check if user has specific permission

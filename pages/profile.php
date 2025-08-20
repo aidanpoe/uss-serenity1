@@ -5,6 +5,9 @@ ini_set('display_errors', 1);
 
 require_once '../includes/config.php';
 
+// Update last active timestamp for current character
+updateLastActive();
+
 // Check if user is logged in
 if (!isLoggedIn()) {
     header("Location: ../steamauth/steamauth.php?login");

@@ -1,6 +1,9 @@
 <?php
 require_once '../includes/config.php';
 
+// Update last active timestamp for current character
+updateLastActive();
+
 // Handle security report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'security_report') {
     try {

@@ -1,6 +1,9 @@
 <?php
 require_once '../includes/config.php';
 
+// Update last active timestamp for current character
+updateLastActive();
+
 // Handle image upload
 function handleImageUpload($file) {
     if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
@@ -164,7 +167,7 @@ try {
         'S.R.T. Leader' => null
     ];
     
-    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('" . implode("','", array_keys($command_positions)) . "') ORDER BY FIELD(position, '" . implode("','", array_keys($command_positions)) . "')");
+    $stmt = $pdo->prepare("SELECT *, last_active FROM roster WHERE position IN ('" . implode("','", array_keys($command_positions)) . "') ORDER BY FIELD(position, '" . implode("','", array_keys($command_positions)) . "')");
     $stmt->execute();
     $command_crew = $stmt->fetchAll();
     
@@ -173,7 +176,7 @@ try {
     }
     
     // Get all crew members
-    $stmt = $pdo->prepare("SELECT * FROM roster ORDER BY department, rank, last_name, first_name");
+    $stmt = $pdo->prepare("SELECT *, last_active FROM roster ORDER BY department, rank, last_name, first_name");
     $stmt->execute();
     $all_crew = $stmt->fetchAll();
     
@@ -1040,6 +1043,34 @@ $ranks = [
 							<p>Department: <?php echo htmlspecialchars($crew_member['department'] ?? 'Unassigned'); ?></p>
 							<?php if ($crew_member['position']): ?>
 							<p><em><?php echo htmlspecialchars($crew_member['position']); ?></em></p>
+							<?php endif; ?>
+							
+							<?php if ($crew_member['last_active']): ?>
+							<div style="font-size: 0.8rem; color: var(--bluey); margin-top: 0.5rem; padding: 0.2rem; background: rgba(0,0,0,0.3); border-radius: 3px;">
+								<strong>Last Active:</strong><br>
+								<?php 
+								$last_active = new DateTime($crew_member['last_active']);
+								$now = new DateTime();
+								$interval = $now->diff($last_active);
+								
+								if ($interval->days == 0 && $interval->h == 0 && $interval->i < 5) {
+									echo '<span style="color: var(--green);">Online</span>';
+								} elseif ($interval->days == 0) {
+									echo '<span style="color: var(--gold);">' . $interval->h . 'h ' . $interval->i . 'm ago</span>';
+								} elseif ($interval->days == 1) {
+									echo '<span style="color: var(--orange);">1 day ago</span>';
+								} elseif ($interval->days < 7) {
+									echo '<span style="color: var(--orange);">' . $interval->days . ' days ago</span>';
+								} else {
+									echo '<span style="color: var(--red);">' . $last_active->format('M j, Y') . '</span>';
+								}
+								?>
+							</div>
+							<?php else: ?>
+							<div style="font-size: 0.8rem; color: var(--gray); margin-top: 0.5rem; padding: 0.2rem; background: rgba(0,0,0,0.3); border-radius: 3px;">
+								<strong>Last Active:</strong><br>
+								<span style="color: var(--gray);">Never logged in</span>
+							</div>
 							<?php endif; ?>
 							
 							<?php if ($crew_member['phaser_training']): ?>
