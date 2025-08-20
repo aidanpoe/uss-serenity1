@@ -2,16 +2,27 @@
 // Secure configuration file
 // Move sensitive data to environment variables or a secure config file outside web root
 
+// Load environment variables from .env file if available
+if (file_exists(__DIR__ . '/../.env')) {
+    $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
+            list($name, $value) = explode('=', $line, 2);
+            $_ENV[trim($name)] = trim($value);
+        }
+    }
+}
+
 // Database configuration - Use environment variables in production
-define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
-define('DB_USERNAME', $_ENV['DB_USERNAME'] ?? 'serenity');
-define('DB_PASSWORD', $_ENV['DB_PASSWORD'] ?? 'Os~886go4'); // Change this password!
-define('DB_NAME', $_ENV['DB_NAME'] ?? 'serenity');
-define('DB_PORT', $_ENV['DB_PORT'] ?? 3306);
+define('DB_HOST', isset($_ENV['DB_HOST']) ? $_ENV['DB_HOST'] : 'localhost');
+define('DB_USERNAME', isset($_ENV['DB_USERNAME']) ? $_ENV['DB_USERNAME'] : 'serenity');
+define('DB_PASSWORD', isset($_ENV['DB_PASSWORD']) ? $_ENV['DB_PASSWORD'] : 'Os~886go4'); // Change this password!
+define('DB_NAME', isset($_ENV['DB_NAME']) ? $_ENV['DB_NAME'] : 'serenity');
+define('DB_PORT', isset($_ENV['DB_PORT']) ? $_ENV['DB_PORT'] : 3306);
 
 // Steam API configuration - Use environment variables in production  
-define('STEAM_API_KEY', $_ENV['STEAM_API_KEY'] ?? '9C00EAFE9AF867596D73067C86308C5A'); // Change this key!
-define('STEAM_DOMAIN', $_ENV['STEAM_DOMAIN'] ?? 'uss-serenity.org');
+define('STEAM_API_KEY', isset($_ENV['STEAM_API_KEY']) ? $_ENV['STEAM_API_KEY'] : '9C00EAFE9AF867596D73067C86308C5A'); // Change this key!
+define('STEAM_DOMAIN', isset($_ENV['STEAM_DOMAIN']) ? $_ENV['STEAM_DOMAIN'] : 'uss-serenity.org');
 
 // Security settings
 define('SESSION_TIMEOUT', 3600); // 1 hour

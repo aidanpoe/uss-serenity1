@@ -4,11 +4,19 @@ require_once __DIR__ . '/secure_config.php';
 
 // Start session with secure settings
 if (session_status() == PHP_SESSION_NONE) {
-    // Secure session configuration
+    // Secure session configuration - adjust for development/production
     ini_set('session.cookie_httponly', 1);
-    ini_set('session.cookie_secure', 1);
+    
+    // Only use secure cookies if HTTPS is available
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+        ini_set('session.cookie_secure', 1);
+        ini_set('session.cookie_samesite', 'Strict');
+    } else {
+        ini_set('session.cookie_secure', 0);
+        ini_set('session.cookie_samesite', 'Lax');
+    }
+    
     ini_set('session.use_only_cookies', 1);
-    ini_set('session.cookie_samesite', 'Strict');
     
     session_start();
     
@@ -50,11 +58,6 @@ function getConnection() {
         error_log("Database connection failed: " . $e->getMessage());
         die("Connection failed. Please try again later.");
     }
-}
-
-// Start session if not already started
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
 }
 
 // Create global PDO connection with error handling
