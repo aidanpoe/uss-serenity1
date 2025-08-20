@@ -6,67 +6,43 @@
     Deny from all
 </FilesMatch>
 
-# Protect configuration files
-<Files "*.php">
-    <LimitExcept GET POST>
-        Order allow,deny
-        Deny from all
-    </LimitExcept>
+# Protect specific configuration files (not all PHP files)
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "secure_config.php">
+    Order allow,deny
+    Deny from all
 </Files>
 
 # Disable directory browsing
 Options -Indexes
 
-# Protect against common attacks
+# Protect against common attacks (simplified)
 <IfModule mod_rewrite.c>
     RewriteEngine On
     
-    # Block suspicious requests
-    RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC,OR]
-    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
-    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2}) [OR]
-    RewriteCond %{QUERY_STRING} ^.*(\[|\]|\(|\)|<|>|ê|"|;|\?|\*|=$).* [NC,OR]
-    RewriteCond %{QUERY_STRING} ^.*((\+|%2B)(concat|delete|get|select|union|insert)).* [NC,OR]
-    RewriteCond %{QUERY_STRING} ^.*(\+|%2B|%20)(drop|create|table).* [NC]
+    # Block obvious SQL injection attempts
+    RewriteCond %{QUERY_STRING} (union.*select|insert.*into|delete.*from) [NC]
     RewriteRule ^(.*)$ - [F,L]
     
-    # Block file injection attacks
-    RewriteCond %{REQUEST_METHOD} GET
-    RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=http:// [OR]
-    RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=(\.\.//?)+
+    # Block file injection attempts
+    RewriteCond %{QUERY_STRING} \.\./
     RewriteRule ^(.*)$ - [F,L]
 </IfModule>
 
-# Security headers
+# Security headers (simplified)
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options nosniff
     Header always set X-Frame-Options DENY
     Header always set X-XSS-Protection "1; mode=block"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.steampowered.com; frame-ancestors 'none';"
     Header unset X-Powered-By
-    Header unset Server
 </IfModule>
 
 # File upload restrictions
 <Files "upload*">
     php_value upload_max_filesize 5M
     php_value post_max_size 10M
-    php_value max_execution_time 60
-    php_value max_input_time 60
 </Files>
-
-# Disable PHP execution in upload directories
-<Directory "assets/crew_photos">
-    <Files "*.php">
-        Order allow,deny
-        Deny from all
-    </Files>
-</Directory>
-
-<Directory "training_files">
-    <Files "*.php">
-        Order allow,deny
-        Deny from all
-    </Files>
-</Directory>
