@@ -30,7 +30,7 @@ $department_permissions = [
 // Available ranks (excluding command ranks)
 $available_ranks = [
     'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class',
-    'Petty Officer 3rd Class', 'Petty Officer 1st Class', 'Chief Petty Officer',
+    'Petty Officer 3rd Class', 'Petty Officer 2nd Class', 'Petty Officer 1st Class', 'Chief Petty Officer',
     'Senior Chief Petty Officer', 'Master Chief Petty Officer', 'Command Master Chief Petty Officer',
     'Warrant Officer', 'Ensign', 'Lieutenant Junior Grade'
 ];
