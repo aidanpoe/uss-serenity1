@@ -320,6 +320,11 @@ try {
 	<meta name="format-detection" content="date=no">
 	<link rel="stylesheet" type="text/css" href="../assets/classic.css">
 	<style>
+		body {
+			background: black !important;
+			background-color: black !important;
+		}
+		
 		.department-section {
 			margin: 2rem 0;
 			border-radius: 15px;
