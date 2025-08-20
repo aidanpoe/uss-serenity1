@@ -857,16 +857,16 @@ $ranks = [
 							<div style="background: rgba(138, 43, 226, 0.1); border: 2px solid #8A2BE2; border-radius: 10px; padding: 1.5rem;">
 								<h4 style="color: #8A2BE2; text-align: center; margin-bottom: 1rem; border-bottom: 1px solid #8A2BE2; padding-bottom: 0.5rem;">NON-COMMISSIONED OFFICERS</h4>
 								<div style="font-size: 0.9rem; line-height: 1.6;">
-									<div style="margin-bottom: 0.5rem;"><strong>Crewman 3rd Class (CRW3)</strong> - Entry Level</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Crewman 2nd Class (CRW2)</strong> - Basic Experience</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Crewman 1st Class (CRW1)</strong> - Experienced</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 3rd Class (PO3)</strong> - Junior Specialist</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 2nd Class (PO2)</strong> - Specialist</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 1st Class (PO1)</strong> - Senior Specialist</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Chief Petty Officer (CPO)</strong> - Department Lead</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Senior Chief Petty Officer (SCPO)</strong> - Senior Lead</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Master Chief Petty Officer (MCPO)</strong> - Master Lead</div>
-									<div><strong>Command Master Chief Petty Officer (CMCPO)</strong> - Senior Enlisted Advisor</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Crewman 3rd Class (CRW3)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Crewman 2nd Class (CRW2)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Crewman 1st Class (CRW1)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 3rd Class (PO3)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 2nd Class (PO2)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 1st Class (PO1)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Chief Petty Officer (CPO)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Senior Chief Petty Officer (SCPO)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Master Chief Petty Officer (MCPO)</strong></div>
+									<div><strong>Command Master Chief Petty Officer (CMCPO)</strong></div>
 								</div>
 							</div>
 							
@@ -874,13 +874,13 @@ $ranks = [
 							<div style="background: rgba(0, 255, 127, 0.1); border: 2px solid #00FF7F; border-radius: 10px; padding: 1.5rem;">
 								<h4 style="color: #00FF7F; text-align: center; margin-bottom: 1rem; border-bottom: 1px solid #00FF7F; padding-bottom: 0.5rem;">COMMISSIONED OFFICERS</h4>
 								<div style="font-size: 0.9rem; line-height: 1.6;">
-									<div style="margin-bottom: 0.5rem;"><strong>Warrant Officer (WO)</strong> - Technical Specialist</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Ensign (ENS)</strong> - Junior Officer</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Junior Grade (LT. JG)</strong> - Experienced Junior</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant (LT)</strong> - Department Officer</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Commander (LT. CMD)</strong> - Senior Officer</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Commander (CMD)</strong> - Department Head</div>
-									<div><strong>Captain (CPT)</strong> - Commanding Officer</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Warrant Officer (WO)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Ensign (ENS)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Junior Grade (LT. JG)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant (LT)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Commander (LT. CMD)</strong></div>
+									<div style="margin-bottom: 0.5rem;"><strong>Commander (CMD)</strong></div>
+									<div><strong>Captain (CPT)</strong></div>
 								</div>
 							</div>
 							
@@ -905,7 +905,7 @@ $ranks = [
 						
 						<div style="margin-top: 2rem; padding: 1rem; background: rgba(255, 136, 0, 0.1); border-left: 4px solid var(--orange); border-radius: 5px;">
 							<p style="font-size: 0.9rem; color: var(--bluey); margin: 0;">
-								<strong style="color: var(--orange);">Note:</strong> All personnel advancement and command assignments are subject to Captain's approval. 
+								<strong style="color: var(--orange);">Note:</strong> Personnel advancement can be approved by Department Heads or Captain. Command assignments require Captain's approval. 
 								Department assignments determine system access permissions and operational responsibilities.
 							</p>
 						</div>
