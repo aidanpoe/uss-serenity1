@@ -617,13 +617,13 @@ try {
 					<h1>Training Management System</h1>
 					<h2>USS-Serenity Educational Resources & File Repository</h2>
 					
-					<?php if (isset($success)): ?>
+					<?php if (isset($success) && !empty($success)): ?>
 					<div style="background: rgba(76, 175, 80, 0.2); border: 2px solid var(--green); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--green); font-weight: bold;">✅ <?php echo htmlspecialchars($success); ?></p>
 					</div>
 					<?php endif; ?>
 					
-					<?php if (isset($error)): ?>
+					<?php if (isset($error) && !empty($error)): ?>
 					<div style="background: rgba(244, 67, 54, 0.2); border: 2px solid var(--red); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--red); font-weight: bold;">❌ <?php echo htmlspecialchars($error); ?></p>
 					</div>
