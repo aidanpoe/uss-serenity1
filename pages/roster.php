@@ -457,6 +457,32 @@ $ranks = [
 			border-radius: 10px;
 			border: 2px solid;
 		}
+		
+		/* Department-based color coding for crew cards */
+		.command-box {
+			background: linear-gradient(135deg, rgba(255, 0, 0, 0.15), rgba(255, 0, 0, 0.08));
+			border-color: var(--red);
+			color: var(--bluey);
+		}
+		
+		.eng-ops-box {
+			background: linear-gradient(135deg, rgba(255, 136, 0, 0.15), rgba(255, 136, 0, 0.08));
+			border-color: var(--orange);
+			color: var(--bluey);
+		}
+		
+		.med-sci-box {
+			background: linear-gradient(135deg, rgba(0, 136, 255, 0.15), rgba(0, 136, 255, 0.08));
+			border-color: var(--blue);
+			color: var(--bluey);
+		}
+		
+		.sec-tac-box {
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.08));
+			border-color: var(--gold);
+			color: var(--bluey);
+		}
+		
 		.phaser-training {
 			font-size: 0.8rem;
 			margin-top: 0.5rem;
