@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'add_item':
                 $area_id = $_POST['area_id'];
                 $item_name = $_POST['item_name'];
-                $description = $_POST['description'] ?? '';
+                $item_description = $_POST['description'] ?? '';
                 $quantity = $_POST['quantity'];
                 $min_quantity = $_POST['min_quantity'] ?? 5;
                 $unit_type = $_POST['unit_type'] ?? 'pieces';
@@ -119,8 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $log_stmt->execute([$existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department]);
                         } else {
                             // Add new item with all fields
-                            $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, description, quantity, min_quantity, unit_type, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                            $insert_stmt->execute([$area_id, $item_name, $description, $quantity, $min_quantity, $unit_type, $user_name, $user_department]);
+                            $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, min_quantity, unit_type, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                            $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $min_quantity, $unit_type, $user_name, $user_department]);
                             
                             $inventory_id = $pdo->lastInsertId();
                             
@@ -187,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($user_department === 'ENG/OPS' || $user_department === 'Command') {
                     $area_id = $_POST['area_id'];
                     $item_name = $_POST['item_name'];
-                    $description = $_POST['description'] ?? '';
+                    $item_description = $_POST['description'] ?? '';
                     $quantity = $_POST['quantity'];
                     $unit_type = $_POST['unit_type'] ?? 'pieces';
                     
@@ -209,8 +209,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $log_stmt->execute([$existing['id'], $quantity, $existing['quantity'], $new_quantity, $user_name, $user_department]);
                         } else {
                             // Add new item
-                            $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, description, quantity, unit_type, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                            $insert_stmt->execute([$area_id, $item_name, $description, $quantity, $unit_type, $user_name, $user_department]);
+                            $insert_stmt = $pdo->prepare("INSERT INTO cargo_inventory (area_id, item_name, item_description, quantity, unit_type, added_by, added_department) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                            $insert_stmt->execute([$area_id, $item_name, $item_description, $quantity, $unit_type, $user_name, $user_department]);
                             
                             $inventory_id = $pdo->lastInsertId();
                             
@@ -613,6 +613,26 @@ if ($user_department) {
             </div>
             <div class="right-frame-top">
                 <div class="banner">USS-SERENITY &#149; CARGO BAY MANAGEMENT</div>
+                <div class="data-cascade-button-group">
+                    <nav> 
+                        <button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>
+                        <button onclick="playSoundAndRedirect('audio2', 'roster.php')">ROSTER</button>
+                        <button onclick="playSoundAndRedirect('audio2', 'command.php')">COMMAND</button>
+                        <button onclick="playSoundAndRedirect('audio2', '#')" style="background-color: var(--orange);">CARGO-BAY</button>
+                    </nav>
+                </div>
+                <div class="bar-panel first-bar-panel">
+                    <div class="bar-1"></div>
+                    <div class="bar-2"></div>
+                    <div class="bar-3"></div>
+                    <div class="bar-4"></div>
+                    <div class="bar-5"></div>
+                    <div class="bar-6"></div>
+                    <div class="bar-7"></div>
+                    <div class="bar-8"></div>
+                    <div class="bar-9"></div>
+                    <div class="bar-10"></div>
+                </div>
             </div>
         </div>
         
@@ -742,8 +762,8 @@ if ($user_department) {
                                                         <span class="item-quantity"><?php echo $item['quantity']; ?> <?php echo htmlspecialchars($item['unit_type']); ?></span>
                                                     </div>
                                                     
-                                                    <?php if (!empty($item['description'])): ?>
-                                                    <p class="item-description"><?php echo htmlspecialchars($item['description']); ?></p>
+                                                    <?php if (!empty($item['item_description'])): ?>
+                                                    <p class="item-description"><?php echo htmlspecialchars($item['item_description']); ?></p>
                                                     <?php endif; ?>
                                                     
                                                     <?php if ($canModify): ?>
@@ -1016,5 +1036,9 @@ if ($user_department) {
             }
         }
     </script>
+                </main>
+            </div>
+        </div>
+    </section>
 </body>
 </html>
