@@ -231,43 +231,7 @@ $ranks = [
 			grid-template-rows: auto auto auto;
 			gap: 1rem;
 		}
-		.ranking-info {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 2rem;
-			margin-top: 2rem;
-		}
-		.ranking-box {
-			background: rgba(0,0,0,0.8);
-			border: 2px solid var(--bluey);
-			border-radius: 8px;
-			padding: 1.5rem;
-			box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-		}
-		.ranking-title {
-			color: var(--bluey);
-			font-size: 1.4rem;
-			font-weight: bold;
-			margin-bottom: 0.5rem;
-			text-align: center;
-		}
-		.ranking-subtitle {
-			color: #ccc;
-			font-size: 1.1rem;
-			text-align: center;
-			margin-bottom: 1rem;
-		}
-		.ranking-content {
-			color: #ccc;
-			font-size: 1rem;
-			line-height: 1.4;
-		}
-		.rank-list {
-			list-style: none;
-			padding: 0;
-			margin: 0;
-		}
-		.rank-list li {
+		.department-box {
 			margin-bottom: 0.4rem;
 			color: #ccc;
 			font-size: 0.9rem;
