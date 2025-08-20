@@ -3,21 +3,34 @@ require_once '../includes/config.php';
 
 // Handle fault report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'fault_report') {
-    try {
-        $pdo = getConnection();
-        $stmt = $pdo->prepare("INSERT INTO fault_reports (location_type, deck_number, room, jefferies_tube_number, access_point, fault_description, reported_by_roster_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([
-            $_POST['location_type'],
-            $_POST['deck_number'] ?? null,
-            $_POST['room'] ?? null,
-            $_POST['jefferies_tube_number'] ?? null,
-            $_POST['access_point'] ?? null,
-            $_POST['fault_description'],
-            $_POST['reported_by_roster_id'] ?? null
-        ]);
-        $success = "Fault report submitted successfully.";
-    } catch (Exception $e) {
-        $error = "Error submitting report: " . $e->getMessage();
+    if (!isLoggedIn()) {
+        $error = "You must be logged in to submit fault reports.";
+    } else {
+        try {
+            // Auto-populate reported_by with current user's character
+            // Find the current user's roster ID based on their character
+            $pdo = getConnection();
+            $current_character = getCurrentCharacter();
+            $reported_by_roster_id = null;
+            
+            if ($current_character && $current_character['character_id']) {
+                $reported_by_roster_id = $current_character['character_id'];
+            }
+            
+            $stmt = $pdo->prepare("INSERT INTO fault_reports (location_type, deck_number, room, jefferies_tube_number, access_point, fault_description, reported_by_roster_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $_POST['location_type'],
+                $_POST['deck_number'] ?? null,
+                $_POST['room'] ?? null,
+                $_POST['jefferies_tube_number'] ?? null,
+                $_POST['access_point'] ?? null,
+                $_POST['fault_description'],
+                $reported_by_roster_id
+            ]);
+            $success = "Fault report submitted successfully.";
+        } catch (Exception $e) {
+            $error = "Error submitting report: " . $e->getMessage();
+        }
     }
 }
 
@@ -159,6 +172,7 @@ try {
 					</div>
 					
 					<!-- Public Fault Reporting Form -->
+					<?php if (isLoggedIn()): ?>
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 2px solid var(--orange); margin: 2rem 0;">
 						<h4>System Fault Report</h4>
 						<form method="POST" action="" id="faultForm">
@@ -176,13 +190,11 @@ try {
 								</div>
 								<div>
 									<label style="color: var(--orange);">Reported By:</label>
-									<select name="reported_by_roster_id" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
-										<option value="">Select Person (Optional)</option>
-										<?php foreach ($roster as $person): ?>
-										<option value="<?php echo $person['id']; ?>"><?php echo htmlspecialchars($person['rank'] . ' ' . $person['first_name'] . ' ' . $person['last_name']); ?></option>
-										<?php endforeach; ?>
-									</select>
-									<small style="color: var(--orange);"><a href="roster.php" style="color: var(--orange);">Not in the roster? Click here to add yourself first.</a></small>
+									<?php 
+									$current_user = trim(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
+									?>
+									<input type="text" value="<?php echo htmlspecialchars($current_user); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--orange); border: 1px solid var(--orange); cursor: not-allowed;">
+									<small style="color: var(--orange); font-size: 0.8rem;">Auto-filled from your current character profile</small>
 								</div>
 							</div>
 							
@@ -216,6 +228,15 @@ try {
 							<button type="submit" style="background-color: var(--orange); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; width: 100%;">Submit Fault Report</button>
 						</form>
 					</div>
+					<?php else: ?>
+					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 2px solid var(--orange); margin: 2rem 0;">
+						<h4>System Fault Report</h4>
+						<p style="color: var(--orange); text-align: center;">You must be logged in to submit fault reports.</p>
+						<div style="text-align: center; margin-top: 1rem;">
+							<a href="../index.php" style="background-color: var(--orange); color: black; padding: 1rem 2rem; border-radius: 5px; text-decoration: none; display: inline-block;">Return to Login</a>
+						</div>
+					</div>
+					<?php endif; ?>
 					
 					<?php if (hasPermission('ENG/OPS')): ?>
 					<!-- Engineering Staff Backend -->
