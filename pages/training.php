@@ -337,6 +337,36 @@ try {
 			background-color: black !important;
 		}
 		
+		/* Filter button styles */
+		.filter-button {
+			cursor: pointer;
+			transition: all 0.3s ease;
+			position: relative;
+		}
+		
+		.filter-button:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+		}
+		
+		.filter-button.active {
+			transform: scale(1.05);
+			box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+		}
+		
+		.filter-button.active::after {
+			content: "ACTIVE";
+			position: absolute;
+			top: 5px;
+			right: 5px;
+			background: var(--green);
+			color: black;
+			padding: 2px 6px;
+			font-size: 0.7rem;
+			font-weight: bold;
+			border-radius: 3px;
+		}
+		
 		.department-section {
 			margin: 2rem 0;
 			border-radius: 15px;
@@ -641,24 +671,28 @@ try {
 					</div>
 					<?php endif; ?>
 					
-					<!-- Training System Statistics -->
+					<!-- Training System Filter Buttons -->
 					<div class="stats-grid">
 						<?php 
 						$total_files = array_sum(array_map('count', $training_files));
 						?>
-						<div class="stat-card blue">
+						<div class="filter-button stat-card blue" onclick="filterDepartment('all')" id="filter-all">
+							<div class="stat-number" style="color: var(--blue);"><?php echo $total_files; ?></div>
+							<div>All Departments</div>
+						</div>
+						<div class="filter-button stat-card blue" onclick="filterDepartment('MED/SCI')" id="filter-medsci">
 							<div class="stat-number" style="color: var(--blue);"><?php echo count($training_files['MED/SCI']); ?></div>
 							<div>Medical/Science Files</div>
 						</div>
-						<div class="stat-card orange">
+						<div class="filter-button stat-card orange" onclick="filterDepartment('ENG/OPS')" id="filter-engops">
 							<div class="stat-number" style="color: var(--orange);"><?php echo count($training_files['ENG/OPS']); ?></div>
 							<div>Engineering/Ops Files</div>
 						</div>
-						<div class="stat-card gold">
+						<div class="filter-button stat-card gold" onclick="filterDepartment('SEC/TAC')" id="filter-sectac">
 							<div class="stat-number" style="color: var(--gold);"><?php echo count($training_files['SEC/TAC']); ?></div>
 							<div>Security/Tactical Files</div>
 						</div>
-						<div class="stat-card red">
+						<div class="filter-button stat-card red" onclick="filterDepartment('Command')" id="filter-command">
 							<div class="stat-number" style="color: var(--red);"><?php echo count($training_files['Command']); ?></div>
 							<div>Command Files</div>
 						</div>
@@ -735,7 +769,7 @@ try {
 						<!-- Training Files Tab -->
 						<div id="files" class="tab-content active">
 							<!-- Medical/Science Department -->
-							<div class="department-section med-sci">
+							<div class="department-section med-sci" id="dept-MED-SCI" data-department="MED/SCI">
 								<h3 style="color: var(--blue);">🏥 Medical/Science Department</h3>
 								<?php if (empty($training_files['MED/SCI'])): ?>
 								<p style="color: var(--blue);"><em>No training files available.</em></p>
@@ -775,7 +809,7 @@ try {
 							</div>
 							
 							<!-- Engineering/Operations Department -->
-							<div class="department-section eng-ops">
+							<div class="department-section eng-ops" id="dept-ENG-OPS" data-department="ENG/OPS">
 								<h3 style="color: var(--orange);">⚙️ Engineering/Operations Department</h3>
 								<?php if (empty($training_files['ENG/OPS'])): ?>
 								<p style="color: var(--orange);"><em>No training files available.</em></p>
@@ -815,7 +849,7 @@ try {
 							</div>
 							
 							<!-- Security/Tactical Department -->
-							<div class="department-section sec-tac">
+							<div class="department-section sec-tac" id="dept-SEC-TAC" data-department="SEC/TAC">
 								<h3 style="color: var(--gold);">🛡️ Security/Tactical Department</h3>
 								<?php if (empty($training_files['SEC/TAC'])): ?>
 								<p style="color: var(--gold);"><em>No training files available.</em></p>
@@ -855,7 +889,7 @@ try {
 							</div>
 							
 							<!-- Command Department -->
-							<div class="department-section command">
+							<div class="department-section command" id="dept-Command" data-department="Command">
 								<h3 style="color: var(--red);">⭐ Command Department</h3>
 								<?php if (empty($training_files['Command'])): ?>
 								<p style="color: var(--red);"><em>No training files available.</em></p>
@@ -967,6 +1001,48 @@ try {
 			} else {
 				fileNameDiv.innerHTML = '';
 			}
+		});
+		
+		// Department filtering functionality
+		function filterDepartment(department) {
+			// Remove active class from all filter buttons
+			document.querySelectorAll('.filter-button').forEach(button => {
+				button.classList.remove('active');
+			});
+			
+			// Add active class to clicked button
+			const activeButton = department === 'all' ? 
+				document.getElementById('filter-all') : 
+				document.getElementById(`filter-${department.toLowerCase().replace('/', '')}`);
+			if (activeButton) {
+				activeButton.classList.add('active');
+			}
+			
+			// Show/hide department sections
+			const allDepartments = document.querySelectorAll('.department-section');
+			
+			if (department === 'all') {
+				// Show all departments
+				allDepartments.forEach(dept => {
+					dept.style.display = 'block';
+				});
+			} else {
+				// Hide all departments first
+				allDepartments.forEach(dept => {
+					dept.style.display = 'none';
+				});
+				
+				// Show only selected department
+				const targetDept = document.querySelector(`[data-department="${department}"]`);
+				if (targetDept) {
+					targetDept.style.display = 'block';
+				}
+			}
+		}
+		
+		// Initialize with all departments visible
+		document.addEventListener('DOMContentLoaded', function() {
+			filterDepartment('all');
 		});
 		
 		// Tab switching functionality
