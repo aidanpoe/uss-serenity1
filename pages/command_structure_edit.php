@@ -12,18 +12,33 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'assign_position')
     try {
         $pdo = getConnection();
         
+        // Start a transaction to ensure both operations succeed or fail together
+        $pdo->beginTransaction();
+        
         // First, clear the old position assignment for this position
         $stmt = $pdo->prepare("UPDATE roster SET position = NULL WHERE position = ?");
         $stmt->execute([$_POST['command_position']]);
         
-        // Then assign the new person to this position (if not "none")
+        // If assigning a person (not "none"), also clear their current position first
         if ($_POST['personnel_id'] && $_POST['personnel_id'] !== 'none') {
+            // Clear any existing position for this person
+            $stmt = $pdo->prepare("UPDATE roster SET position = NULL WHERE id = ?");
+            $stmt->execute([$_POST['personnel_id']]);
+            
+            // Then assign the new person to this position
             $stmt = $pdo->prepare("UPDATE roster SET position = ? WHERE id = ?");
             $stmt->execute([$_POST['command_position'], $_POST['personnel_id']]);
         }
         
+        // Commit the transaction
+        $pdo->commit();
+        
         $success = "Command position updated successfully.";
     } catch (Exception $e) {
+        // Rollback on error
+        if ($pdo->inTransaction()) {
+            $pdo->rollback();
+        }
         $error = "Error updating command position: " . $e->getMessage();
     }
 }
@@ -276,7 +291,8 @@ function isEligibleForPosition($person, $position, $requirements, $rank_hierarch
 					<div style="background: rgba(204, 68, 68, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0; border: 1px solid var(--red);">
 						<h4>Captain Authorization Required</h4>
 						<p style="color: var(--red);"><strong>Access Level:</strong> Captain Only</p>
-						<p style="color: var(--orange);"><em>Click "Edit" on any position to assign personnel. System automatically filters by rank and department requirements.</em></p>
+						<p style="color: var(--orange);"><em>Click "Edit" on any position to assign personnel. All crew members are available for selection. If someone holds a different position, they will be automatically moved to the new assignment.</em></p>
+						<p style="color: var(--bluey); font-size: 0.9rem;"><strong>Legend:</strong> ✓ = Meets requirements | ⚠ = Does not meet rank/department requirements</p>
 						
 						<!-- Debug: Show filled positions -->
 						<div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 5px;">
@@ -314,11 +330,14 @@ function isEligibleForPosition($person, $position, $requirements, $rank_hierarch
 										<select name="personnel_id" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--red); margin: 0.5rem 0;">
 											<option value="none">Vacant Position</option>
 											<?php foreach ($all_personnel as $personnel): ?>
-												<?php if (isEligibleForPosition($personnel, $position, $position_requirements[$position], $rank_hierarchy)): ?>
-													<option value="<?php echo $personnel['id']; ?>" <?php echo ($person && $person['id'] == $personnel['id']) ? 'selected' : ''; ?>>
-														<?php echo htmlspecialchars($personnel['rank'] . ' ' . $personnel['first_name'] . ' ' . $personnel['last_name'] . ' (' . $personnel['department'] . ')'); ?>
-													</option>
-												<?php endif; ?>
+												<?php 
+												$is_eligible = isEligibleForPosition($personnel, $position, $position_requirements[$position], $rank_hierarchy);
+												$current_position = $personnel['position'] ? ' [Currently: ' . $personnel['position'] . ']' : '';
+												$eligibility_indicator = $is_eligible ? '✓' : '⚠';
+												?>
+												<option value="<?php echo $personnel['id']; ?>" <?php echo ($person && $person['id'] == $personnel['id']) ? 'selected' : ''; ?>>
+													<?php echo htmlspecialchars($eligibility_indicator . ' ' . $personnel['rank'] . ' ' . $personnel['first_name'] . ' ' . $personnel['last_name'] . ' (' . $personnel['department'] . ')' . $current_position); ?>
+												</option>
 											<?php endforeach; ?>
 										</select>
 										<div>
@@ -386,11 +405,14 @@ function isEligibleForPosition($person, $position, $requirements, $rank_hierarch
 											<select name="personnel_id" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--bluey); margin: 0.5rem 0;">
 												<option value="none">Vacant Position</option>
 												<?php foreach ($all_personnel as $personnel): ?>
-													<?php if (isEligibleForPosition($personnel, $position, $position_requirements[$position], $rank_hierarchy)): ?>
-														<option value="<?php echo $personnel['id']; ?>" <?php echo ($person && $person['id'] == $personnel['id']) ? 'selected' : ''; ?>>
-															<?php echo htmlspecialchars($personnel['rank'] . ' ' . $personnel['first_name'] . ' ' . $personnel['last_name'] . ' (' . $personnel['department'] . ')'); ?>
-														</option>
-													<?php endif; ?>
+													<?php 
+													$is_eligible = isEligibleForPosition($personnel, $position, $position_requirements[$position], $rank_hierarchy);
+													$current_position = $personnel['position'] ? ' [Currently: ' . $personnel['position'] . ']' : '';
+													$eligibility_indicator = $is_eligible ? '✓' : '⚠';
+													?>
+													<option value="<?php echo $personnel['id']; ?>" <?php echo ($person && $person['id'] == $personnel['id']) ? 'selected' : ''; ?>>
+														<?php echo htmlspecialchars($eligibility_indicator . ' ' . $personnel['rank'] . ' ' . $personnel['first_name'] . ' ' . $personnel['last_name'] . ' (' . $personnel['department'] . ')' . $current_position); ?>
+													</option>
 												<?php endforeach; ?>
 											</select>
 											<div>

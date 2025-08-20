@@ -27,6 +27,17 @@ $department_permissions = [
     'Command' => 'Command'
 ];
 
+// Map individual departments to roster display departments
+$roster_department_mapping = [
+    'Medical' => 'MED/SCI',
+    'Science' => 'MED/SCI',
+    'Engineering' => 'ENG/OPS', 
+    'Operations' => 'ENG/OPS',
+    'Security' => 'SEC/TAC',
+    'Tactical' => 'SEC/TAC',
+    'Command' => 'Command'
+];
+
 // Available ranks (excluding command ranks)
 $available_ranks = [
     'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class',
@@ -57,6 +68,9 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
         if (!array_key_exists($_POST['department'], $department_permissions)) {
             throw new Exception("Invalid department selected.");
         }
+        
+        // Map selected department to roster display format
+        $roster_department = $roster_department_mapping[$_POST['department']];
         
         // Check character name uniqueness for this user
         $stmt = $pdo->prepare("SELECT id FROM roster WHERE user_id = ? AND character_name = ? AND is_active = 1");
@@ -104,7 +118,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
             $_POST['first_name'],
             $_POST['last_name'],
             $_POST['species'],
-            $_POST['department'],
+            $roster_department,  // Use mapped department
             $_POST['position'],
             $_POST['rank'],
             $image_path
@@ -133,7 +147,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
             $_SESSION['rank'] = $_POST['rank'];
             $_SESSION['position'] = $_POST['position'];
             $_SESSION['department'] = $permission_group;
-            $_SESSION['roster_department'] = $_POST['department'];
+            $_SESSION['roster_department'] = $roster_department;
         } else {
             // Ask if they want to switch to this new character
             $success = "Character '" . htmlspecialchars($_POST['character_name']) . "' created successfully! <a href='profile.php' style='color: var(--blue);'>Switch to this character</a> or continue with your current character.";

@@ -63,24 +63,30 @@ if ($_POST) {
             
             // Map roster department to user department permissions
             $user_department = '';
+            $roster_department = '';
             switch($department) {
                 case 'Medical':
                 case 'Science':
                     $user_department = 'MED/SCI';
+                    $roster_department = 'MED/SCI';
                     break;
                 case 'Engineering':
                 case 'Operations':
                     $user_department = 'ENG/OPS';
+                    $roster_department = 'ENG/OPS';
                     break;
                 case 'Security':
                 case 'Tactical':
                     $user_department = 'SEC/TAC';
+                    $roster_department = 'SEC/TAC';
                     break;
                 case 'Command':
                     $user_department = 'Command';
+                    $roster_department = 'Command';
                     break;
                 default:
                     $user_department = 'SEC/TAC'; // Default fallback
+                    $roster_department = 'SEC/TAC';
                     break;
             }
             
@@ -92,7 +98,7 @@ if ($_POST) {
             // Create roster entry and link to user
             $character_name = $first_name . ' ' . $last_name;
             $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, user_id, character_name, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW())");
-            $stmt->execute([$rank, $first_name, $last_name, $species, $department, $user_id, $character_name]);
+            $stmt->execute([$rank, $first_name, $last_name, $species, $roster_department, $user_id, $character_name]);
             $character_id = $pdo->lastInsertId();
             
             // Set this as the user's active character
@@ -108,7 +114,7 @@ if ($_POST) {
             $_SESSION['first_name'] = $first_name;
             $_SESSION['last_name'] = $last_name;
             $_SESSION['department'] = $user_department; // User permission department (MED/SCI, ENG/OPS, SEC/TAC)
-            $_SESSION['roster_department'] = $department; // Roster display department
+            $_SESSION['roster_department'] = $roster_department; // Roster display department
             $_SESSION['steamid'] = $_SESSION['pending_steam_id']; // Set steamid for session
             
             // Update last login

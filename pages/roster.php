@@ -183,12 +183,14 @@ try {
         'Command' => 0,
         'ENG/OPS' => 0,
         'MED/SCI' => 0,
-        'SEC/TAC' => 0
+        'SEC/TAC' => 0,
+        'Unassigned' => 0
     ];
     
     foreach ($all_crew as $crew_member) {
-        if (isset($department_counts[$crew_member['department']])) {
-            $department_counts[$crew_member['department']]++;
+        $dept = $crew_member['department'] ?? 'Unassigned';
+        if (isset($department_counts[$dept])) {
+            $department_counts[$dept]++;
         }
     }
     
@@ -523,6 +525,11 @@ $ranks = [
 							<button class="filter-btn" onclick="filterByDepartment('SEC/TAC')" data-department="SEC/TAC" style="background-color: var(--orange); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 5px; font-weight: bold; cursor: pointer;">
 								SEC/TAC (<?php echo $department_counts['SEC/TAC']; ?>)
 							</button>
+							<?php if ($department_counts['Unassigned'] > 0): ?>
+							<button class="filter-btn" onclick="filterByDepartment('Unassigned')" data-department="Unassigned" style="background-color: var(--gray); color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 5px; font-weight: bold; cursor: pointer;">
+								Unassigned (<?php echo $department_counts['Unassigned']; ?>)
+							</button>
+							<?php endif; ?>
 						</div>
 						<div id="filter-status" style="text-align: center; margin-top: 1rem; color: var(--gold); font-size: 0.9rem;">
 							Showing all <?php echo $department_counts['All']; ?> personnel
@@ -538,8 +545,9 @@ $ranks = [
 								case 'ENG/OPS': echo 'eng-ops-box'; break;
 								case 'MED/SCI': echo 'med-sci-box'; break;
 								case 'SEC/TAC': echo 'sec-tac-box'; break;
+								default: echo 'crew-card'; break; // Default styling for unassigned
 							}
-						?>" data-department="<?php echo htmlspecialchars($crew_member['department']); ?>">
+						?>" data-department="<?php echo htmlspecialchars($crew_member['department'] ?? 'Unassigned'); ?>">
 							<?php if ($crew_member['image_path']): ?>
 								<?php 
 								$image_file_path = '../' . $crew_member['image_path'];
@@ -555,7 +563,7 @@ $ranks = [
 							<strong><?php echo htmlspecialchars($crew_member['rank']); ?></strong><br>
 							<h4><?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?></h4>
 							<p>Species: <?php echo htmlspecialchars($crew_member['species']); ?></p>
-							<p>Department: <?php echo htmlspecialchars($crew_member['department']); ?></p>
+							<p>Department: <?php echo htmlspecialchars($crew_member['department'] ?? 'Unassigned'); ?></p>
 							<?php if ($crew_member['position']): ?>
 							<p><em><?php echo htmlspecialchars($crew_member['position']); ?></em></p>
 							<?php endif; ?>
