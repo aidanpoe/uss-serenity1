@@ -284,17 +284,6 @@ $ranks = [
 			border-color: var(--red);
 			background: rgba(204, 68, 68, 0.1);
 		}
-		.command-compact {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			grid-template-rows: auto auto;
-			gap: 0.5rem;
-		}
-		.command-single {
-			grid-column: 1 / -1;
-			justify-self: center;
-			max-width: 48%;
-		}
 		.med-sci-department {
 			border-color: var(--blue);
 			background: rgba(85, 102, 255, 0.1);
