@@ -17,13 +17,32 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'fault_report') {
                 $reported_by_roster_id = $current_character['character_id'];
             }
             
+            // Prepare location data based on type
+            $location_type = $_POST['location_type'];
+            $deck_number = null;
+            $room = null;
+            $jefferies_tube_number = null;
+            $access_point = null;
+            
+            if ($location_type === 'Internal') {
+                $deck_number = $_POST['deck_number'] ?? null;
+                $room = $_POST['room'] ?? null;
+            } elseif ($location_type === 'External') {
+                $hull_direction = $_POST['hull_direction'] ?? '';
+                $hull_position = $_POST['hull_position'] ?? '';
+                $room = $hull_direction . ($hull_position ? ' - ' . $hull_position : '');
+            } elseif ($location_type === 'Jefferies Tube') {
+                $access_point = $_POST['access_point'] ?? null;
+                $jefferies_tube_number = 'Near: ' . $access_point;
+            }
+            
             $stmt = $pdo->prepare("INSERT INTO fault_reports (location_type, deck_number, room, jefferies_tube_number, access_point, fault_description, reported_by_roster_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $_POST['location_type'],
-                $_POST['deck_number'] ?? null,
-                $_POST['room'] ?? null,
-                $_POST['jefferies_tube_number'] ?? null,
-                $_POST['access_point'] ?? null,
+                $location_type,
+                $deck_number,
+                $room,
+                $jefferies_tube_number,
+                $access_point,
                 $_POST['fault_description'],
                 $reported_by_roster_id
             ]);
@@ -183,8 +202,8 @@ try {
 									<label style="color: var(--orange);">Location Type:</label>
 									<select name="location_type" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);" onchange="toggleLocationFields()">
 										<option value="">Select Location Type</option>
-										<option value="Deck">Deck/Room</option>
-										<option value="Hull">Hull</option>
+										<option value="Internal">Internal</option>
+										<option value="External">External</option>
 										<option value="Jefferies Tube">Jefferies Tube</option>
 									</select>
 								</div>
@@ -198,25 +217,95 @@ try {
 								</div>
 							</div>
 							
-							<div id="deckFields" style="display: none; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-								<div>
-									<label style="color: var(--orange);">Deck Number:</label>
-									<input type="number" name="deck_number" min="1" max="15" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
-								</div>
-								<div>
-									<label style="color: var(--orange);">Room/Section:</label>
-									<input type="text" name="room" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
+							<!-- Internal Location Fields -->
+							<div id="internalFields" style="display: none; margin-bottom: 1rem;">
+								<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+									<div>
+										<label style="color: var(--orange);">Deck:</label>
+										<select name="deck_number" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);" onchange="updateSections()">
+											<option value="">Select Deck</option>
+											<option value="1">Deck 1</option>
+											<option value="2">Deck 2</option>
+											<option value="3">Deck 3</option>
+											<option value="4">Deck 4</option>
+											<option value="5">Deck 5</option>
+											<option value="6">Deck 6</option>
+											<option value="11">Deck 11</option>
+										</select>
+									</div>
+									<div>
+										<label style="color: var(--orange);">Section:</label>
+										<select name="room" id="sectionSelect" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
+											<option value="">Select Section</option>
+										</select>
+									</div>
 								</div>
 							</div>
 							
-							<div id="jefferiesFields" style="display: none; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-								<div>
-									<label style="color: var(--orange);">Jefferies Tube Number:</label>
-									<input type="text" name="jefferies_tube_number" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
+							<!-- External Location Fields -->
+							<div id="externalFields" style="display: none; margin-bottom: 1rem;">
+								<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+									<div>
+										<label style="color: var(--orange);">Hull Direction:</label>
+										<select name="hull_direction" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);" onchange="updateHullPosition()">
+											<option value="">Select Direction</option>
+											<option value="Forward">Forward</option>
+											<option value="Starboard">Starboard</option>
+											<option value="Stern">Stern</option>
+											<option value="Port">Port</option>
+										</select>
+									</div>
+									<div>
+										<label style="color: var(--orange);">Hull Position:</label>
+										<select name="hull_position" id="hullPositionSelect" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
+											<option value="">Select Position</option>
+										</select>
+									</div>
 								</div>
+							</div>
+							
+							<!-- Jefferies Tube Fields -->
+							<div id="jefferiesFields" style="display: none; margin-bottom: 1rem;">
 								<div>
-									<label style="color: var(--orange);">Closest Access Point:</label>
-									<input type="text" name="access_point" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
+									<label style="color: var(--orange);">Nearest Access Point:</label>
+									<select name="access_point" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--orange);">
+										<option value="">Select Access Point</option>
+										<optgroup label="Deck 1">
+											<option value="Deck 1 - Section 4 Hallway">Section 4 Hallway</option>
+										</optgroup>
+										<optgroup label="Deck 2">
+											<option value="Deck 2 - Section 2 Turbo lift">Section 2 Turbo lift</option>
+											<option value="Deck 2 - Section 3 VIP Quarters 1">Section 3 VIP Quarters 1</option>
+											<option value="Deck 2 - Section 4 The Raven">Section 4 The Raven</option>
+											<option value="Deck 2 - Section 5 Science Lab">Section 5 Science Lab</option>
+										</optgroup>
+										<optgroup label="Deck 3">
+											<option value="Deck 3 - Turbo lift: left hatch">Turbo lift: left hatch</option>
+											<option value="Deck 3 - Turbo lift: right hatch">Turbo lift: right hatch</option>
+											<option value="Deck 3 - XO Quarters">XO Quarters</option>
+											<option value="Deck 3 - SO Quarters">SO Quarters</option>
+										</optgroup>
+										<optgroup label="Deck 4">
+											<option value="Deck 4 - Turbo lift: left hatch">Turbo lift: left hatch</option>
+											<option value="Deck 4 - Turbo lift: right hatch">Turbo lift: right hatch</option>
+											<option value="Deck 4 - Section 4 Security">Section 4 Security</option>
+											<option value="Deck 4 - Section 3 Transporter room">Section 3 Transporter room</option>
+										</optgroup>
+										<optgroup label="Deck 5">
+											<option value="Deck 5 - Turbo lift hatch">Turbo lift hatch</option>
+											<option value="Deck 5 - Turbo lift door">Turbo lift door</option>
+											<option value="Deck 5 - Section 3 Science Lab">Section 3 Science Lab</option>
+										</optgroup>
+										<optgroup label="Deck 6">
+											<option value="Deck 6 - Section 3 Left Holodeck">Section 3 Left Holodeck</option>
+											<option value="Deck 6 - Section 4 Right Holodeck">Section 4 Right Holodeck</option>
+											<option value="Deck 6 - Section 15B Sickbay Lab">Section 15B Sickbay Lab</option>
+										</optgroup>
+										<optgroup label="Deck 11">
+											<option value="Deck 11 - Section 4 Engineering lower level">Section 4 Engineering lower level</option>
+											<option value="Deck 11 - Section 4 Engineering higher level">Section 4 Engineering higher level</option>
+										</optgroup>
+									</select>
 								</div>
 							</div>
 							
@@ -333,18 +422,149 @@ try {
 	<script>
 		function toggleLocationFields() {
 			const locationType = document.querySelector('select[name="location_type"]').value;
-			const deckFields = document.getElementById('deckFields');
+			const internalFields = document.getElementById('internalFields');
+			const externalFields = document.getElementById('externalFields');
 			const jefferiesFields = document.getElementById('jefferiesFields');
 			
 			// Hide all fields first
-			deckFields.style.display = 'none';
+			internalFields.style.display = 'none';
+			externalFields.style.display = 'none';
 			jefferiesFields.style.display = 'none';
 			
 			// Show relevant fields
-			if (locationType === 'Deck') {
-				deckFields.style.display = 'grid';
+			if (locationType === 'Internal') {
+				internalFields.style.display = 'block';
+			} else if (locationType === 'External') {
+				externalFields.style.display = 'block';
 			} else if (locationType === 'Jefferies Tube') {
-				jefferiesFields.style.display = 'grid';
+				jefferiesFields.style.display = 'block';
+			}
+		}
+		
+		function updateSections() {
+			const deckNumber = document.querySelector('select[name="deck_number"]').value;
+			const sectionSelect = document.getElementById('sectionSelect');
+			
+			// Clear existing options
+			sectionSelect.innerHTML = '<option value="">Select Section</option>';
+			
+			const sections = {
+				'1': [
+					'Section 1 Bridge',
+					'Section 2 Ready Room',
+					'Section 3 Conference Room',
+					'Section 4 Hallway',
+					'Section 5 Turbo lift 1',
+					'Section 5B Turbo lift 2',
+					'Section 6 Airlock'
+				],
+				'2': [
+					'Section 1 Hallway Inboard',
+					'Section 1B hallway Starboard',
+					'Section 1C Hallway Port',
+					'Section 2 Turbo lift',
+					'Section 3 VIP Quarters 1',
+					'Section 4 The Raven',
+					'Section 5 Science Lab',
+					'Section 13 Mess Hall'
+				],
+				'3': [
+					'Section 1 Hallway Forward',
+					'Section 1B Hallway Aft',
+					'Section 1C Hallway Starboard',
+					'Section 1D Hallway Port',
+					'Section 2 Turbo lift 1',
+					'Section 2B Turbolift 2',
+					'Section 3 Captains Quarters',
+					'Section 4 Small Conference Room',
+					'Section 5 Officers Quarters 1',
+					'Section 6 Officers Quarters 2',
+					'Section 7 Officers Quarters 3',
+					'Section 8 Officers Quarters 4',
+					'Section 9 Officers Quarters 5',
+					'Section 10 Officers Quarters 6'
+				],
+				'4': [
+					'Section 1 Hallway',
+					'Section 1B Hallway Security',
+					'Section 2 Turbo lift',
+					'Section 3 Transporter room',
+					'Section 4 Security',
+					'Section 5 Brig 1',
+					'Section 5B Brig Cell 1',
+					'Section 6 Brig 2',
+					'Section 6B Brig Cell 2',
+					'Section 7 Brig 3',
+					'Section 7B Brig Cell 3',
+					'Section 8 Brig 4',
+					'Section 8B Interview brig cell 4'
+				],
+				'5': [
+					'Section 1 Hallway inboard',
+					'Section 1B Hallway Aft',
+					'Section 1C Hallway Forward',
+					'Section 2 Turbo lift',
+					'Section 3 Science Lab',
+					'Section 4 Crew Quarters 1',
+					'Section 5 Crew Quarters 2',
+					'Section 6 Crew Quarters 3',
+					'Section 7 Crew Quarters 4',
+					'Section 8 Crew Quarters 5',
+					'Section 9 Crew Quarters 6',
+					'Section 10 Crew Quarters 7',
+					'Section 11 Crew Quarters 8',
+					'Section 12 Crew Quarters 9',
+					'Section 13 Crew Quarters 10',
+					'Section 14 Crew Quarters 11',
+					'Section 15 Crew Quarters 12',
+					'Section 16 Crew Quarters 13',
+					'Section 17 Crew Quarters 14',
+					'Section 18 Crew Quarters 15',
+					'Section 19 Crew Quarters 16'
+				],
+				'6': [
+					'Section 1 Hallway',
+					'Section 2 Turbo Lift',
+					'Section 3 Left Holodeck',
+					'Section 4 Right Holodeck',
+					'Section 15 Sickbay',
+					'Section 15B Sickbay Lab'
+				],
+				'11': [
+					'Section 1B1 Hallway Starboard',
+					'Section 2B1 Turbo lift 2',
+					'Section 4 Engineering',
+					'Section 5 Turbo lift 1',
+					'Section 7 Cargo bay',
+					'Section 8 Hallway Inboard'
+				]
+			};
+			
+			if (sections[deckNumber]) {
+				sections[deckNumber].forEach(section => {
+					const option = document.createElement('option');
+					option.value = section;
+					option.textContent = section;
+					sectionSelect.appendChild(option);
+				});
+			}
+		}
+		
+		function updateHullPosition() {
+			const hullDirection = document.querySelector('select[name="hull_direction"]').value;
+			const hullPositionSelect = document.getElementById('hullPositionSelect');
+			
+			// Clear existing options
+			hullPositionSelect.innerHTML = '<option value="">Select Position</option>';
+			
+			if (hullDirection) {
+				const positions = ['Dorsal (Top of ship)', 'Ventral (Bottom of ship)'];
+				positions.forEach(position => {
+					const option = document.createElement('option');
+					option.value = position;
+					option.textContent = position;
+					hullPositionSelect.appendChild(option);
+				});
 			}
 		}
 	</script>
