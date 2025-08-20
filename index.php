@@ -453,6 +453,7 @@ function loginbutton($buttonstyle = "square") {
 				
 				this.lastMessageId = 0;
 				this.eventSource = null;
+				this.pollingInterval = null;
 				this.reconnectAttempts = 0;
 				this.maxReconnectAttempts = 5;
 				this.reconnectDelay = 1000;
@@ -461,7 +462,7 @@ function loginbutton($buttonstyle = "square") {
 				this.sendingMessage = false;
 				
 				// User department for delete permissions
-				this.userDepartment = '<?php echo isset($_SESSION['department']) ? strtolower($_SESSION['department']) : ''; ?>';
+				this.userDepartment = "<?php echo isset($_SESSION['department']) ? strtolower($_SESSION['department']) : ''; ?>";
 				this.isCommand = (this.userDepartment === 'command');
 				
 				this.init();
@@ -559,6 +560,13 @@ function loginbutton($buttonstyle = "square") {
 			}
 			
 			startRealTimeConnection() {
+				// Check if EventSource is supported
+				if (typeof EventSource === 'undefined') {
+					console.warn('EventSource not supported, falling back to polling');
+					this.fallbackToPolling();
+					return;
+				}
+				
 				if (this.eventSource) {
 					this.eventSource.close();
 				}
@@ -923,7 +931,33 @@ function loginbutton($buttonstyle = "square") {
 					this.eventSource.close();
 					this.eventSource = null;
 				}
+				if (this.pollingInterval) {
+					clearInterval(this.pollingInterval);
+					this.pollingInterval = null;
+				}
 				this.isConnected = false;
+			}
+			
+			fallbackToPolling() {
+				console.log('Using polling fallback for real-time updates');
+				this.showConnectionStatus('Polling Mode', 'orange');
+				
+				// Poll for new messages every 5 seconds
+				this.pollingInterval = setInterval(async () => {
+					try {
+						const response = await fetch(`api/messaging.php?action=get_messages&limit=25`);
+						const data = await response.json();
+						
+						if (data.messages && data.messages.length > 0) {
+							const newMessages = data.messages.filter(msg => msg.id > this.lastMessageId);
+							if (newMessages.length > 0) {
+								this.handleNewMessages(newMessages);
+							}
+						}
+					} catch (error) {
+						console.error('Polling error:', error);
+					}
+				}, 5000);
 			}
 		}
 		
