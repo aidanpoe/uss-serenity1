@@ -3,17 +3,25 @@ require_once '../includes/config.php';
 
 // Handle suggestion submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'submit_suggestion') {
-    try {
-        $pdo = getConnection();
-        $stmt = $pdo->prepare("INSERT INTO command_suggestions (suggestion_title, suggestion_description, submitted_by) VALUES (?, ?, ?)");
-        $stmt->execute([
-            $_POST['suggestion_title'],
-            $_POST['suggestion_description'],
-            $_POST['submitted_by']
-        ]);
-        $success = "Suggestion submitted successfully.";
-    } catch (Exception $e) {
-        $error = "Error submitting suggestion: " . $e->getMessage();
+    if (!isLoggedIn()) {
+        $error = "You must be logged in to submit suggestions.";
+    } else {
+        try {
+            // Auto-populate submitted_by with current user's character
+            $submitted_by = ($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '');
+            $submitted_by = trim($submitted_by); // Remove extra spaces
+            
+            $pdo = getConnection();
+            $stmt = $pdo->prepare("INSERT INTO command_suggestions (suggestion_title, suggestion_description, submitted_by) VALUES (?, ?, ?)");
+            $stmt->execute([
+                $_POST['suggestion_title'],
+                $_POST['suggestion_description'],
+                $submitted_by
+            ]);
+            $success = "Suggestion submitted successfully.";
+        } catch (Exception $e) {
+            $error = "Error submitting suggestion: " . $e->getMessage();
+        }
     }
 }
 
@@ -216,6 +224,7 @@ try {
 					<?php endif; ?>
 					
 					<!-- Public Suggestion Form -->
+					<?php if (isLoggedIn()): ?>
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 2px solid var(--red); margin: 2rem 0;">
 						<h4>Submit Suggestion to Command</h4>
 						<form method="POST" action="">
@@ -233,12 +242,25 @@ try {
 							
 							<div style="margin-bottom: 1rem;">
 								<label style="color: var(--red);">Submitted By:</label>
-								<input type="text" name="submitted_by" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--red);">
+								<?php 
+								$current_user = trim(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
+								?>
+								<input type="text" value="<?php echo htmlspecialchars($current_user); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--blue); border: 1px solid var(--blue); cursor: not-allowed;">
+								<small style="color: var(--blue); font-size: 0.8rem;">Auto-filled from your current character profile</small>
 							</div>
 							
 							<button type="submit" style="background-color: var(--red); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; width: 100%;">Submit Suggestion</button>
 						</form>
 					</div>
+					<?php else: ?>
+					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 2px solid var(--red); margin: 2rem 0;">
+						<h4>Submit Suggestion to Command</h4>
+						<p style="color: var(--red); text-align: center;">You must be logged in to submit suggestions to Command.</p>
+						<div style="text-align: center; margin-top: 1rem;">
+							<a href="../index.php" style="background-color: var(--red); color: black; padding: 1rem 2rem; border-radius: 5px; text-decoration: none; display: inline-block;">Return to Login</a>
+						</div>
+					</div>
+					<?php endif; ?>
 					
 					<?php if (hasPermission('Command')): ?>
 					<!-- Suggestion Management -->
