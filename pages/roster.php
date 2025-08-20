@@ -852,44 +852,35 @@ $ranks = [
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
 						<h3 style="text-align: center; color: var(--orange); margin-bottom: 2rem;">USS SERENITY RANK STRUCTURE</h3>
 						
-						<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
-							<!-- Enlisted Ranks -->
-							<div style="background: rgba(255, 215, 0, 0.1); border: 2px solid var(--gold); border-radius: 10px; padding: 1.5rem;">
-								<h4 style="color: var(--gold); text-align: center; margin-bottom: 1rem; border-bottom: 1px solid var(--gold); padding-bottom: 0.5rem;">ENLISTED PERSONNEL</h4>
+						<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+							<!-- NCO Ranks -->
+							<div style="background: rgba(138, 43, 226, 0.1); border: 2px solid #8A2BE2; border-radius: 10px; padding: 1.5rem;">
+								<h4 style="color: #8A2BE2; text-align: center; margin-bottom: 1rem; border-bottom: 1px solid #8A2BE2; padding-bottom: 0.5rem;">NON-COMMISSIONED OFFICERS</h4>
 								<div style="font-size: 0.9rem; line-height: 1.6;">
-									<div style="margin-bottom: 0.5rem;"><strong>Crewman 3rd Class</strong> - Entry Level</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Crewman 2nd Class</strong> - Basic Experience</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Crewman 1st Class</strong> - Experienced</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 3rd Class</strong> - Specialist</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 1st Class</strong> - Senior Specialist</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Chief Petty Officer</strong> - Department Lead</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Senior Chief Petty Officer</strong> - Senior Lead</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Master Chief Petty Officer</strong> - Master Lead</div>
-									<div><strong>Command Master Chief</strong> - Senior Enlisted Advisor</div>
-								</div>
-							</div>
-							
-							<!-- Warrant Officers -->
-							<div style="background: rgba(0, 136, 255, 0.1); border: 2px solid var(--blue); border-radius: 10px; padding: 1.5rem;">
-								<h4 style="color: var(--blue); text-align: center; margin-bottom: 1rem; border-bottom: 1px solid var(--blue); padding-bottom: 0.5rem;">WARRANT OFFICERS</h4>
-								<div style="font-size: 0.9rem; line-height: 1.6;">
-									<div style="margin-bottom: 0.5rem;"><strong>Warrant Officer</strong> - Technical Specialist</div>
-									<div style="color: var(--orange); font-size: 0.85rem; font-style: italic;">
-										Highly specialized technical experts in specific fields such as engineering, tactical systems, or medical technology.
-									</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Crewman 3rd Class (CRW3)</strong> - Entry Level</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Crewman 2nd Class (CRW2)</strong> - Basic Experience</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Crewman 1st Class (CRW1)</strong> - Experienced</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 3rd Class (PO3)</strong> - Junior Specialist</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 2nd Class (PO2)</strong> - Specialist</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Petty Officer 1st Class (PO1)</strong> - Senior Specialist</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Chief Petty Officer (CPO)</strong> - Department Lead</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Senior Chief Petty Officer (SCPO)</strong> - Senior Lead</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Master Chief Petty Officer (MCPO)</strong> - Master Lead</div>
+									<div><strong>Command Master Chief Petty Officer (CMCPO)</strong> - Senior Enlisted Advisor</div>
 								</div>
 							</div>
 							
 							<!-- Commissioned Officers -->
-							<div style="background: rgba(255, 136, 0, 0.1); border: 2px solid var(--orange); border-radius: 10px; padding: 1.5rem;">
-								<h4 style="color: var(--orange); text-align: center; margin-bottom: 1rem; border-bottom: 1px solid var(--orange); padding-bottom: 0.5rem;">COMMISSIONED OFFICERS</h4>
+							<div style="background: rgba(0, 255, 127, 0.1); border: 2px solid #00FF7F; border-radius: 10px; padding: 1.5rem;">
+								<h4 style="color: #00FF7F; text-align: center; margin-bottom: 1rem; border-bottom: 1px solid #00FF7F; padding-bottom: 0.5rem;">COMMISSIONED OFFICERS</h4>
 								<div style="font-size: 0.9rem; line-height: 1.6;">
-									<div style="margin-bottom: 0.5rem;"><strong>Ensign</strong> - Junior Officer</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Junior Grade</strong> - Experienced Junior</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant</strong> - Department Officer</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Commander</strong> - Senior Officer</div>
-									<div style="margin-bottom: 0.5rem;"><strong>Commander</strong> - Department Head</div>
-									<div><strong>Captain</strong> - Commanding Officer</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Warrant Officer (WO)</strong> - Technical Specialist</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Ensign (ENS)</strong> - Junior Officer</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Junior Grade (LT. JG)</strong> - Experienced Junior</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant (LT)</strong> - Department Officer</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Lieutenant Commander (LT. CMD)</strong> - Senior Officer</div>
+									<div style="margin-bottom: 0.5rem;"><strong>Commander (CMD)</strong> - Department Head</div>
+									<div><strong>Captain (CPT)</strong> - Commanding Officer</div>
 								</div>
 							</div>
 							
@@ -897,7 +888,7 @@ $ranks = [
 							<div style="background: rgba(255, 0, 0, 0.1); border: 2px solid var(--red); border-radius: 10px; padding: 1.5rem;">
 								<h4 style="color: var(--red); text-align: center; margin-bottom: 1rem; border-bottom: 1px solid var(--red); padding-bottom: 0.5rem;">COMMAND AUTHORITY</h4>
 								<div style="font-size: 0.9rem; line-height: 1.6;">
-									<div style="margin-bottom: 0.75rem;"><strong style="color: var(--red);">Captain</strong><br>
+									<div style="margin-bottom: 0.75rem;"><strong style="color: var(--red);">Captain (CPT)</strong><br>
 									<span style="font-size: 0.85rem; color: var(--orange);">Ultimate authority over ship operations, crew, and mission execution.</span></div>
 									
 									<div style="margin-bottom: 0.75rem;"><strong style="color: var(--red);">First Officer (XO)</strong><br>
