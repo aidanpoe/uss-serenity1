@@ -224,7 +224,7 @@ function loginbutton($buttonstyle = "square") {
 									<a href="https://docs.google.com/document/d/1MwVJZp0NW9SL85EVUFxCENwIrHGyL5uFuWvKGRoO6Sg/edit?tab=t.0" target="_blank" style="color: var(--bluey);">→ Rules of Play</a>
 								</li>
 								<li style="margin: 0.5rem 0;">
-									<a href="#" onclick="alert('Link coming soon'); return false;" style="color: var(--bluey);">→ Discord</a>
+									<a href="#" onclick="showDiscordModal(); return false;" style="color: var(--bluey);">→ Discord</a>
 								</li>
 								<li style="margin: 0.5rem 0;">
 									<a href="#" onclick="showShipBoardingConfirm(); return false;" style="color: var(--bluey);">→ Ship Boarding</a>
@@ -240,6 +240,19 @@ function loginbutton($buttonstyle = "square") {
 			</div>
 		</div>
 	</section>
+	
+	<!-- LCARS Discord Modal -->
+	<div id="discordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+		<div style="background: linear-gradient(135deg, #000000, #1a1a2e); border: 3px solid var(--orange); border-radius: 15px; padding: 2rem; max-width: 500px; text-align: center; box-shadow: 0 0 30px rgba(255, 136, 0, 0.5);">
+			<div style="border-bottom: 2px solid var(--orange); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+				<h3 style="color: var(--orange); margin: 0; font-size: 1.3rem;">LCARS - COMMUNICATION CHANNEL</h3>
+			</div>
+			<div style="margin: 1.5rem 0; color: var(--bluey); font-size: 1.1rem; line-height: 1.5;">
+				<p style="margin: 0; font-weight: bold;">Taking you to Discord</p>
+				<p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Please stand by...</p>
+			</div>
+		</div>
+	</div>
 	
 	<!-- LCARS Ship Boarding Confirmation Modal -->
 	<div id="shipBoardingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
@@ -259,6 +272,38 @@ function loginbutton($buttonstyle = "square") {
 	</div>
 	
 	<script>
+		function showDiscordModal() {
+			const modal = document.getElementById('discordModal');
+			modal.style.display = 'flex';
+			modal.style.opacity = '0';
+			setTimeout(() => {
+				modal.style.transition = 'opacity 0.3s ease';
+				modal.style.opacity = '1';
+				
+				// After 2 seconds, redirect to Discord and fade out
+				setTimeout(() => {
+					// Open Discord link in new tab
+					window.open('https://discord.gg/r5r38Md3Xb', '_blank');
+					
+					// Fade out modal
+					modal.style.transition = 'opacity 0.5s ease';
+					modal.style.opacity = '0';
+					setTimeout(() => {
+						modal.style.display = 'none';
+					}, 500);
+				}, 2000);
+			}, 10);
+		}
+		
+		function closeDiscordModal() {
+			const modal = document.getElementById('discordModal');
+			modal.style.transition = 'opacity 0.3s ease';
+			modal.style.opacity = '0';
+			setTimeout(() => {
+				modal.style.display = 'none';
+			}, 300);
+		}
+		
 		function showShipBoardingConfirm() {
 			const modal = document.getElementById('shipBoardingModal');
 			modal.style.display = 'flex';
