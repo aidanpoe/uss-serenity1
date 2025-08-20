@@ -40,10 +40,10 @@ try {
             $sender_rank = $_SESSION['rank'] ?? '';
             $sender_department = $_SESSION['department'] ?? '';
             
-            // Insert message
+            // Insert message with 7-day expiration
             $stmt = $pdo->prepare("
-                INSERT INTO crew_messages (sender_id, sender_name, sender_rank, sender_department, message) 
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO crew_messages (sender_id, sender_name, sender_rank, sender_department, message, expires_at) 
+                VALUES (?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))
             ");
             $stmt->execute([$_SESSION['user_id'], $sender_name, $sender_rank, $sender_department, $message]);
             
@@ -54,14 +54,18 @@ try {
             break;
             
         case 'get_messages':
+            // Perform automatic cleanup of expired messages (limit to prevent performance issues)
+            $cleanupStmt = $pdo->prepare("DELETE FROM crew_messages WHERE expires_at < NOW() LIMIT 100");
+            $cleanupStmt->execute();
+            
             $limit = min(50, max(10, intval($_GET['limit'] ?? 25))); // Between 10-50 messages
             $before_id = intval($_GET['before_id'] ?? 0);
             
             $sql = "
-                SELECT id, sender_name, sender_rank, sender_department, message, timestamp,
+                SELECT id, sender_name, sender_rank, sender_department, message, timestamp, expires_at,
                        CASE WHEN sender_id = ? THEN 1 ELSE 0 END as is_own_message
                 FROM crew_messages 
-                WHERE is_deleted = 0
+                WHERE is_deleted = 0 AND expires_at > NOW()
             ";
             $params = [$_SESSION['user_id']];
             
@@ -83,7 +87,13 @@ try {
             // Format timestamps
             foreach ($messages as &$msg) {
                 $msg['timestamp'] = date('M j, H:i', strtotime($msg['timestamp']));
+                $msg['expires_at'] = date('M j, H:i', strtotime($msg['expires_at']));
                 $msg['is_own_message'] = (bool)$msg['is_own_message'];
+                
+                // Calculate time until expiration
+                $expiresTimestamp = strtotime($msg['expires_at']);
+                $daysUntilExpiry = ceil(($expiresTimestamp - time()) / (24 * 60 * 60));
+                $msg['days_until_expiry'] = max(0, $daysUntilExpiry);
             }
             
             echo json_encode(['messages' => $messages]);
@@ -129,13 +139,18 @@ try {
             $is_command = (strtolower($user_dept) === 'command');
             
             if ($is_command) {
-                // Command department can delete any message
-                $stmt = $pdo->prepare("UPDATE crew_messages SET is_deleted = 1 WHERE id = ?");
+                // Command department can delete any message (if not expired)
+                $stmt = $pdo->prepare("UPDATE crew_messages SET is_deleted = 1 WHERE id = ? AND expires_at > NOW()");
                 $stmt->execute([$message_id]);
             } else {
-                // Regular users can only delete their own messages
-                $stmt = $pdo->prepare("UPDATE crew_messages SET is_deleted = 1 WHERE id = ? AND sender_id = ?");
+                // Regular users can only delete their own messages (if not expired)
+                $stmt = $pdo->prepare("UPDATE crew_messages SET is_deleted = 1 WHERE id = ? AND sender_id = ? AND expires_at > NOW()");
                 $stmt->execute([$message_id, $_SESSION['user_id']]);
+            }
+            
+            if ($stmt->rowCount() === 0) {
+                echo json_encode(['error' => 'Message not found or already expired']);
+                exit;
             }
             
             echo json_encode(['success' => true]);

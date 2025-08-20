@@ -212,7 +212,7 @@ function loginbutton($buttonstyle = "square") {
 									</button>
 								</div>
 								<div style="text-align: right; margin-top: 0.5rem;">
-									<small style="color: var(--bluey);">Max 500 characters | Auto-refresh every 10 seconds</small>
+									<small style="color: var(--bluey);">Max 500 characters | Auto-refresh every 10 seconds | Messages expire after 7 days</small>
 								</div>
 							</div>
 						<?php endif; ?>
@@ -616,6 +616,9 @@ function loginbutton($buttonstyle = "square") {
 							</div>
 							<div style="display: flex; align-items: center; gap: 0.5rem;">
 								<span style="color: var(--bluey); font-size: 0.8rem;">${msg.timestamp}</span>
+								<span style="color: var(--orange); font-size: 0.7rem;" title="Message expires on ${msg.expires_at}">
+									${msg.days_until_expiry}d
+								</span>
 								${(isOwnMessage || isCommand) ? `<button onclick="deleteMessage(${msg.id})" style="background: var(--red); color: black; border: none; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem; cursor: pointer;" title="Delete message">🗑️</button>` : ''}
 							</div>
 						</div>
