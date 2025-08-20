@@ -265,6 +265,16 @@ $ranks = [
 			transform: translateY(-2px);
 		}
 		
+		.department-label {
+			font-size: 0.65rem;
+			font-weight: normal;
+			color: #999;
+			margin-bottom: 0.25rem;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			opacity: 0.8;
+		}
+		
 		.position-title {
 			font-size: 0.85rem;
 			font-weight: bold;
@@ -505,6 +515,7 @@ $ranks = [
 							<div class="command-row">
 								<!-- Commanding Officer - Center -->
 								<div class="officer-box command-co">
+									<div class="department-label">COMMAND</div>
 									<div class="position-title">COMMANDING OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Commanding Officer']): ?>
@@ -519,8 +530,9 @@ $ranks = [
 								</div>
 							</div>
 							<div class="command-row">
-								<!-- First Officer - Left, Second Officer - Right -->
+								<!-- First Officer - Left, Second Officer - Center, Third Officer - Right -->
 								<div class="officer-box command-xo">
+									<div class="department-label">COMMAND</div>
 									<div class="position-title">FIRST OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['First Officer']): ?>
@@ -534,6 +546,7 @@ $ranks = [
 									<?php endif; ?>
 								</div>
 								<div class="officer-box command-2o">
+									<div class="department-label">COMMAND</div>
 									<div class="position-title">SECOND OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Second Officer']): ?>
@@ -546,106 +559,8 @@ $ranks = [
 									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
 									<?php endif; ?>
 								</div>
-							</div>
-						</div>
-
-						<!-- Department Heads -->
-						<div class="command-tier department-heads">
-							<div class="tier-title">DEPARTMENT HEADS</div>
-							<div class="command-row">
-								<!-- Chief Medical Officer -->
-								<div class="officer-box dept-head medical">
-									<div class="position-title">CHIEF MEDICAL OFFICER</div>
-									<div class="officer-name">
-										<?php if ($command_positions['Chief Medical Officer']): ?>
-											<?php echo htmlspecialchars($command_positions['Chief Medical Officer']['rank'] . ' ' . $command_positions['Chief Medical Officer']['first_name'] . ' ' . $command_positions['Chief Medical Officer']['last_name']); ?>
-										<?php else: ?>
-											Position Vacant
-										<?php endif; ?>
-									</div>
-									<?php if (hasPermission('Captain')): ?>
-									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
-									<?php endif; ?>
-								</div>
-								
-								<!-- Chief Science Officer -->
-								<div class="officer-box dept-head science">
-									<div class="position-title">CHIEF SCIENCE OFFICER</div>
-									<div class="officer-name">
-										<?php if ($command_positions['Chief Science Officer']): ?>
-											<?php echo htmlspecialchars($command_positions['Chief Science Officer']['rank'] . ' ' . $command_positions['Chief Science Officer']['first_name'] . ' ' . $command_positions['Chief Science Officer']['last_name']); ?>
-										<?php else: ?>
-											Position Vacant
-										<?php endif; ?>
-									</div>
-									<?php if (hasPermission('Captain')): ?>
-									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
-									<?php endif; ?>
-								</div>
-								
-								<!-- Chief Engineer -->
-								<div class="officer-box dept-head engineering">
-									<div class="position-title">CHIEF ENGINEER</div>
-									<div class="officer-name">
-										<?php if ($command_positions['Chief Engineer']): ?>
-											<?php echo htmlspecialchars($command_positions['Chief Engineer']['rank'] . ' ' . $command_positions['Chief Engineer']['first_name'] . ' ' . $command_positions['Chief Engineer']['last_name']); ?>
-										<?php else: ?>
-											Position Vacant
-										<?php endif; ?>
-									</div>
-									<?php if (hasPermission('Captain')): ?>
-									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
-									<?php endif; ?>
-								</div>
-								
-								<!-- Operations Officer -->
-								<div class="officer-box dept-head operations">
-									<div class="position-title">OPERATIONS OFFICER</div>
-									<div class="officer-name">
-										<?php if ($command_positions['Operations Officer']): ?>
-											<?php echo htmlspecialchars($command_positions['Operations Officer']['rank'] . ' ' . $command_positions['Operations Officer']['first_name'] . ' ' . $command_positions['Operations Officer']['last_name']); ?>
-										<?php else: ?>
-											Position Vacant
-										<?php endif; ?>
-									</div>
-									<?php if (hasPermission('Captain')): ?>
-									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
-									<?php endif; ?>
-								</div>
-							</div>
-							<div class="command-row">
-								<!-- Security Chief -->
-								<div class="officer-box dept-head security">
-									<div class="position-title">SECURITY CHIEF</div>
-									<div class="officer-name">
-										<?php if ($command_positions['Security Chief']): ?>
-											<?php echo htmlspecialchars($command_positions['Security Chief']['rank'] . ' ' . $command_positions['Security Chief']['first_name'] . ' ' . $command_positions['Security Chief']['last_name']); ?>
-										<?php else: ?>
-											Position Vacant
-										<?php endif; ?>
-									</div>
-									<?php if (hasPermission('Captain')): ?>
-									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
-									<?php endif; ?>
-								</div>
-								
-								<!-- Tactical Officer -->
-								<div class="officer-box dept-head tactical">
-									<div class="position-title">TACTICAL OFFICER</div>
-									<div class="officer-name">
-										<?php if ($command_positions['Tactical Officer']): ?>
-											<?php echo htmlspecialchars($command_positions['Tactical Officer']['rank'] . ' ' . $command_positions['Tactical Officer']['first_name'] . ' ' . $command_positions['Tactical Officer']['last_name']); ?>
-										<?php else: ?>
-											Position Vacant
-										<?php endif; ?>
-									</div>
-									<?php if (hasPermission('Captain')): ?>
-									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
-									<?php endif; ?>
-								</div>
-								
-								<!-- Third Officer -->
-								<div class="officer-box dept-head command">
+								<div class="officer-box command-3o">
+									<div class="department-label">COMMAND</div>
 									<div class="position-title">THIRD OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Third Officer']): ?>
@@ -661,12 +576,164 @@ $ranks = [
 							</div>
 						</div>
 
-						<!-- Senior Staff & Specialized Positions -->
-						<div class="command-tier senior-staff">
-							<div class="tier-title">SENIOR STAFF & SPECIALIZED POSITIONS</div>
+						<!-- Department Heads -->
+						<div class="command-tier department-heads">
+							<div class="tier-title">DEPARTMENT HEADS</div>
 							<div class="command-row">
+								<!-- Head of MED/SCI -->
+								<div class="officer-box dept-head medical">
+									<div class="department-label">MEDICAL/SCIENCE</div>
+									<div class="position-title">HEAD OF MED/SCI</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Head of MED/SCI']): ?>
+											<?php echo htmlspecialchars($command_positions['Head of MED/SCI']['rank'] . ' ' . $command_positions['Head of MED/SCI']['first_name'] . ' ' . $command_positions['Head of MED/SCI']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Head of ENG/OPS -->
+								<div class="officer-box dept-head engineering">
+									<div class="department-label">ENGINEERING/OPERATIONS</div>
+									<div class="position-title">HEAD OF ENG/OPS</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Head of ENG/OPS']): ?>
+											<?php echo htmlspecialchars($command_positions['Head of ENG/OPS']['rank'] . ' ' . $command_positions['Head of ENG/OPS']['first_name'] . ' ' . $command_positions['Head of ENG/OPS']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Head of SEC/TAC -->
+								<div class="officer-box dept-head security">
+									<div class="department-label">SECURITY/TACTICAL</div>
+									<div class="position-title">HEAD OF SEC/TAC</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Head of SEC/TAC']): ?>
+											<?php echo htmlspecialchars($command_positions['Head of SEC/TAC']['rank'] . ' ' . $command_positions['Head of SEC/TAC']['first_name'] . ' ' . $command_positions['Head of SEC/TAC']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+							</div>
+						</div>
+
+						<!-- Senior Staff -->
+						<div class="command-tier senior-staff">
+							<div class="tier-title">SENIOR STAFF</div>
+							<div class="command-row">
+								<!-- Chief Medical Officer -->
+								<div class="officer-box senior-staff medical">
+									<div class="department-label">MEDICAL</div>
+									<div class="position-title">CHIEF MEDICAL OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Chief Medical Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Chief Medical Officer']['rank'] . ' ' . $command_positions['Chief Medical Officer']['first_name'] . ' ' . $command_positions['Chief Medical Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Chief Science Officer -->
+								<div class="officer-box senior-staff science">
+									<div class="department-label">SCIENCE</div>
+									<div class="position-title">CHIEF SCIENCE OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Chief Science Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Chief Science Officer']['rank'] . ' ' . $command_positions['Chief Science Officer']['first_name'] . ' ' . $command_positions['Chief Science Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Chief Engineer -->
+								<div class="officer-box senior-staff engineering">
+									<div class="department-label">ENGINEERING</div>
+									<div class="position-title">CHIEF ENGINEER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Chief Engineer']): ?>
+											<?php echo htmlspecialchars($command_positions['Chief Engineer']['rank'] . ' ' . $command_positions['Chief Engineer']['first_name'] . ' ' . $command_positions['Chief Engineer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Chief Operations Officer -->
+								<div class="officer-box senior-staff operations">
+									<div class="department-label">OPERATIONS</div>
+									<div class="position-title">CHIEF OPERATIONS OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Operations Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Operations Officer']['rank'] . ' ' . $command_positions['Operations Officer']['first_name'] . ' ' . $command_positions['Operations Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+							</div>
+							<div class="command-row">
+								<!-- Security Chief -->
+								<div class="officer-box senior-staff security">
+									<div class="department-label">SECURITY</div>
+									<div class="position-title">SECURITY CHIEF</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Security Chief']): ?>
+											<?php echo htmlspecialchars($command_positions['Security Chief']['rank'] . ' ' . $command_positions['Security Chief']['first_name'] . ' ' . $command_positions['Security Chief']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
+								<!-- Tactical Officer -->
+								<div class="officer-box senior-staff tactical">
+									<div class="department-label">TACTICAL</div>
+									<div class="position-title">TACTICAL OFFICER</div>
+									<div class="officer-name">
+										<?php if ($command_positions['Tactical Officer']): ?>
+											<?php echo htmlspecialchars($command_positions['Tactical Officer']['rank'] . ' ' . $command_positions['Tactical Officer']['first_name'] . ' ' . $command_positions['Tactical Officer']['last_name']); ?>
+										<?php else: ?>
+											Position Vacant
+										<?php endif; ?>
+									</div>
+									<?php if (hasPermission('Captain')): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'command_structure_edit.php')" class="edit-btn">Edit Assignment</button>
+									<?php endif; ?>
+								</div>
+								
 								<!-- Intelligence Officer -->
 								<div class="officer-box senior-staff intelligence">
+									<div class="department-label">INTELLIGENCE</div>
 									<div class="position-title">INTELLIGENCE OFFICER</div>
 									<div class="officer-name">
 										<?php if ($command_positions['Intelligence Officer']): ?>
@@ -682,6 +749,7 @@ $ranks = [
 								
 								<!-- S.R.T. Leader (Offline) -->
 								<div class="officer-box senior-staff srt offline">
+									<div class="department-label">SPECIAL RESPONSE</div>
 									<div class="position-title">S.R.T. LEADER</div>
 									<div class="officer-name offline-status">
 										<?php if ($command_positions['S.R.T. Leader']): ?>
