@@ -195,7 +195,7 @@ function loginbutton($buttonstyle = "square") {
 							</div>
 						</div>
 						
-						<?php if (!isLoggedIn() && !isset($_SESSION['steamid'])): ?>
+						<?php if (!isLoggedIn()): ?>
 						<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 10px; margin: 2rem 0; border: 2px solid var(--african-violet);">
 							<h4>Staff Access</h4>
 							<p>Access to administrative functions requires Steam authentication.</p>

@@ -357,12 +357,6 @@ if ($_POST) {
                 <small style="color: var(--blue);">Your department assignment determines your system access permissions.</small>
             </div>
             
-            <div class="form-group">
-                <label for="position">Position *</label>
-                <input type="text" id="position" name="position" value="<?php echo htmlspecialchars($_POST['position'] ?? ''); ?>" required placeholder="e.g., Chief Engineer, Tactical Officer">
-                <small style="color: var(--blue);">Your character's role/position aboard the USS Serenity.</small>
-            </div>
-            
             <div style="background: rgba(85, 102, 255, 0.2); padding: 1rem; border-radius: 5px; margin: 1rem 0; border: 1px solid var(--blue);">
                 <p style="margin: 0; color: var(--blue); font-size: 0.9rem;"><strong>Note:</strong> Your crew roster profile will be created automatically with your account. Authentication is handled entirely through Steam - no password needed!</p>
             </div>
