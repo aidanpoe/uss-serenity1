@@ -14,10 +14,7 @@ require '../steamauth/userInfo.php';
 // Handle form submission
 if ($_POST) {
     $username = trim($_POST['username']);
-                <small style="color: var(--blue);">Your department assignment determines your system access permissions.</small>
-            </div>
-            
-            <div style="background: rgba(85, 102, 255, 0.2); padding: 1rem; border-radius: 5px; margin: 1rem 0; border: 1px solid var(--blue);")= trim($_POST['rank']);
+    $rank = trim($_POST['rank']);
     $first_name = trim($_POST['first_name']);
     $last_name = trim($_POST['last_name']);
     $species = trim($_POST['species']);
