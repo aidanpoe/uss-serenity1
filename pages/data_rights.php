@@ -87,6 +87,9 @@ try {
             try {
                 $pdo->beginTransaction();
                 
+                // Temporarily disable foreign key checks for cleanup
+                $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
+                
                 // Get user info before deletion for logging
                 $stmt = $pdo->prepare("SELECT username, steam_id FROM users WHERE id = ?");
                 $stmt->execute([$user_id]);
@@ -123,9 +126,31 @@ try {
                 ");
                 $stmt->execute([$user_id]);
                 
+                // Also clean up any training_audit records where this user is referenced in trainee_id
+                $stmt = $pdo->prepare("
+                    UPDATE training_audit 
+                    SET trainee_id = NULL, character_name = 'Deleted User' 
+                    WHERE trainee_id = ?
+                ");
+                $stmt->execute([$user_id]);
+                
+                // Delete any other user-related audit records that can be safely removed
+                $stmt = $pdo->prepare("DELETE FROM user_activity_logs WHERE user_id = ?");
+                $stmt->execute([$user_id]);
+                
+                $stmt = $pdo->prepare("DELETE FROM login_logs WHERE user_id = ?");
+                $stmt->execute([$user_id]);
+                
+                // Delete user sessions
+                $stmt = $pdo->prepare("DELETE FROM user_sessions WHERE user_id = ?");
+                $stmt->execute([$user_id]);
+                
                 // Delete user account
                 $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
                 $stmt->execute([$user_id]);
+                
+                // Re-enable foreign key checks
+                $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
                 
                 // Log the deletion for audit purposes
                 error_log("GDPR Account Deletion: User ID $user_id (" . $user_info['username'] . ", Steam: " . $user_info['steam_id'] . ") deleted their account on " . date('Y-m-d H:i:s'));
@@ -142,6 +167,8 @@ try {
                 
             } catch (Exception $e) {
                 $pdo->rollback();
+                // Re-enable foreign key checks in case of error
+                $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
                 $error = "Error deleting account: " . $e->getMessage();
             }
         }
