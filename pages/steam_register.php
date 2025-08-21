@@ -39,6 +39,17 @@ if ($_POST) {
         $errors[] = "Department is required";
     }
     
+    // GDPR Consent Validation
+    if (!isset($_POST['consent_privacy']) || $_POST['consent_privacy'] !== '1') {
+        $errors[] = "You must consent to data processing to create an account";
+    }
+    if (!isset($_POST['consent_terms']) || $_POST['consent_terms'] !== '1') {
+        $errors[] = "You must agree to the Terms of Service";
+    }
+    if (!isset($_POST['consent_age']) || $_POST['consent_age'] !== '1') {
+        $errors[] = "You must confirm you meet the age requirements";
+    }
+    
     // Check if username already exists
     if (!empty($username)) {
         $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
@@ -366,6 +377,61 @@ if ($_POST) {
                 </select>
                 <div id="department-info" class="department-info"></div>
                 <small style="color: var(--blue);">Your department assignment determines your system access permissions.</small>
+            </div>
+            
+            <!-- GDPR Consent Section -->
+            <div style="background: rgba(255, 255, 0, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0; border: 2px solid var(--gold);">
+                <h4 style="color: var(--gold); margin-top: 0;">📋 Data Protection & Privacy Consent</h4>
+                
+                <div style="background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 5px; margin: 1rem 0;">
+                    <h5 style="color: var(--blue);">What data we collect:</h5>
+                    <ul style="color: white; font-size: 0.9rem;">
+                        <li><strong>Steam Information:</strong> Your Steam ID, username, and avatar (from Steam API)</li>
+                        <li><strong>Account Data:</strong> Username you choose, department permissions</li>
+                        <li><strong>Character Data:</strong> Fictional character profiles for roleplay</li>
+                        <li><strong>Activity Data:</strong> Login times and system usage for security</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 5px; margin: 1rem 0;">
+                    <h5 style="color: var(--blue);">Your rights:</h5>
+                    <ul style="color: white; font-size: 0.9rem;">
+                        <li>✅ Access and download your data</li>
+                        <li>✅ Correct any inaccurate information</li>
+                        <li>✅ Delete your account and data</li>
+                        <li>✅ Restrict or object to data processing</li>
+                    </ul>
+                </div>
+                
+                <div style="margin: 1.5rem 0;">
+                    <label style="display: flex; align-items: flex-start; color: white; cursor: pointer;">
+                        <input type="checkbox" name="consent_privacy" value="1" required style="margin-right: 0.5rem; margin-top: 0.2rem;">
+                        <span>
+                            <strong>I consent to the collection and processing of my personal data</strong> as described in the 
+                            <a href="../privacy-policy.html" target="_blank" style="color: var(--gold);">Privacy Policy</a>. 
+                            I understand this is necessary to provide the USS Serenity roleplay service.
+                        </span>
+                    </label>
+                </div>
+                
+                <div style="margin: 1.5rem 0;">
+                    <label style="display: flex; align-items: flex-start; color: white; cursor: pointer;">
+                        <input type="checkbox" name="consent_terms" value="1" required style="margin-right: 0.5rem; margin-top: 0.2rem;">
+                        <span>
+                            <strong>I agree to the Terms of Service</strong> and understand that character data and roleplay activities are fictional.
+                            <a href="../terms-of-service.html" target="_blank" style="color: var(--gold);">Read Terms of Service</a>
+                        </span>
+                    </label>
+                </div>
+                
+                <div style="margin: 1.5rem 0;">
+                    <label style="display: flex; align-items: flex-start; color: white; cursor: pointer;">
+                        <input type="checkbox" name="consent_age" value="1" required style="margin-right: 0.5rem; margin-top: 0.2rem;">
+                        <span>
+                            <strong>I confirm I am at least 13 years old</strong> (Steam's minimum age) and have parental consent if under 18.
+                        </span>
+                    </label>
+                </div>
             </div>
             
             <div style="background: rgba(85, 102, 255, 0.2); padding: 1rem; border-radius: 5px; margin: 1rem 0; border: 1px solid var(--blue);">

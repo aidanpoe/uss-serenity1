@@ -58,6 +58,26 @@ function loginbutton($buttonstyle = "square") {
 	<audio id="audio2" src="assets/beep2.mp3" preload="auto"></audio>
 	<audio id="audio3" src="assets/beep3.mp3" preload="auto"></audio>
 	<audio id="audio4" src="assets/beep4.mp3" preload="auto"></audio>
+	
+	<?php if (isset($_GET['account_deleted']) && $_GET['account_deleted'] == '1'): ?>
+	<!-- Account Deletion Confirmation -->
+	<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+		<div style="background: rgba(0,0,0,0.95); padding: 3rem; border-radius: 15px; border: 3px solid var(--green); max-width: 600px; text-align: center;">
+			<h2 style="color: var(--green); margin-bottom: 2rem;">✅ Account Successfully Deleted</h2>
+			<p style="color: white; font-size: 1.2rem; margin-bottom: 2rem;">
+				Your USS Serenity account and personal data have been permanently deleted in compliance with GDPR requirements.
+			</p>
+			<p style="color: var(--blue); margin-bottom: 2rem;">
+				Thank you for being part of our community. Live long and prosper! 🖖
+			</p>
+			<button onclick="this.parentElement.parentElement.style.display='none'" 
+				style="background-color: var(--green); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-size: 1.1rem; font-weight: bold; cursor: pointer;">
+				Acknowledge
+			</button>
+		</div>
+	</div>
+	<?php endif; ?>
+	
 	<section class="wrap-standard" id="column-3">
 		<div class="wrap">
 			<div class="left-frame-top">
@@ -271,7 +291,15 @@ function loginbutton($buttonstyle = "square") {
 				</main>
 				<footer>
 					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
-					LCARS Inspired Website Template by <a href="https://www.thelcars.com">www.TheLCARS.com</a>.				 		 
+					LCARS Inspired Website Template by <a href="https://www.thelcars.com">www.TheLCARS.com</a><br>
+					<div style="margin-top: 1rem; font-size: 0.8rem;">
+						<a href="privacy-policy.html" style="color: var(--blue); margin: 0 1rem;">Privacy Policy</a>
+						<a href="terms-of-service.html" style="color: var(--blue); margin: 0 1rem;">Terms of Service</a>
+						<?php if (isLoggedIn()): ?>
+						<a href="pages/data_rights.php" style="color: var(--gold); margin: 0 1rem;">Your Data Rights</a>
+						<?php endif; ?>
+						<span style="color: var(--green);">GDPR Compliant</span>
+					</div>
 				</footer> 
 			</div>
 		</div>

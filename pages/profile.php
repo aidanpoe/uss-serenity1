@@ -508,6 +508,26 @@ try {
 						<p>Contact your Captain or try logging out and back in through Steam to complete your profile setup.</p>
 					</div>
 					<?php endif; ?>
+					
+					<!-- GDPR Data Rights Section -->
+					<div style="background: rgba(255, 255, 0, 0.1); padding: 1.5rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--gold);">
+						<h3 style="color: var(--gold);">🔒 Your Privacy & Data Rights</h3>
+						<p style="color: white;">As part of our GDPR compliance, you have full control over your personal data:</p>
+						<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1rem 0;">
+							<a href="data_rights.php" style="background-color: var(--blue); color: black; padding: 1rem; border-radius: 10px; text-decoration: none; font-weight: bold; text-align: center; transition: all 0.2s ease;">
+								📊 View My Data Summary
+							</a>
+							<a href="data_rights.php" style="background-color: var(--green); color: black; padding: 1rem; border-radius: 10px; text-decoration: none; font-weight: bold; text-align: center; transition: all 0.2s ease;">
+								📥 Download My Data
+							</a>
+							<a href="../privacy-policy.html" style="background-color: var(--gold); color: black; padding: 1rem; border-radius: 10px; text-decoration: none; font-weight: bold; text-align: center; transition: all 0.2s ease;">
+								📋 Privacy Policy
+							</a>
+						</div>
+						<p style="color: var(--blue); font-size: 0.9rem; margin: 1rem 0 0 0;">
+							<strong>Your Rights:</strong> Access, rectify, erase, restrict processing, data portability, and object to processing of your personal data.
+						</p>
+					</div>
 				</main>
 			</div>
 		</div>
