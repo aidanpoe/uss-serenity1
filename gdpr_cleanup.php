@@ -124,9 +124,18 @@ try {
     // 6. Clean up expired sessions (already handled by PHP session garbage collection, but log it)
     logCleanup("Session cleanup handled by PHP session.gc_maxlifetime (1 hour)");
     
-    // 7. Anonymize old IP address logs if stored separately (6 months retention)
-    // Note: Current implementation doesn't store IP addresses separately, but this is where you would clean them
-    logCleanup("IP address log cleanup: Not applicable (no separate IP log table)");
+    // 7. Clean up IP addresses from audit logs (7 days retention)
+    // Anonymize IP addresses in training audit logs older than 7 days
+    $stmt = $pdo->prepare("UPDATE training_audit SET ip_address = 'xxx.xxx.xxx.xxx' WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY) AND ip_address IS NOT NULL AND ip_address != 'xxx.xxx.xxx.xxx'");
+    $stmt->execute();
+    $anonymized_audit_ips = $stmt->rowCount();
+    logCleanup("Anonymized $anonymized_audit_ips IP addresses in training_audit (older than 7 days)");
+    
+    // Anonymize IP addresses in training access logs older than 7 days  
+    $stmt = $pdo->prepare("UPDATE training_access_log SET ip_address = 'xxx.xxx.xxx.xxx' WHERE accessed_at < DATE_SUB(NOW(), INTERVAL 7 DAY) AND ip_address IS NOT NULL AND ip_address != 'xxx.xxx.xxx.xxx'");
+    $stmt->execute();
+    $anonymized_access_ips = $stmt->rowCount();
+    logCleanup("Anonymized $anonymized_access_ips IP addresses in training_access_log (older than 7 days)");
     
     // 8. Clean up old message expiration (from messaging system)
     $stmt = $pdo->prepare("DELETE FROM crew_messages WHERE expires_at < NOW()");
@@ -145,7 +154,7 @@ try {
     logCleanup("Deleted $cleaned_reactions orphaned message reactions");
     
     // Summary
-    $total_cleaned = $cleaned_logins + $cleaned_training + $cleaned_access + count($files_to_delete) + $cleaned_messages + $cleaned_reactions;
+    $total_cleaned = $cleaned_logins + $cleaned_training + $cleaned_access + count($files_to_delete) + $cleaned_messages + $cleaned_reactions + $anonymized_audit_ips + $anonymized_access_ips;
     logCleanup("GDPR cleanup completed successfully. Total items processed: $total_cleaned");
     
     // Generate compliance report
@@ -157,7 +166,9 @@ try {
             'training_access' => $cleaned_access,
             'deleted_files' => count($files_to_delete),
             'expired_messages' => $cleaned_messages,
-            'orphaned_reactions' => $cleaned_reactions
+            'orphaned_reactions' => $cleaned_reactions,
+            'anonymized_audit_ips' => $anonymized_audit_ips,
+            'anonymized_access_ips' => $anonymized_access_ips
         ],
         'inactive_accounts_detected' => count($inactive_accounts),
         'total_items_processed' => $total_cleaned,

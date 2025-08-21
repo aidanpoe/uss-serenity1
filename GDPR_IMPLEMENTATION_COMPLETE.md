@@ -58,7 +58,7 @@
 - **User accounts:** Until deletion or 24 months inactive
 - **Session data:** 1 hour automatic expiry
 - **Login logs:** 12 months maximum
-- **IP address logs:** 6 months (audit logs)
+- **IP address logs:** 7 days (anonymized after)
 - **Training access:** 24 months maximum
 - **Deleted files:** 90 days in recycle bin
 - **Expired messages:** Automatic deletion

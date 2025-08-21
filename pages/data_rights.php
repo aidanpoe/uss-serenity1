@@ -432,7 +432,7 @@ try {
                     </tr>
                     <tr>
                         <td>IP Address Logs</td>
-                        <td>6 months</td>
+                        <td>7 days</td>
                         <td>Yes</td>
                     </tr>
                     <tr>
