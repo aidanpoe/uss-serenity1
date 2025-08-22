@@ -393,7 +393,13 @@ try {
 									<li style="margin: 0.5rem 0;">→ Deep Space Exploration</li>
 									<li style="margin: 0.5rem 0;">→ All Systems Nominal</li>
 									<li style="margin: 0.5rem 0;">→ Crew Status: Green</li>
-									<li style="margin: 0.5rem 0;">→ Current Stardate: 101825.4</li>
+									<li style="margin: 0.5rem 0;">→ Current Stardate: <?php 
+										// Calculate current stardate (Star Trek formula with 360 years added)
+										$currentYear = (int)date('Y') + 360;
+										$dayOfYear = (int)date('z') + 1; // z is 0-indexed, so add 1
+										$stardate = ($currentYear - 2323) * 1000 + (($dayOfYear - 1) * 1000 / 365.25);
+										echo number_format($stardate, 1);
+									?> • <?php echo date('F j, ') . ($currentYear); ?></li>
 								</ul>
 							</div>
 						</div>
