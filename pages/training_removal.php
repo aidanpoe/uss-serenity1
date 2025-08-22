@@ -213,10 +213,10 @@ try {
 										<span style="color: var(--orange);">(<?php echo htmlspecialchars($training['certification_level']); ?>)</span>
 										<br>
 										<small style="color: var(--gray);">
-											Assigned: <?php echo date('Y-m-d', strtotime($training['assigned_date'])); ?>
+											Assigned: <?php echo formatICDateOnly($training['assigned_date']); ?>
 											| Status: <span style="color: var(--green);"><?php echo htmlspecialchars($training['status']); ?></span>
 											<?php if ($training['completion_date']): ?>
-											| Completed: <?php echo date('Y-m-d', strtotime($training['completion_date'])); ?>
+											| Completed: <?php echo formatICDateOnly($training['completion_date']); ?>
 											<?php endif; ?>
 										</small>
 									</div>

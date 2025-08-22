@@ -340,7 +340,7 @@ try {
 										</span>
 									</h4>
 									<p style="margin: 0.25rem 0; color: var(--orange);">
-										Incident Date: <?php echo date('F j, Y', strtotime($record['incident_date'])); ?>
+										Incident Date: <?php echo formatICDateOnly($record['incident_date']); ?>
 									</p>
 								</div>
 								<div style="text-align: right; display: flex; flex-direction: column; gap: 0.5rem;">

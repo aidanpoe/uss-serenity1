@@ -151,12 +151,12 @@ try {
 											</td>
 											<td style="padding: 1rem; border: 1px solid var(--blue);">
 												<div style="color: var(--orange); font-size: 0.8rem;">
-													<?php echo date('Y-m-d H:i', strtotime($record['created_at'])); ?>
+													<?php echo formatICDateTime($record['created_at']); ?>
 												</div>
 											</td>
 											<td style="padding: 1rem; border: 1px solid var(--blue);">
 												<div style="color: var(--green); font-size: 0.8rem;">
-													<?php echo date('Y-m-d H:i', strtotime($record['updated_at'])); ?>
+													<?php echo formatICDateTime($record['updated_at']); ?>
 												</div>
 											</td>
 										</tr>

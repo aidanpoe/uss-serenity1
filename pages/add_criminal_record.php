@@ -268,7 +268,7 @@ try {
 								<!-- Incident Date -->
 								<div class="form-group">
 									<label for="incident_date">Incident Date <span class="required">*</span></label>
-									<input type="date" name="incident_date" id="incident_date" value="<?php echo isset($_POST['incident_date']) ? htmlspecialchars($_POST['incident_date']) : date('Y-m-d'); ?>" required>
+									<input type="date" name="incident_date" id="incident_date" value="<?php echo isset($_POST['incident_date']) ? htmlspecialchars($_POST['incident_date']) : formatICDateOnly(date('Y-m-d H:i:s')); ?>" required>
 								</div>
 								
 								<!-- Location -->

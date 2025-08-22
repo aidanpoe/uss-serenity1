@@ -647,13 +647,13 @@ try {
 							</td>
 							<td><?php echo htmlspecialchars($assignment['module_department']); ?></td>
 							<td><?php echo htmlspecialchars($assignment['certification_level']); ?></td>
-							<td><?php echo date('M j, Y', strtotime($assignment['assigned_date'])); ?></td>
+							<td><?php echo formatICDateOnly($assignment['assigned_date']); ?></td>
 							<td>
 								<span class="status-badge status-<?php echo str_replace('_', '-', $assignment['status']); ?>">
 									<?php echo ucfirst(str_replace('_', ' ', $assignment['status'])); ?>
 								</span>
 								<?php if ($assignment['completion_date']): ?>
-								<br><small>Completed: <?php echo date('M j, Y', strtotime($assignment['completion_date'])); ?></small>
+								<br><small>Completed: <?php echo formatICDateOnly($assignment['completion_date']); ?></small>
 								<?php endif; ?>
 							</td>
 							<td>

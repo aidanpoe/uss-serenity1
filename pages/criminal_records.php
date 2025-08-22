@@ -414,7 +414,7 @@ try {
 									<div>
 										<strong style="color: var(--gold);">Last Incident:</strong><br>
 										<span style="color: var(--orange);">
-											<?php echo $suspect['last_incident_date'] ? date('M j, Y', strtotime($suspect['last_incident_date'])) : 'None'; ?>
+											<?php echo $suspect['last_incident_date'] ? formatICDateOnly($suspect['last_incident_date']) : 'None'; ?>
 										</span>
 									</div>
 								</div>

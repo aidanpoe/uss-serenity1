@@ -412,7 +412,7 @@ try {
 									<div>
 										<strong>Suggestion #<?php echo $suggestion['id']; ?></strong><br>
 										<h5><?php echo htmlspecialchars($suggestion['suggestion_title']); ?></h5>
-										<small>Submitted: <?php echo date('Y-m-d H:i', strtotime($suggestion['created_at'])); ?></small><br>
+										<small>Submitted: <?php echo formatICDateTime($suggestion['created_at']); ?></small><br>
 										<small>By: <?php echo htmlspecialchars($suggestion['submitted_by']); ?></small>
 									</div>
 									<div>
@@ -461,7 +461,7 @@ try {
 											<strong style="color: var(--gold);">Recommendation #<?php echo $recommendation['id']; ?></strong><br>
 											<h5 style="color: var(--gold);"><?php echo htmlspecialchars($recommendation['recommended_person']); ?></h5>
 											<small>For: <strong><?php echo htmlspecialchars($recommendation['recommended_award']); ?></strong></small><br>
-											<small>Submitted: <?php echo date('Y-m-d H:i', strtotime($recommendation['submitted_at'])); ?></small><br>
+											<small>Submitted: <?php echo formatICDateTime($recommendation['submitted_at']); ?></small><br>
 											<small>By: <?php echo htmlspecialchars($recommendation['submitted_by']); ?></small>
 										</div>
 										<div>

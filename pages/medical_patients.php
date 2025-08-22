@@ -387,7 +387,7 @@ try {
 									<div>
 										<strong style="color: var(--blue);">Last Record:</strong><br>
 										<span style="color: var(--orange);">
-											<?php echo $patient['last_medical_record'] ? date('M j, Y', strtotime($patient['last_medical_record'])) : 'None'; ?>
+											<?php echo $patient['last_medical_record'] ? formatICDateOnly($patient['last_medical_record']) : 'None'; ?>
 										</span>
 									</div>
 								</div>
@@ -403,7 +403,7 @@ try {
 									<?php endif; ?>
 									<?php if ($patient['status'] === 'Deceased' && $patient['date_of_death']): ?>
 									<div style="margin-top: 0.5rem; color: var(--red); font-size: 0.8rem;">
-										Deceased: <?php echo date('M j, Y', strtotime($patient['date_of_death'])); ?>
+										Deceased: <?php echo formatICDateOnly($patient['date_of_death']); ?>
 									</div>
 									<?php endif; ?>
 								</div>

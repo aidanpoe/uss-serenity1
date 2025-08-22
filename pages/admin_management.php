@@ -490,7 +490,7 @@ try {
 											
 											<div style="border-top: 1px solid var(--red); padding-top: 1rem; margin-top: 1rem;">
 												<p style="color: var(--red); font-weight: bold;">
-													Date of Death: <?php echo $deceased['date_of_death'] ? date('F j, Y', strtotime($deceased['date_of_death'])) : 'Unknown'; ?>
+													Date of Death: <?php echo $deceased['date_of_death'] ? formatICDateOnly($deceased['date_of_death']) : 'Unknown'; ?>
 												</p>
 												<?php if ($deceased['cause_of_death']): ?>
 												<p style="color: var(--orange); font-size: 0.9rem;">

@@ -324,7 +324,7 @@ try {
 										</span>
 									</h4>
 									<p style="margin: 0.25rem 0; color: var(--orange);">
-										<?php echo date('F j, Y \a\t g:i A', strtotime($log['action_timestamp'])); ?>
+										<?php echo formatICDateTime($log['action_timestamp']); ?>
 									</p>
 								</div>
 								<div style="text-align: right;">
