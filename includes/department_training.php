@@ -60,7 +60,7 @@ function getDepartmentModules($department) {
     $stmt = $pdo->prepare("
         SELECT id, module_name, module_code, certification_level, description
         FROM training_modules 
-        WHERE (department = ? OR department = 'Universal') AND is_active = 1
+        WHERE (department = ? OR department = 'All') AND is_active = 1
         ORDER BY department, certification_level, module_name
     ");
     $stmt->execute([$dbDepartment]);
@@ -146,7 +146,7 @@ function renderDepartmentTrainingSection($department, $department_display_name) 
     
     $current_dept = '';
     foreach ($modules as $module) {
-        $module_dept = $module['department'] === 'Universal' ? 'Universal' : $department_display_name;
+        $module_dept = $module['department'] === 'All' ? 'Universal' : $department_display_name;
         if ($module_dept !== $current_dept) {
             if ($current_dept !== '') echo '</optgroup>';
             echo '<optgroup label="' . htmlspecialchars($module_dept) . '">';
