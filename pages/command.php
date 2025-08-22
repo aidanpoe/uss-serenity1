@@ -627,13 +627,12 @@ try {
 								<strong style="color: var(--red);">Conference Room:</strong> Deck 1
 							</div>
 							<div>
-								<strong style="color: var(--red);">Captain's Cabin:</strong> Deck 2<br>
-								<strong style="color: var(--red);">Senior Staff:</strong> Deck 2-3<br>
-								<strong style="color: var(--red);">Strategic Ops:</strong> Deck 8
+								<strong style="color: var(--red);">Captain's Quarters:</strong> Deck 3<br>
+								<strong style="color: var(--red);">Senior Staff:</strong> Deck 2-3
 							</div>
 							<div>
 								<strong style="color: var(--red);">Current Mission:</strong> Exploration<br>
-								<strong style="color: var(--red);">ETA:</strong> Starbase 47: 3 Days<br>
+								<strong style="color: var(--red);">ETA:</strong> Waiting for a response sorry...<br>
 								<strong style="color: var(--red);">Status:</strong> All Green
 							</div>
 						</div>
