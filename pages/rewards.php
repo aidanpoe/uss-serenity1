@@ -5,17 +5,31 @@ require_once '../includes/config.php';
 updateLastActive();
 
 // Fetch all available awards from database
-$awards_query = "SELECT DISTINCT 
+$awards_query = "SELECT 
     award_name, 
     award_description,
-    MIN(id) as min_id
+    id
 FROM awards 
-GROUP BY award_name, award_description 
 ORDER BY award_name ASC";
 
 try {
     $awards_result = $pdo->query($awards_query);
     $awards = $awards_result->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Remove duplicates by award_name if any exist
+    $unique_awards = [];
+    $seen_names = [];
+    foreach ($awards as $award) {
+        if (!in_array($award['award_name'], $seen_names)) {
+            $unique_awards[] = $award;
+            $seen_names[] = $award['award_name'];
+        }
+    }
+    $awards = $unique_awards;
+    
+    // Debug output - remove after testing
+    error_log("Awards query executed. Found " . count($awards) . " unique awards.");
+    
 } catch (PDOException $e) {
     $awards = [];
     error_log("Awards query error: " . $e->getMessage());
@@ -249,6 +263,13 @@ $award_categories = array_filter($award_categories, function($category) {
                     
                     <div class="total-awards">
                         📊 Total Available Awards: <?php echo count($awards); ?>
+                        <!-- Debug info - remove after testing -->
+                        <?php if (count($awards) == 0): ?>
+                        <br><small style="color: var(--red);">
+                            Debug: Query executed, but returned <?php echo count($awards); ?> results.
+                            <br>Database connection: <?php echo isset($pdo) ? 'OK' : 'FAILED'; ?>
+                        </small>
+                        <?php endif; ?>
                     </div>
                     
                     <div class="search-container">
