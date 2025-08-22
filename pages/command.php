@@ -109,10 +109,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 try {
     $pdo = getConnection();
     
-    // Get command structure
-    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('Commanding Officer', 'First Officer', 'Second Officer', 'Third Officer') ORDER BY FIELD(position, 'Commanding Officer', 'First Officer', 'Second Officer', 'Third Officer')");
+    // Get command structure - try broader search for command positions
+    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position LIKE '%Command%' OR position LIKE '%Captain%' OR position LIKE '%Officer%' OR position LIKE '%Executive%' ORDER BY position");
     $stmt->execute();
-    $command_officers = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    $all_command_related = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    
+    // Filter for actual command positions (prioritize high-ranking positions)
+    $command_officers = [];
+    $priority_positions = ['Captain', 'Commanding Officer', 'Head of Command', 'First Officer', 'Executive Officer', 'Second Officer', 'Third Officer'];
+    
+    // First, add officers with priority positions
+    foreach ($all_command_related as $officer) {
+        foreach ($priority_positions as $priority_pos) {
+            if (stripos($officer['position'], $priority_pos) !== false) {
+                $command_officers[] = $officer;
+                break;
+            }
+        }
+    }
+    
+    // If no priority positions found, show any command-related positions
+    if (empty($command_officers)) {
+        $command_officers = array_slice($all_command_related, 0, 6); // Limit to 6 for display
+    }
     
     // Get data for command users only
     if (hasPermission('Command')) {
