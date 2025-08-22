@@ -58,12 +58,18 @@ function getDepartmentModules($department) {
     
     // Get modules for this department plus universal modules
     $stmt = $pdo->prepare("
-        SELECT id, module_name, module_code, certification_level, description
+        SELECT id, module_name, module_code, certification_level, description, department
         FROM training_modules 
         WHERE (department = ? OR department = 'All') AND is_active = 1
-        ORDER BY department, certification_level, module_name
+        ORDER BY 
+            CASE 
+                WHEN department = ? THEN 1 
+                WHEN department = 'All' THEN 2 
+                ELSE 3 
+            END,
+            certification_level, module_name
     ");
-    $stmt->execute([$dbDepartment]);
+    $stmt->execute([$dbDepartment, $dbDepartment]);
     return $stmt->fetchAll();
 }
 
