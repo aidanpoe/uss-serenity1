@@ -6,11 +6,14 @@ updateLastActive();
 
 // Fetch all available awards from database
 $awards_query = "SELECT 
-    award_name, 
-    award_description,
-    id
+    name as award_name, 
+    description as award_description,
+    id,
+    type,
+    specialization,
+    minimum_rank
 FROM awards 
-ORDER BY award_name ASC";
+ORDER BY name ASC";
 
 try {
     $awards_result = $pdo->query($awards_query);
@@ -32,25 +35,28 @@ try {
     error_log("Awards query error: " . $e->getMessage());
 }
 
-// Group awards by category if they have prefixes
+// Group awards by type and specialization from database
 $award_categories = [
-    'Starfleet' => [],
-    'Service' => [],
-    'Combat' => [],
-    'Special' => [],
+    'Medals' => [],
+    'Ribbons' => [],
+    'Badges' => [],
+    'Grades' => [],
     'Other' => []
 ];
 
 foreach ($awards as $award) {
+    $type = $award['type'] ?? 'Other';
     $name = $award['award_name'];
-    if (strpos($name, 'Starfleet') === 0) {
-        $award_categories['Starfleet'][] = $award;
-    } elseif (strpos($name, 'Service') === 0 || strpos($name, 'Years') !== false) {
-        $award_categories['Service'][] = $award;
-    } elseif (strpos($name, 'Combat') === 0 || strpos($name, 'Battle') !== false || strpos($name, 'Victory') !== false) {
-        $award_categories['Combat'][] = $award;
-    } elseif (strpos($name, 'Medal') !== false || strpos($name, 'Cross') !== false || strpos($name, 'Star') !== false) {
-        $award_categories['Special'][] = $award;
+    
+    // Use the database type field for categorization
+    if ($type === 'Medal') {
+        $award_categories['Medals'][] = $award;
+    } elseif ($type === 'Ribbon') {
+        $award_categories['Ribbons'][] = $award;
+    } elseif ($type === 'Badge') {
+        $award_categories['Badges'][] = $award;
+    } elseif ($type === 'Grade') {
+        $award_categories['Grades'][] = $award;
     } else {
         $award_categories['Other'][] = $award;
     }
@@ -296,9 +302,19 @@ $award_categories = array_filter($award_categories, function($category) {
                                                 <div class="award-name">
                                                     🏅 <?php echo htmlspecialchars($award['award_name']); ?>
                                                 </div>
+                                                <?php if (!empty($award['specialization'])): ?>
+                                                <div style="color: var(--orange); font-size: 0.9rem; margin-bottom: 0.5rem; text-align: center;">
+                                                    📋 <?php echo htmlspecialchars($award['specialization']); ?>
+                                                </div>
+                                                <?php endif; ?>
                                                 <div class="award-description">
                                                     <?php echo htmlspecialchars($award['award_description']); ?>
                                                 </div>
+                                                <?php if (!empty($award['minimum_rank'])): ?>
+                                                <div style="color: var(--blue); font-size: 0.8rem; margin-top: 1rem; text-align: center; border-top: 1px solid var(--blue); padding-top: 0.5rem;">
+                                                    👤 Minimum Rank: <?php echo htmlspecialchars($award['minimum_rank']); ?>
+                                                </div>
+                                                <?php endif; ?>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
