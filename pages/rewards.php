@@ -13,12 +13,12 @@ FROM awards
 GROUP BY award_name, award_description 
 ORDER BY award_name ASC";
 
-$awards_result = $conn->query($awards_query);
-$awards = [];
-if ($awards_result) {
-    while ($row = $awards_result->fetch_assoc()) {
-        $awards[] = $row;
-    }
+try {
+    $awards_result = $pdo->query($awards_query);
+    $awards = $awards_result->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $awards = [];
+    error_log("Awards query error: " . $e->getMessage());
 }
 
 // Group awards by category if they have prefixes
