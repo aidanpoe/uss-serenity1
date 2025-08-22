@@ -104,6 +104,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
         }
     }
+    
+    // Handle award recommendation update (command staff only)
+    if ($_POST['action'] === 'update_award_recommendation') {
+        if (!hasPermission('Command')) {
+            $error = "Access denied. Command authorization required.";
+        } else {
+            try {
+                $reviewed_by = trim(
+                    ($_SESSION['rank'] ?? '') . ' ' . 
+                    ($_SESSION['first_name'] ?? '') . ' ' . 
+                    ($_SESSION['last_name'] ?? '')
+                );
+                
+                $pdo = getConnection();
+                $stmt = $pdo->prepare("UPDATE award_recommendations SET status = ?, review_notes = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?");
+                $stmt->execute([
+                    $_POST['status'] ?? '',
+                    $_POST['review_notes'] ?? '',
+                    $reviewed_by,
+                    $_POST['recommendation_id'] ?? 0
+                ]);
+                $success = "Award recommendation updated successfully.";
+            } catch (Exception $e) {
+                $error = "Error updating award recommendation: " . $e->getMessage();
+            }
+        }
+    }
 }
 
 try {
@@ -361,6 +388,86 @@ try {
 						<p style="color: var(--red); text-align: center;">You must be logged in to submit suggestions to Command.</p>
 						<div style="text-align: center; margin-top: 1rem;">
 							<a href="../index.php" style="background-color: var(--red); color: black; padding: 1rem 2rem; border-radius: 5px; text-decoration: none; display: inline-block;">Return to Login</a>
+						</div>
+					</div>
+					<?php endif; ?>
+					
+					<!-- Award Recommendations Management (Command Staff Only) -->
+					<?php if (hasPermission('Command')): ?>
+					<div style="background: rgba(255, 215, 0, 0.1); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--gold);">
+						<h3 style="color: var(--gold); text-align: center;">🏅 Award Recommendations Management</h3>
+						<p style="color: var(--gold); text-align: center; margin-bottom: 1.5rem; font-style: italic;">
+							Command Staff Access Only - Review and process award recommendations
+						</p>
+						
+						<div style="max-height: 400px; overflow-y: auto;">
+							<?php if (!empty($award_recommendations)): ?>
+								<?php foreach ($award_recommendations as $recommendation): ?>
+								<div style="background: rgba(255, 215, 0, 0.1); padding: 1.5rem; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--gold);">
+									<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+										<div>
+											<h4 style="color: var(--gold); margin: 0 0 1rem 0;">
+												Recommend: <?php echo htmlspecialchars($recommendation['recommended_person'] ?? 'Unknown'); ?>
+											</h4>
+											<p style="margin: 0.5rem 0; color: white;">
+												<strong style="color: var(--gold);">Award:</strong> <?php echo htmlspecialchars($recommendation['recommended_award'] ?? 'Unknown Award'); ?>
+											</p>
+											<p style="margin: 0.5rem 0; color: white;">
+												<strong style="color: var(--gold);">Justification:</strong><br>
+												<?php echo htmlspecialchars($recommendation['justification'] ?? 'No justification provided'); ?>
+											</p>
+											<div style="margin-top: 1rem;">
+												<small style="color: var(--orange);">
+													Recommended by: <?php echo htmlspecialchars($recommendation['submitted_by'] ?? 'Unknown'); ?> 
+													on <?php echo htmlspecialchars($recommendation['submitted_at'] ?? 'Unknown date'); ?>
+												</small><br>
+												<small style="color: var(--gold);">
+													Status: <strong><?php echo htmlspecialchars($recommendation['status'] ?? 'Pending'); ?></strong>
+													<?php if (!empty($recommendation['reviewed_by'])): ?>
+														| Reviewed by: <?php echo htmlspecialchars($recommendation['reviewed_by']); ?>
+													<?php endif; ?>
+												</small>
+												<?php if (!empty($recommendation['review_notes'])): ?>
+													<br><small style="color: var(--blue);">
+														Review Notes: <?php echo htmlspecialchars($recommendation['review_notes']); ?>
+													</small>
+												<?php endif; ?>
+											</div>
+										</div>
+										<div>
+											<form method="POST" action="" style="display: flex; flex-direction: column; gap: 1rem;">
+												<input type="hidden" name="action" value="update_award_recommendation">
+												<input type="hidden" name="recommendation_id" value="<?php echo htmlspecialchars($recommendation['id'] ?? ''); ?>">
+												
+												<div>
+													<label style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Status:</label>
+													<select name="status" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px;">
+														<option value="Pending" <?php echo ($recommendation['status'] ?? '') === 'Pending' ? 'selected' : ''; ?>>Pending</option>
+														<option value="Approved" <?php echo ($recommendation['status'] ?? '') === 'Approved' ? 'selected' : ''; ?>>Approved</option>
+														<option value="Needs More Work" <?php echo ($recommendation['status'] ?? '') === 'Needs More Work' ? 'selected' : ''; ?>>Needs More Work</option>
+														<option value="Rejected" <?php echo ($recommendation['status'] ?? '') === 'Rejected' ? 'selected' : ''; ?>>Rejected</option>
+													</select>
+												</div>
+												
+												<div>
+													<label style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Review Notes:</label>
+													<textarea name="review_notes" placeholder="Add review comments..." style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px; resize: vertical; min-height: 80px;"><?php echo htmlspecialchars($recommendation['review_notes'] ?? ''); ?></textarea>
+												</div>
+												
+												<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 0.75rem; border-radius: 5px; font-weight: bold;">
+													Update Review
+												</button>
+											</form>
+										</div>
+									</div>
+								</div>
+								<?php endforeach; ?>
+							<?php else: ?>
+								<div style="text-align: center; padding: 2rem;">
+									<p style="color: var(--gold); font-size: 1.1rem;">No award recommendations have been submitted yet.</p>
+									<small style="color: var(--orange);">Award recommendations will appear here for command staff review.</small>
+								</div>
+							<?php endif; ?>
 						</div>
 					</div>
 					<?php endif; ?>
