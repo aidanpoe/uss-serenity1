@@ -46,6 +46,16 @@ function handleDepartmentTraining($current_department) {
 function getDepartmentModules($department) {
     global $pdo;
     
+    // Map page department names to database department names
+    $departmentMap = [
+        'Medical' => 'MED/SCI',
+        'Engineering' => 'ENG/OPS', 
+        'Security' => 'SEC/TAC',
+        'Command' => 'Command'
+    ];
+    
+    $dbDepartment = $departmentMap[$department] ?? $department;
+    
     // Get modules for this department plus universal modules
     $stmt = $pdo->prepare("
         SELECT id, module_name, module_code, certification_level, description
@@ -53,12 +63,22 @@ function getDepartmentModules($department) {
         WHERE (department = ? OR department = 'Universal') AND is_active = 1
         ORDER BY department, certification_level, module_name
     ");
-    $stmt->execute([$department]);
+    $stmt->execute([$dbDepartment]);
     return $stmt->fetchAll();
 }
 
 function getDepartmentStaff($department) {
     global $pdo;
+    
+    // Map page department names to database department names
+    $departmentMap = [
+        'Medical' => 'MED/SCI',
+        'Engineering' => 'ENG/OPS', 
+        'Security' => 'SEC/TAC',
+        'Command' => 'Command'
+    ];
+    
+    $dbDepartment = $departmentMap[$department] ?? $department;
     
     // Get all staff from this department plus Command staff
     $stmt = $pdo->prepare("
@@ -70,12 +90,22 @@ function getDepartmentStaff($department) {
         AND (u.active = 1 OR u.active IS NULL)
         ORDER BY r.department, r.rank, r.last_name, r.first_name
     ");
-    $stmt->execute([$department]);
+    $stmt->execute([$dbDepartment]);
     return $stmt->fetchAll();
 }
 
 function getDepartmentTrainable($department) {
     global $pdo;
+    
+    // Map page department names to database department names
+    $departmentMap = [
+        'Medical' => 'MED/SCI',
+        'Engineering' => 'ENG/OPS', 
+        'Security' => 'SEC/TAC',
+        'Command' => 'Command'
+    ];
+    
+    $dbDepartment = $departmentMap[$department] ?? $department;
     
     // Get all staff from this department (not including Command for training targets)
     $stmt = $pdo->prepare("
@@ -87,7 +117,7 @@ function getDepartmentTrainable($department) {
         AND (u.active = 1 OR u.active IS NULL)
         ORDER BY r.rank, r.last_name, r.first_name
     ");
-    $stmt->execute([$department]);
+    $stmt->execute([$dbDepartment]);
     return $stmt->fetchAll();
 }
 
