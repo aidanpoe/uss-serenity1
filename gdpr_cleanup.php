@@ -124,18 +124,10 @@ try {
     // 6. Clean up expired sessions (already handled by PHP session garbage collection, but log it)
     logCleanup("Session cleanup handled by PHP session.gc_maxlifetime (1 hour)");
     
-    // 7. Clean up IP addresses from audit logs (7 days retention)
-    // Anonymize IP addresses in training audit logs older than 7 days
-    $stmt = $pdo->prepare("UPDATE training_audit SET ip_address = 'xxx.xxx.xxx.xxx' WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY) AND ip_address IS NOT NULL AND ip_address != 'xxx.xxx.xxx.xxx'");
-    $stmt->execute();
-    $anonymized_audit_ips = $stmt->rowCount();
-    logCleanup("Anonymized $anonymized_audit_ips IP addresses in training_audit (older than 7 days)");
-    
-    // Anonymize IP addresses in training access logs older than 7 days  
-    $stmt = $pdo->prepare("UPDATE training_access_log SET ip_address = 'xxx.xxx.xxx.xxx' WHERE accessed_at < DATE_SUB(NOW(), INTERVAL 7 DAY) AND ip_address IS NOT NULL AND ip_address != 'xxx.xxx.xxx.xxx'");
-    $stmt->execute();
-    $anonymized_access_ips = $stmt->rowCount();
-    logCleanup("Anonymized $anonymized_access_ips IP addresses in training_access_log (older than 7 days)");
+    // 7. No IP address logging - this step is no longer needed
+    $anonymized_audit_ips = 0;
+    $anonymized_access_ips = 0;
+    logCleanup("IP address anonymization: Not applicable (IP logging disabled)");
     
     // 8. Clean up old message expiration (from messaging system)
     $stmt = $pdo->prepare("DELETE FROM crew_messages WHERE expires_at < NOW()");

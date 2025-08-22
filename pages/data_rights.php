@@ -431,11 +431,6 @@ try {
                         <td>Yes</td>
                     </tr>
                     <tr>
-                        <td>IP Address Logs</td>
-                        <td>7 days</td>
-                        <td>Yes</td>
-                    </tr>
-                    <tr>
                         <td>Training File Access</td>
                         <td>24 months</td>
                         <td>Yes</td>

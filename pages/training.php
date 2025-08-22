@@ -15,19 +15,18 @@ function logTrainingAction($file_id, $action, $notes = '') {
         $character_name = ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '');
         $user_rank = $_SESSION['rank'] ?? '';
         $user_dept = $_SESSION['department'] ?? '';
-        $ip_address = $_SERVER['REMOTE_ADDR'] ?? '';
         $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         
         $stmt = $pdo->prepare("
             INSERT INTO training_audit 
             (file_id, action, performed_by, character_name, user_rank, user_department, 
-             ip_address, user_agent, additional_notes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             user_agent, additional_notes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
         
         $stmt->execute([
             $file_id, $action, $_SESSION['user_id'], $character_name, 
-            $user_rank, $user_dept, $ip_address, $user_agent, $notes
+            $user_rank, $user_dept, $user_agent, $notes
         ]);
     } catch (Exception $e) {
         error_log("Training audit error: " . $e->getMessage());
@@ -246,12 +245,12 @@ if (isset($_GET['download']) && is_numeric($_GET['download'])) {
             
             // Log in access log
             $stmt = $pdo->prepare("
-                INSERT INTO training_access_log (file_id, accessed_by, access_type, ip_address, user_agent) 
-                VALUES (?, ?, 'download', ?, ?)
+                INSERT INTO training_access_log (file_id, accessed_by, access_type, user_agent) 
+                VALUES (?, ?, 'download', ?)
             ");
             $stmt->execute([
                 $file_id, $_SESSION['user_id'], 
-                $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? ''
+                $_SERVER['HTTP_USER_AGENT'] ?? ''
             ]);
         }
         
