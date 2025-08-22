@@ -18,13 +18,16 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'security_report')
         $error = "Invalid security token. Please try again.";
     } else {
         try {
+            // Auto-populate reported_by with current user's character
+            $reported_by = trim(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
+            
             $pdo = getConnection();
             $stmt = $pdo->prepare("INSERT INTO security_reports (incident_type, description, involved_roster_id, reported_by) VALUES (?, ?, ?, ?)");
             $stmt->execute([
                 sanitizeInput($_POST['incident_type']),
                 sanitizeInput($_POST['description']),
                 isset($_POST['involved_roster_id']) ? filter_var($_POST['involved_roster_id'], FILTER_VALIDATE_INT) : null,
-                sanitizeInput($_POST['reported_by'])
+                $reported_by
             ]);
             $success = "Security report submitted successfully.";
         } catch (Exception $e) {
@@ -294,7 +297,11 @@ try {
 							
 							<div style="margin-bottom: 1rem;">
 								<label style="color: var(--gold);">Reported By:</label>
-								<input type="text" name="reported_by" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+								<?php 
+								$current_user = trim(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
+								?>
+								<input type="text" value="<?php echo htmlspecialchars($current_user); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--gold); border: 1px solid var(--gold); cursor: not-allowed;">
+								<small style="color: var(--gold); font-size: 0.8rem;">Auto-filled from your current character profile</small>
 							</div>
 							
 							<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; width: 100%;">Submit Security Report</button>
