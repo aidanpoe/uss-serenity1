@@ -184,6 +184,10 @@ try {
     
 } catch (Exception $e) {
     $error = "Database error: " . $e->getMessage();
+    // Initialize empty arrays to prevent undefined variable errors
+    $modules = [];
+    $crew = [];
+    $assignments = [];
 }
 ?>
 
@@ -718,3 +722,5 @@ try {
 			playAudio('audio3');
 		}
 	</script>
+</body>
+</html>
