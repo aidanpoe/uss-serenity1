@@ -27,9 +27,6 @@ try {
     }
     $awards = $unique_awards;
     
-    // Debug output - remove after testing
-    error_log("Awards query executed. Found " . count($awards) . " unique awards.");
-    
 } catch (PDOException $e) {
     $awards = [];
     error_log("Awards query error: " . $e->getMessage());
@@ -263,13 +260,6 @@ $award_categories = array_filter($award_categories, function($category) {
                     
                     <div class="total-awards">
                         📊 Total Available Awards: <?php echo count($awards); ?>
-                        <!-- Debug info - remove after testing -->
-                        <?php if (count($awards) == 0): ?>
-                        <br><small style="color: var(--red);">
-                            Debug: Query executed, but returned <?php echo count($awards); ?> results.
-                            <br>Database connection: <?php echo isset($pdo) ? 'OK' : 'FAILED'; ?>
-                        </small>
-                        <?php endif; ?>
                     </div>
                     
                     <div class="search-container">
