@@ -270,7 +270,21 @@ try {
 					
 					<!-- Audit Log Results -->
 					<div class="audit-container">
-						<h3>Audit Trail Results: <?php echo count($audit_logs); ?> actions found</h3>
+						<h3>Audit Trail Results: <?php echo count($audit_logs ?? []); ?> actions found</h3>
+						
+						<!-- Quick test to verify data -->
+						<div style="background: rgba(255, 255, 0, 0.1); border: 1px solid yellow; padding: 1rem; margin: 1rem 0;">
+							<strong>Quick Data Check:</strong>
+							<?php if (isset($audit_logs)): ?>
+								Found <?php echo count($audit_logs); ?> audit log entries.
+								<?php if (count($audit_logs) > 0): ?>
+									<br>First entry: <?php echo htmlspecialchars($audit_logs[0]['action_type'] ?? 'Unknown'); ?> by character ID <?php echo htmlspecialchars($audit_logs[0]['character_id'] ?? 'Unknown'); ?>
+								<?php endif; ?>
+							<?php else: ?>
+								audit_logs variable is not set.
+							<?php endif; ?>
+						</div>
+						
 						<?php if (!empty($filter_auditor) || !empty($filter_action) || $filter_days !== '30'): ?>
 						<p style="color: var(--orange);">
 							Active filters: 
@@ -299,11 +313,12 @@ try {
 							$entry_class = 'audit-entry';
 							if (strpos($log['action_type'], 'delete') !== false) $entry_class .= ' delete-action';
 						?>
+						<!-- Debug: Processing log entry <?php echo $log['id']; ?> -->
 						<div class="<?php echo $entry_class; ?>">
 							<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
 								<div>
 									<h4 style="color: var(--gold); margin: 0;">
-										<?php echo htmlspecialchars($log['rank'] . ' ' . $log['first_name'] . ' ' . $log['last_name']); ?>
+										<?php echo htmlspecialchars(($log['rank'] ?? 'Unknown Rank') . ' ' . ($log['first_name'] ?? 'Unknown') . ' ' . ($log['last_name'] ?? 'User')); ?>
 										<span class="action-badge action-<?php echo strpos($log['action_type'], 'delete') !== false ? 'delete' : 'view'; ?>">
 											<?php echo htmlspecialchars(strtoupper(str_replace('_', ' ', $log['action_type']))); ?>
 										</span>
@@ -335,7 +350,7 @@ try {
 							<?php endif; ?>
 							
 							<div style="border-top: 1px solid var(--gray); padding-top: 0.5rem; margin-top: 1rem; font-size: 0.9rem; color: var(--bluey);">
-								<strong>Department:</strong> <?php echo htmlspecialchars($log['department']); ?> | 
+								<strong>Department:</strong> <?php echo htmlspecialchars($log['department'] ?? 'Unknown'); ?> | 
 								<strong>Timestamp:</strong> <?php echo $log['action_timestamp']; ?>
 							</div>
 						</div>

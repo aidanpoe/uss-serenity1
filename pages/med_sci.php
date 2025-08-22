@@ -152,12 +152,13 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_medical_re
                 $stmt = $pdo->prepare("DELETE FROM medical_records WHERE id = ?");
                 $stmt->execute([$_POST['record_id']]);
                 
-                // Log the action for Starfleet Auditors
-                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                // Log the action for auditing (both Command and Starfleet Auditors)
+                if (isset($_SESSION['character_id']) && (hasPermission('Command') || $roster_dept === 'Starfleet Auditor')) {
                     logAuditorAction($_SESSION['character_id'], 'delete_medical_record', 'medical_records', $record['id'], [
                         'patient_name' => $record['first_name'] . ' ' . $record['last_name'],
                         'condition' => $record['condition_description'],
-                        'status' => $record['status']
+                        'status' => $record['status'],
+                        'user_type' => $roster_dept === 'Starfleet Auditor' ? 'Starfleet Auditor' : 'Command Staff'
                     ]);
                 }
                 
@@ -190,12 +191,13 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_science_re
                 $stmt = $pdo->prepare("DELETE FROM science_reports WHERE id = ?");
                 $stmt->execute([$_POST['report_id']]);
                 
-                // Log the action for Starfleet Auditors
-                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                // Log the action for auditing (both Command and Starfleet Auditors)
+                if (isset($_SESSION['character_id']) && (hasPermission('Command') || $roster_dept === 'Starfleet Auditor')) {
                     logAuditorAction($_SESSION['character_id'], 'delete_science_report', 'science_reports', $report['id'], [
                         'title' => $report['title'],
                         'reported_by' => $report['reported_by'],
-                        'status' => $report['status']
+                        'status' => $report['status'],
+                        'user_type' => $roster_dept === 'Starfleet Auditor' ? 'Starfleet Auditor' : 'Command Staff'
                     ]);
                 }
                 

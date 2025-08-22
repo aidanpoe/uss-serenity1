@@ -30,13 +30,14 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_criminal_r
                 $stmt = $pdo->prepare("DELETE FROM criminal_records WHERE id = ?");
                 $stmt->execute([$_POST['record_id']]);
                 
-                // Log the action for Starfleet Auditors
-                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                // Log the action for auditing (both Command and Starfleet Auditors)
+                if (isset($_SESSION['character_id']) && (hasPermission('Command') || $roster_dept === 'Starfleet Auditor')) {
                     logAuditorAction($_SESSION['character_id'], 'delete_criminal_record', 'criminal_records', $record['id'], [
                         'person_name' => $record['first_name'] . ' ' . $record['last_name'],
                         'offense' => $record['offense'],
                         'sentence' => $record['sentence'],
-                        'status' => $record['status']
+                        'status' => $record['status'],
+                        'user_type' => $roster_dept === 'Starfleet Auditor' ? 'Starfleet Auditor' : 'Command Staff'
                     ]);
                 }
                 

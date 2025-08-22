@@ -151,12 +151,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     $stmt = $pdo->prepare("DELETE FROM award_recommendations WHERE id = ?");
                     $stmt->execute([$_POST['recommendation_id'] ?? 0]);
                     
-                    // Log the action for Starfleet Auditors
-                    if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                    // Log the action for auditing (both Command and Starfleet Auditors)
+                    if (isset($_SESSION['character_id']) && (hasPermission('Command') || $roster_dept === 'Starfleet Auditor')) {
                         logAuditorAction($_SESSION['character_id'], 'delete_award_recommendation', 'award_recommendations', $recommendation['id'], [
                             'recommended_person' => $recommendation['recommended_person'],
                             'recommended_award' => $recommendation['recommended_award'],
-                            'status' => $recommendation['status']
+                            'status' => $recommendation['status'],
+                            'user_type' => $roster_dept === 'Starfleet Auditor' ? 'Starfleet Auditor' : 'Command Staff'
                         ]);
                     }
                     
