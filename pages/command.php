@@ -160,6 +160,26 @@ try {
         $command_officers = array_slice($all_command_related, 0, 6); // Limit to 6 for display
     }
     
+    // Get roster data for award recommendations dropdown
+    $roster_members = [];
+    try {
+        $stmt = $pdo->prepare("SELECT id, rank, first_name, last_name, department, position FROM roster ORDER BY rank DESC, last_name ASC, first_name ASC");
+        $stmt->execute();
+        $roster_members = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Exception $e) {
+        // Roster table may not exist yet, continue without dropdown data
+    }
+    
+    // Get awards data for award recommendations dropdown
+    $available_awards = [];
+    try {
+        $stmt = $pdo->prepare("SELECT id, name, type, specialization, minimum_rank, description FROM awards ORDER BY order_precedence ASC, name ASC");
+        $stmt->execute();
+        $available_awards = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Exception $e) {
+        // Awards table may not exist yet, continue without dropdown data
+    }
+    
     // Get data for command users only
     if (hasPermission('Command')) {
         
@@ -357,11 +377,46 @@ try {
 							<input type="hidden" name="action" value="submit_award_recommendation">
 							<div style="margin-bottom: 1rem;">
 								<label for="recommended_person" style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Crew Member to Recommend:</label>
-								<input type="text" name="recommended_person" id="recommended_person" required placeholder="e.g., Lieutenant Commander Jane Doe" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px;">
+								<select name="recommended_person" id="recommended_person" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px;">
+									<option value="">-- Select a Crew Member --</option>
+									<?php if (!empty($roster_members)): ?>
+										<?php foreach ($roster_members as $member): ?>
+											<option value="<?php echo htmlspecialchars(($member['rank'] ?? '') . ' ' . ($member['first_name'] ?? '') . ' ' . ($member['last_name'] ?? '')); ?>">
+												<?php echo htmlspecialchars(($member['rank'] ?? '') . ' ' . ($member['first_name'] ?? '') . ' ' . ($member['last_name'] ?? '') . ' - ' . ($member['department'] ?? '') . ($member['position'] ? ' (' . $member['position'] . ')' : '')); ?>
+											</option>
+										<?php endforeach; ?>
+									<?php else: ?>
+										<option value="" disabled>No crew members found in roster</option>
+									<?php endif; ?>
+								</select>
 							</div>
 							<div style="margin-bottom: 1rem;">
 								<label for="recommended_award" style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Suggested Award:</label>
-								<input type="text" name="recommended_award" id="recommended_award" required placeholder="e.g., Starfleet Commendation Medal" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px;">
+								<select name="recommended_award" id="recommended_award" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px;">
+									<option value="">-- Select an Award --</option>
+									<?php if (!empty($available_awards)): ?>
+										<?php 
+										$current_category = '';
+										foreach ($available_awards as $award): 
+											$award_category = ($award['type'] ?? 'Medal') . ($award['specialization'] ? ' - ' . $award['specialization'] : '');
+											if ($award_category !== $current_category) {
+												if ($current_category !== '') echo '</optgroup>';
+												echo '<optgroup label="' . htmlspecialchars($award_category) . '">';
+												$current_category = $award_category;
+											}
+										?>
+											<option value="<?php echo htmlspecialchars($award['name'] ?? ''); ?>" title="<?php echo htmlspecialchars($award['description'] ?? ''); ?>">
+												<?php echo htmlspecialchars($award['name'] ?? ''); ?> (Min: <?php echo htmlspecialchars($award['minimum_rank'] ?? 'Unknown'); ?>)
+											</option>
+										<?php endforeach; ?>
+										<?php if ($current_category !== '') echo '</optgroup>'; ?>
+									<?php else: ?>
+										<option value="" disabled>No awards found in database</option>
+									<?php endif; ?>
+								</select>
+								<small style="color: var(--orange); font-size: 0.8rem; display: block; margin-top: 0.5rem;">
+									Awards are grouped by type and specialization. Hover over options to see descriptions.
+								</small>
 							</div>
 							<div style="margin-bottom: 1rem;">
 								<label for="justification" style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Justification:</label>
