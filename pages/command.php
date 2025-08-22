@@ -73,6 +73,29 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'submit_award_reco
     }
 }
 
+// Handle award recommendation update (backend only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_award_recommendation') {
+    if (hasPermission('Command')) {
+        try {
+            $pdo = getConnection();
+            
+            $reviewed_by = ($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '');
+            $reviewed_by = trim($reviewed_by);
+            
+            $stmt = $pdo->prepare("UPDATE award_recommendations SET status = ?, review_notes = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?");
+            $stmt->execute([
+                $_POST['status'],
+                $_POST['review_notes'],
+                $reviewed_by,
+                $_POST['recommendation_id']
+            ]);
+            $success = "Award recommendation updated successfully.";
+        } catch (Exception $e) {
+            $error = "Error updating award recommendation: " . $e->getMessage();
+        }
+    }
+}
+
 // Handle suggestion update (backend only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_suggestion') {
     if (hasPermission('Command')) {
@@ -104,6 +127,11 @@ try {
         $stmt = $pdo->prepare("SELECT * FROM command_suggestions ORDER BY status ASC, created_at DESC");
         $stmt->execute();
         $suggestions = $stmt->fetchAll();
+        
+        // Get award recommendations for backend
+        $stmt = $pdo->prepare("SELECT * FROM award_recommendations ORDER BY status ASC, submitted_at DESC");
+        $stmt->execute();
+        $award_recommendations = $stmt->fetchAll();
         
         // Get department summary data
         $stmt = $pdo->prepare("
@@ -298,6 +326,7 @@ try {
 						<p style="color: var(--gold); text-align: center; margin-bottom: 1.5rem; font-style: italic;">
 							Notice exceptional service? Recommend a crew member for an award!
 						</p>
+						<?php if (isLoggedIn()): ?>
 						<form method="POST" action="">
 							<input type="hidden" name="action" value="submit_award_recommendation">
 							<div style="margin-bottom: 1rem;">
@@ -312,10 +341,27 @@ try {
 								<label for="justification" style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Justification:</label>
 								<textarea name="justification" id="justification" rows="4" required placeholder="Explain why this crew member deserves this award..." style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px;"></textarea>
 							</div>
+							<div style="margin-bottom: 1rem;">
+								<label for="recommended_by" style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Recommended By:</label>
+								<?php 
+								$current_user = trim(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
+								?>
+								<input type="text" value="<?php echo htmlspecialchars($current_user); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--gold); border: 2px solid var(--gold); border-radius: 5px; cursor: not-allowed;">
+								<small style="color: var(--gold); font-size: 0.8rem;">Auto-filled from your current character profile</small>
+							</div>
 							<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; width: 100%; font-weight: bold;">🏅 Submit Recommendation</button>
 						</form>
+						<?php else: ?>
+						<div style="text-align: center; padding: 2rem;">
+							<p style="color: var(--gold); font-size: 1.1rem; margin-bottom: 1rem;">
+								You must be logged in to submit award recommendations.
+							</p>
+							<a href="../index.php" style="background-color: var(--gold); color: black; padding: 1rem 2rem; border-radius: 5px; text-decoration: none; display: inline-block; font-weight: bold;">
+								Return to Login
+							</a>
+						</div>
+						<?php endif; ?>
 					</div>
-					<?php endif; ?>
 					
 					<?php if (!isset($_SESSION['user_id'])): ?>
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 2px solid var(--red); margin: 2rem 0;">
@@ -366,6 +412,68 @@ try {
 								</div>
 							</div>
 							<?php endforeach; ?>
+						</div>
+					</div>
+					<?php endif; ?>
+					
+					<?php if (hasPermission('Command')): ?>
+					<!-- Award Recommendations Management -->
+					<div style="background: rgba(0,0,0,0.7); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--gold);">
+						<h4>🏅 Award Recommendations Management</h4>
+						<div style="max-height: 600px; overflow-y: auto; border: 1px solid var(--gold); border-radius: 5px; padding: 1rem; margin: 1rem 0; background: rgba(0,0,0,0.3);">
+							<?php if (empty($award_recommendations)): ?>
+								<p style="color: var(--gold); text-align: center; margin: 2rem 0;">
+									No award recommendations submitted yet.
+								</p>
+							<?php else: ?>
+								<?php foreach ($award_recommendations as $recommendation): ?>
+								<div style="border-bottom: 1px solid var(--gray); padding: 1rem 0; <?php echo $recommendation['status'] === 'Approved' || $recommendation['status'] === 'Rejected' ? 'opacity: 0.7;' : ''; ?>">
+									<div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 1rem;">
+										<div>
+											<strong style="color: var(--gold);">Recommendation #<?php echo $recommendation['id']; ?></strong><br>
+											<h5 style="color: var(--gold);"><?php echo htmlspecialchars($recommendation['recommended_person']); ?></h5>
+											<small>For: <strong><?php echo htmlspecialchars($recommendation['recommended_award']); ?></strong></small><br>
+											<small>Submitted: <?php echo date('Y-m-d H:i', strtotime($recommendation['submitted_at'])); ?></small><br>
+											<small>By: <?php echo htmlspecialchars($recommendation['submitted_by']); ?></small>
+										</div>
+										<div>
+											<strong style="color: var(--gold);">Justification:</strong><br>
+											<div style="color: var(--bluey); line-height: 1.4; margin-bottom: 1rem;">
+												<?php echo nl2br(htmlspecialchars($recommendation['justification'])); ?>
+											</div>
+											<?php if ($recommendation['review_notes']): ?>
+											<strong style="color: var(--orange);">Command Review:</strong><br>
+											<div style="color: var(--orange); font-style: italic;">
+												<?php echo nl2br(htmlspecialchars($recommendation['review_notes'])); ?>
+											</div>
+											<?php endif; ?>
+										</div>
+										<div>
+											<strong>Status:</strong> 
+											<span style="color: <?php 
+												echo $recommendation['status'] === 'Approved' ? 'var(--green)' : 
+													($recommendation['status'] === 'Rejected' ? 'var(--red)' : 'var(--gold)'); 
+											?>">
+												<?php echo $recommendation['status']; ?>
+											</span><br>
+											<?php if ($recommendation['status'] === 'Pending'): ?>
+											<form method="POST" action="" style="margin-top: 1rem;">
+												<input type="hidden" name="action" value="update_award_recommendation">
+												<input type="hidden" name="recommendation_id" value="<?php echo $recommendation['id']; ?>">
+												<select name="status" style="width: 100%; padding: 0.25rem; background: black; color: white; border: 1px solid var(--gold); margin-bottom: 0.5rem;">
+													<option value="Pending">Pending</option>
+													<option value="Approved">Approve</option>
+													<option value="Rejected">Reject</option>
+												</select>
+												<textarea name="review_notes" placeholder="Command review notes..." rows="3" style="width: 100%; padding: 0.25rem; background: black; color: white; border: 1px solid var(--gold); margin-bottom: 0.5rem;"><?php echo htmlspecialchars($recommendation['review_notes'] ?? ''); ?></textarea>
+												<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%;">Update</button>
+											</form>
+											<?php endif; ?>
+										</div>
+									</div>
+								</div>
+								<?php endforeach; ?>
+							<?php endif; ?>
 						</div>
 					</div>
 					<?php endif; ?>
