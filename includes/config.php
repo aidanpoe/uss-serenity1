@@ -302,8 +302,13 @@ function canEditPersonnelFiles() {
         return true;
     }
     
-    // Priority 3: Captain and Command have access
-    if ($user_dept === 'Command' || $user_dept === 'Captain') {
+    // Priority 3: Command staff (both user and character level)
+    if ($user_dept === 'Command' || $user_dept === 'Captain' || $roster_dept === 'Command') {
+        return true;
+    }
+    
+    // Priority 4: Check if user has Command permission through character rank
+    if (hasPermission('Command')) {
         return true;
     }
     

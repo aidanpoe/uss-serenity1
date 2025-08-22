@@ -374,12 +374,15 @@ try {
 								<h4>Quick Actions</h4>
 								<div style="display: flex; flex-direction: column; gap: 0.5rem;">
 									<button onclick="playSoundAndRedirect('audio2', 'roster.php')" style="background-color: var(--red); color: black; border: none; padding: 0.75rem; border-radius: 5px;">Ship's Roster</button>
+									<?php 
+									$roster_dept = $_SESSION['roster_department'] ?? '';
+									if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor' || canEditPersonnelFiles()): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'personnel_edit.php')" style="background-color: var(--blue); color: black; border: none; padding: 0.75rem; border-radius: 5px;">👥 Personnel Editor</button>
+									<?php endif; ?>
 									<button onclick="playSoundAndRedirect('audio2', 'awards_management.php')" style="background-color: var(--gold); color: black; border: none; padding: 0.75rem; border-radius: 5px;">🏅 Awards Management</button>
 									<button onclick="playSoundAndRedirect('audio2', 'admin_management.php')" style="background-color: var(--orange); color: black; border: none; padding: 0.75rem; border-radius: 5px;">⚠️ Admin Management</button>
 									<button onclick="playSoundAndRedirect('audio2', 'training_modules.php')" style="background-color: var(--green); color: black; border: none; padding: 0.75rem; border-radius: 5px;">🎓 Training Modules</button>
-									<?php 
-									$roster_dept = $_SESSION['roster_department'] ?? '';
-									if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
+									<?php if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
 									<button onclick="playSoundAndRedirect('audio2', 'auditor_activity_log.php')" style="background-color: var(--purple); color: white; border: none; padding: 0.75rem; border-radius: 5px;">🔍 Auditor Activity Log</button>
 									<?php endif; ?>
 								</div>
