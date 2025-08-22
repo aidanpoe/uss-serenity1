@@ -424,6 +424,13 @@ if (!function_exists('canEditPersonnelFiles')) {
 						</div>
 					</div>
 				</div>
+				
+				<!-- Department Training Section -->
+				<?php 
+				if (function_exists('renderDepartmentTrainingSection')) {
+					renderDepartmentTrainingSection('Command', 'Command');
+				}
+				?>
 				<?php endif; ?>
 				
 				<!-- Public Suggestion Form -->
@@ -500,6 +507,122 @@ if (!function_exists('canEditPersonnelFiles')) {
 					</div>
 				</div>
 				<?php endif; ?>
+				
+				<?php if (function_exists('hasPermission') && hasPermission('Command')): ?>
+				<!-- Crew Suggestions Management -->
+				<div style="background: rgba(0,0,0,0.7); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--red);">
+					<h4>Crew Suggestions Management</h4>
+					<div style="max-height: 300px; overflow-y: auto;">
+						<?php if (!empty($suggestions)): ?>
+							<?php foreach ($suggestions as $suggestion): ?>
+							<div style="background: rgba(204, 68, 68, 0.1); padding: 1rem; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--red);">
+								<div style="display: flex; justify-content: space-between; align-items: flex-start;">
+									<div style="flex: 1;">
+										<h5 style="color: var(--red); margin: 0 0 0.5rem 0;"><?php echo htmlspecialchars($suggestion['suggestion_title'] ?? 'Untitled'); ?></h5>
+										<p style="margin: 0.5rem 0; font-size: 0.9rem;"><?php echo htmlspecialchars($suggestion['suggestion_description'] ?? 'No description'); ?></p>
+										<small style="color: var(--orange);">
+											Submitted by: <?php echo htmlspecialchars($suggestion['submitted_by'] ?? 'Unknown'); ?> 
+											on <?php echo htmlspecialchars($suggestion['submission_date'] ?? 'Unknown date'); ?>
+										</small><br>
+										<small style="color: var(--gold);">Status: <?php echo htmlspecialchars($suggestion['status'] ?? 'pending'); ?></small>
+									</div>
+									<div style="margin-left: 1rem;">
+										<form method="POST" style="display: inline-block;">
+											<input type="hidden" name="action" value="update_suggestion">
+											<input type="hidden" name="suggestion_id" value="<?php echo htmlspecialchars($suggestion['id'] ?? ''); ?>">
+											<select name="status" style="background: black; color: white; border: 1px solid var(--red); padding: 0.25rem;">
+												<option value="pending" <?php echo ($suggestion['status'] ?? '') === 'pending' ? 'selected' : ''; ?>>Pending</option>
+												<option value="reviewed" <?php echo ($suggestion['status'] ?? '') === 'reviewed' ? 'selected' : ''; ?>>Reviewed</option>
+												<option value="implemented" <?php echo ($suggestion['status'] ?? '') === 'implemented' ? 'selected' : ''; ?>>Implemented</option>
+											</select>
+											<button type="submit" style="background-color: var(--red); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; margin-left: 0.5rem;">Update</button>
+										</form>
+									</div>
+								</div>
+							</div>
+							<?php endforeach; ?>
+						<?php else: ?>
+							<p style="color: var(--red); text-align: center; padding: 2rem;">No suggestions submitted yet.</p>
+						<?php endif; ?>
+					</div>
+				</div>
+
+				<!-- Award Recommendations Management -->
+				<div style="background: rgba(255, 215, 0, 0.1); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--gold);">
+					<h4>🏅 Award Recommendations Management</h4>
+					<div style="max-height: 400px; overflow-y: auto;">
+						<?php if (!empty($award_recommendations)): ?>
+							<?php foreach ($award_recommendations as $recommendation): ?>
+							<div style="background: rgba(255, 215, 0, 0.1); padding: 1rem; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--gold);">
+								<div style="display: flex; justify-content: space-between; align-items: flex-start;">
+									<div style="flex: 1;">
+										<h5 style="color: var(--gold); margin: 0 0 0.5rem 0;">
+											Recommend <?php echo htmlspecialchars($recommendation['recommended_person'] ?? 'Unknown'); ?> 
+											for <?php echo htmlspecialchars($recommendation['recommended_award'] ?? 'Unknown Award'); ?>
+										</h5>
+										<p style="margin: 0.5rem 0; font-size: 0.9rem; color: white;">
+											<strong>Justification:</strong> <?php echo htmlspecialchars($recommendation['justification'] ?? 'No justification provided'); ?>
+										</p>
+										<small style="color: var(--orange);">
+											Recommended by: <?php echo htmlspecialchars($recommendation['submitted_by'] ?? 'Unknown'); ?> 
+											on <?php echo htmlspecialchars($recommendation['submitted_at'] ?? 'Unknown date'); ?>
+										</small><br>
+										<small style="color: var(--gold);">
+											Status: <?php echo htmlspecialchars($recommendation['status'] ?? 'Pending'); ?>
+											<?php if (!empty($recommendation['reviewed_by'])): ?>
+												| Reviewed by: <?php echo htmlspecialchars($recommendation['reviewed_by']); ?>
+											<?php endif; ?>
+										</small>
+										<?php if (!empty($recommendation['review_notes'])): ?>
+											<br><small style="color: var(--blue);">
+												Review Notes: <?php echo htmlspecialchars($recommendation['review_notes']); ?>
+											</small>
+										<?php endif; ?>
+									</div>
+									<div style="margin-left: 1rem;">
+										<form method="POST" style="display: flex; flex-direction: column; gap: 0.5rem;">
+											<input type="hidden" name="action" value="update_award_recommendation">
+											<input type="hidden" name="recommendation_id" value="<?php echo htmlspecialchars($recommendation['id'] ?? ''); ?>">
+											<select name="status" style="background: black; color: white; border: 1px solid var(--gold); padding: 0.25rem;">
+												<option value="Pending" <?php echo ($recommendation['status'] ?? '') === 'Pending' ? 'selected' : ''; ?>>Pending</option>
+												<option value="Approved" <?php echo ($recommendation['status'] ?? '') === 'Approved' ? 'selected' : ''; ?>>Approved</option>
+												<option value="Rejected" <?php echo ($recommendation['status'] ?? '') === 'Rejected' ? 'selected' : ''; ?>>Rejected</option>
+											</select>
+											<textarea name="review_notes" placeholder="Review notes..." style="background: black; color: white; border: 1px solid var(--gold); padding: 0.25rem; resize: vertical; min-height: 60px; width: 200px;"><?php echo htmlspecialchars($recommendation['review_notes'] ?? ''); ?></textarea>
+											<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 0.5rem; border-radius: 3px; font-weight: bold;">Update Review</button>
+										</form>
+									</div>
+								</div>
+							</div>
+							<?php endforeach; ?>
+						<?php else: ?>
+							<p style="color: var(--gold); text-align: center; padding: 2rem;">No award recommendations submitted yet.</p>
+						<?php endif; ?>
+					</div>
+				</div>
+				<?php endif; ?>
+				
+				<!-- Ship Information -->
+				<div style="background: rgba(204, 68, 68, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">
+					<h4>Command Information</h4>
+					<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+						<div>
+							<strong style="color: var(--red);">Bridge:</strong> Deck 1<br>
+							<strong style="color: var(--red);">Ready Room:</strong> Deck 1<br>
+							<strong style="color: var(--red);">Conference Room:</strong> Deck 1
+						</div>
+						<div>
+							<strong style="color: var(--red);">Captain's Cabin:</strong> Deck 2<br>
+							<strong style="color: var(--red);">Senior Staff:</strong> Deck 2-3<br>
+							<strong style="color: var(--red);">Strategic Ops:</strong> Deck 8
+						</div>
+						<div>
+							<strong style="color: var(--red);">Current Mission:</strong> Exploration<br>
+							<strong style="color: var(--red);">ETA:</strong> Starbase 47: 3 Days<br>
+							<strong style="color: var(--red);">Status:</strong> All Green
+						</div>
+					</div>
+				</div>
 			</main>
 		</div>
 	</div>
