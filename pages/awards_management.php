@@ -16,6 +16,7 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_award'])) {
     $roster_id = (int)$_POST['roster_id'];
     $award_id = (int)$_POST['award_id'];
+    $assigned_by = (int)$_POST['assigned_by'];
     $citation = trim($_POST['citation']);
     $date_awarded = $_POST['date_awarded'];
     
@@ -27,15 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_award'])) {
         if ($check_stmt->rowCount() > 0) {
             $error = "This crew member already has this award.";
         } else {
-            // Get the awarding officer's roster ID
-            $awarding_officer_id = null;
-            if (isset($_SESSION['roster_id'])) {
-                $awarding_officer_id = $_SESSION['roster_id'];
-            }
-            
             // Insert the award
             $stmt = $pdo->prepare("INSERT INTO crew_awards (roster_id, award_id, awarded_by_roster_id, date_awarded, citation) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$roster_id, $award_id, $awarding_officer_id, $date_awarded, $citation]);
+            $stmt->execute([$roster_id, $award_id, $assigned_by, $date_awarded, $citation]);
             
             // Update award count in roster
             $update_stmt = $pdo->prepare("UPDATE roster SET award_count = (SELECT COUNT(*) FROM crew_awards WHERE roster_id = ?) WHERE id = ?");
@@ -92,6 +87,14 @@ try {
     if (empty($error)) {
         $error = "Error loading crew members: " . $e->getMessage();
     }
+}
+
+// Get command personnel for "Assigned By" dropdown
+try {
+    $command_stmt = $pdo->query("SELECT id, rank, first_name, last_name, position FROM roster WHERE department = 'Command' OR position LIKE '%Captain%' OR position LIKE '%Commander%' OR position LIKE '%Admiral%' ORDER BY rank, last_name, first_name");
+    $command_personnel = $command_stmt->fetchAll();
+} catch (Exception $e) {
+    $command_personnel = [];
 }
 
 // Get current award assignments
@@ -707,6 +710,18 @@ try {
                                 <div class="form-group">
                                     <label for="date_awarded">Date Awarded:</label>
                                     <input type="date" name="date_awarded" id="date_awarded" value="<?php echo date('Y-m-d'); ?>" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="assigned_by">Assigned By:</label>
+                                    <select name="assigned_by" id="assigned_by" required>
+                                        <option value="">Select assigning officer...</option>
+                                        <?php foreach ($command_personnel as $officer): ?>
+                                            <option value="<?php echo $officer['id']; ?>" <?php echo (isset($_SESSION['roster_id']) && $_SESSION['roster_id'] == $officer['id']) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($officer['rank'] . ' ' . $officer['first_name'] . ' ' . $officer['last_name'] . ' - ' . $officer['position']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
                                 
                                 <div class="form-group">

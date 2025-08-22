@@ -34,6 +34,45 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'submit_suggestion
     }
 }
 
+// Handle award recommendation submission
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'submit_award_recommendation') {
+    if (!isLoggedIn()) {
+        $error = "You must be logged in to submit award recommendations.";
+    } else {
+        try {
+            $submitted_by = ($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '');
+            $submitted_by = trim($submitted_by);
+            
+            $pdo = getConnection();
+            
+            // Create award_recommendations table if it doesn't exist
+            $pdo->exec("CREATE TABLE IF NOT EXISTS award_recommendations (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                recommended_person VARCHAR(255) NOT NULL,
+                recommended_award VARCHAR(255) NOT NULL,
+                justification TEXT NOT NULL,
+                submitted_by VARCHAR(255) NOT NULL,
+                status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+                reviewed_by VARCHAR(255),
+                review_notes TEXT,
+                submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                reviewed_at TIMESTAMP NULL
+            )");
+            
+            $stmt = $pdo->prepare("INSERT INTO award_recommendations (recommended_person, recommended_award, justification, submitted_by) VALUES (?, ?, ?, ?)");
+            $stmt->execute([
+                $_POST['recommended_person'],
+                $_POST['recommended_award'],
+                $_POST['justification'],
+                $submitted_by
+            ]);
+            $success = "Award recommendation submitted successfully and is pending command review.";
+        } catch (Exception $e) {
+            $error = "Error submitting award recommendation: " . $e->getMessage();
+        }
+    }
+}
+
 // Handle suggestion update (backend only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_suggestion') {
     if (hasPermission('Command')) {
@@ -238,33 +277,47 @@ try {
 					<!-- Public Suggestion Form -->
 					<?php if (isLoggedIn()): ?>
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 2px solid var(--red); margin: 2rem 0;">
-						<h4>Submit Suggestion to Command</h4>
+						<h3 style="color: var(--red); text-align: center;">Submit Suggestion to Command</h3>
 						<form method="POST" action="">
 							<input type="hidden" name="action" value="submit_suggestion">
-							
 							<div style="margin-bottom: 1rem;">
-								<label style="color: var(--red);">Suggestion Title:</label>
-								<input type="text" name="suggestion_title" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--red);">
+								<label for="suggestion_title" style="color: var(--red); display: block; margin-bottom: 0.5rem;">Suggestion Title:</label>
+								<input type="text" name="suggestion_title" id="suggestion_title" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--red); border-radius: 5px;">
 							</div>
-							
 							<div style="margin-bottom: 1rem;">
-								<label style="color: var(--red);">Detailed Description:</label>
-								<textarea name="suggestion_description" required rows="4" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--red);" placeholder="Provide detailed description of your suggestion..."></textarea>
+								<label for="suggestion_description" style="color: var(--red); display: block; margin-bottom: 0.5rem;">Description:</label>
+								<textarea name="suggestion_description" id="suggestion_description" rows="4" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--red); border-radius: 5px;"></textarea>
 							</div>
-							
-							<div style="margin-bottom: 1rem;">
-								<label style="color: var(--red);">Submitted By:</label>
-								<?php 
-								$current_user = trim(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
-								?>
-								<input type="text" value="<?php echo htmlspecialchars($current_user); ?>" readonly style="width: 100%; padding: 0.5rem; background: #333; color: var(--blue); border: 1px solid var(--blue); cursor: not-allowed;">
-								<small style="color: var(--blue); font-size: 0.8rem;">Auto-filled from your current character profile</small>
-							</div>
-							
-							<button type="submit" style="background-color: var(--red); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; width: 100%;">Submit Suggestion</button>
+							<button type="submit" style="background-color: var(--red); color: black; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; width: 100%; font-weight: bold;">Submit Suggestion</button>
 						</form>
 					</div>
-					<?php else: ?>
+					
+					<!-- Award Recommendation Form -->
+					<div style="background: rgba(255, 215, 0, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid var(--gold); margin: 2rem 0;">
+						<h3 style="color: var(--gold); text-align: center;">🏅 Recommend Award</h3>
+						<p style="color: var(--gold); text-align: center; margin-bottom: 1.5rem; font-style: italic;">
+							Notice exceptional service? Recommend a crew member for an award!
+						</p>
+						<form method="POST" action="">
+							<input type="hidden" name="action" value="submit_award_recommendation">
+							<div style="margin-bottom: 1rem;">
+								<label for="recommended_person" style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Crew Member to Recommend:</label>
+								<input type="text" name="recommended_person" id="recommended_person" required placeholder="e.g., Lieutenant Commander Jane Doe" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px;">
+							</div>
+							<div style="margin-bottom: 1rem;">
+								<label for="recommended_award" style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Suggested Award:</label>
+								<input type="text" name="recommended_award" id="recommended_award" required placeholder="e.g., Starfleet Commendation Medal" style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px;">
+							</div>
+							<div style="margin-bottom: 1rem;">
+								<label for="justification" style="color: var(--gold); display: block; margin-bottom: 0.5rem;">Justification:</label>
+								<textarea name="justification" id="justification" rows="4" required placeholder="Explain why this crew member deserves this award..." style="width: 100%; padding: 0.5rem; background: black; color: white; border: 2px solid var(--gold); border-radius: 5px;"></textarea>
+							</div>
+							<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; width: 100%; font-weight: bold;">🏅 Submit Recommendation</button>
+						</form>
+					</div>
+					<?php endif; ?>
+					
+					<?php if (!isset($_SESSION['user_id'])): ?>
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 2px solid var(--red); margin: 2rem 0;">
 						<h4>Submit Suggestion to Command</h4>
 						<p style="color: var(--red); text-align: center;">You must be logged in to submit suggestions to Command.</p>

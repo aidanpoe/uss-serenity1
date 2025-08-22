@@ -285,6 +285,12 @@ function loginbutton($buttonstyle = "square") {
 										ACCESS
 									</button>
 								</div>
+								<div style="background: rgba(255, 215, 0, 0.2); padding: 1rem; border-radius: 10px; border: 2px solid var(--gold);">
+									<h5 style="color: var(--gold); margin: 0 0 0.5rem 0;">🏅 Rewards Database</h5>
+									<button onclick="playSoundAndRedirect('audio2', 'pages/rewards.php')" class="lcars-quick-btn" style="background-color: var(--gold); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
+										ACCESS
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
