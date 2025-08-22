@@ -93,7 +93,6 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_security_r
         $error = "Only Command staff and Starfleet Auditors can delete security reports.";
     }
 }
-}
 
 // Handle phaser training update (backend only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_phaser_training') {
