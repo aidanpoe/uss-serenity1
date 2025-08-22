@@ -3,8 +3,9 @@
 session_start();
 require_once '../includes/config.php';
 
-// Check if user is logged in and has command permissions
-if (!isset($_SESSION['steamid']) || !hasPermission('Command')) {
+// Check if user is logged in and has command permissions or is Starfleet Auditor
+$roster_dept = $_SESSION['roster_department'] ?? '';
+if (!isset($_SESSION['steamid']) || (!hasPermission('Command') && $roster_dept !== 'Starfleet Auditor')) {
     header('Location: login.php');
     exit();
 }
@@ -28,13 +29,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_award'])) {
         if ($check_stmt->rowCount() > 0) {
             $error = "This crew member already has this award.";
         } else {
+            // Get crew member and award details for logging
+            $crew_stmt = $pdo->prepare("SELECT first_name, last_name, rank FROM roster WHERE id = ?");
+            $crew_stmt->execute([$roster_id]);
+            $crew_member = $crew_stmt->fetch();
+            
+            $award_stmt = $pdo->prepare("SELECT name FROM awards WHERE id = ?");
+            $award_stmt->execute([$award_id]);
+            $award = $award_stmt->fetch();
+            
             // Insert the award
             $stmt = $pdo->prepare("INSERT INTO crew_awards (roster_id, award_id, awarded_by_roster_id, date_awarded, citation) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$roster_id, $award_id, $assigned_by, $date_awarded, $citation]);
+            $new_award_id = $pdo->lastInsertId();
             
             // Update award count in roster
             $update_stmt = $pdo->prepare("UPDATE roster SET award_count = (SELECT COUNT(*) FROM crew_awards WHERE roster_id = ?) WHERE id = ?");
             $update_stmt->execute([$roster_id, $roster_id]);
+            
+            // Log the action for auditing (both Command and Starfleet Auditors)
+            if (isset($_SESSION['character_id']) && (hasPermission('Command') || $roster_dept === 'Starfleet Auditor')) {
+                logAuditorAction($_SESSION['character_id'], 'assign_award', 'crew_awards', $new_award_id, [
+                    'recipient_name' => ($crew_member['rank'] ?? '') . ' ' . ($crew_member['first_name'] ?? '') . ' ' . ($crew_member['last_name'] ?? ''),
+                    'award_name' => $award['name'] ?? 'Unknown Award',
+                    'citation' => $citation,
+                    'date_awarded' => $date_awarded,
+                    'user_type' => $roster_dept === 'Starfleet Auditor' ? 'Starfleet Auditor' : 'Command Staff'
+                ]);
+            }
             
             $message = "Award successfully assigned!";
         }
@@ -48,19 +70,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_award'])) {
     $crew_award_id = (int)$_POST['crew_award_id'];
     
     try {
-        // Get roster_id before deletion for award count update
-        $get_roster_stmt = $pdo->prepare("SELECT roster_id FROM crew_awards WHERE id = ?");
-        $get_roster_stmt->execute([$crew_award_id]);
-        $roster_data = $get_roster_stmt->fetch();
+        // Get award details before deletion for logging
+        $get_award_stmt = $pdo->prepare("
+            SELECT ca.roster_id, ca.id, r.first_name, r.last_name, r.rank, a.name as award_name, ca.citation
+            FROM crew_awards ca
+            JOIN roster r ON ca.roster_id = r.id
+            JOIN awards a ON ca.award_id = a.id
+            WHERE ca.id = ?
+        ");
+        $get_award_stmt->execute([$crew_award_id]);
+        $award_data = $get_award_stmt->fetch();
         
-        if ($roster_data) {
+        if ($award_data) {
             // Delete the award
             $stmt = $pdo->prepare("DELETE FROM crew_awards WHERE id = ?");
             $stmt->execute([$crew_award_id]);
             
             // Update award count
             $update_stmt = $pdo->prepare("UPDATE roster SET award_count = (SELECT COUNT(*) FROM crew_awards WHERE roster_id = ?) WHERE id = ?");
-            $update_stmt->execute([$roster_data['roster_id'], $roster_data['roster_id']]);
+            $update_stmt->execute([$award_data['roster_id'], $award_data['roster_id']]);
+            
+            // Log the action for auditing (both Command and Starfleet Auditors)
+            if (isset($_SESSION['character_id']) && (hasPermission('Command') || $roster_dept === 'Starfleet Auditor')) {
+                logAuditorAction($_SESSION['character_id'], 'remove_award', 'crew_awards', $crew_award_id, [
+                    'recipient_name' => ($award_data['rank'] ?? '') . ' ' . ($award_data['first_name'] ?? '') . ' ' . ($award_data['last_name'] ?? ''),
+                    'award_name' => $award_data['award_name'] ?? 'Unknown Award',
+                    'citation' => $award_data['citation'] ?? '',
+                    'user_type' => $roster_dept === 'Starfleet Auditor' ? 'Starfleet Auditor' : 'Command Staff'
+                ]);
+            }
             
             $message = "Award successfully removed!";
         }
