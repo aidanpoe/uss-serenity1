@@ -629,7 +629,7 @@ try {
 							<div>
 								<strong style="color: var(--red);">Captain's Quarters:</strong> Deck 3<br>
 								<strong style="color: var(--red);">Senior Staff:</strong> Ship wide<br>
-								<strong style="color: var(--red);">Pub: The Raven:</strong> Deck 2
+								<strong style="color: var(--red);">Pub: The Raven</strong> Deck 2
 							</div>
 							<div>
 								<strong style="color: var(--red);">Current Mission:</strong> Exploration<br>
