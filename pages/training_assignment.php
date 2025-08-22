@@ -466,242 +466,255 @@ try {
 							<div class="stat-label">Completion Rate</div>
 						</div>
 					</div>
-        
-        <!-- Tabs -->
-        <div class="tab-container">
-            <div class="tab active" onclick="showTab('individual')">Individual Assignment</div>
-            <div class="tab" onclick="showTab('bulk')">Bulk Assignment</div>
-            <div class="tab" onclick="showTab('manage')">Manage Assignments</div>
-        </div>
-        
-        <!-- Individual Assignment Tab -->
-        <div id="individual-tab" class="tab-content active">
-            <h2>➕ Assign Training to Individual Crew Member</h2>
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
-                <input type="hidden" name="action" value="assign_training">
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="module_id">Training Module:</label>
-                        <select name="module_id" id="module_id" required>
-                            <option value="">Select Training Module</option>
-                            <?php foreach ($modules as $module): ?>
-                            <option value="<?php echo $module['id']; ?>">
-                                [<?php echo htmlspecialchars($module['department']); ?>] 
-                                <?php echo htmlspecialchars($module['module_name']); ?>
-                                (<?php echo htmlspecialchars($module['certification_level']); ?>)
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="roster_id">Crew Member:</label>
-                        <select name="roster_id" id="roster_id" required>
-                            <option value="">Select Crew Member</option>
-                            <?php foreach ($crew as $member): ?>
-                            <option value="<?php echo $member['roster_id']; ?>">
-                                <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?> 
-                                (<?php echo htmlspecialchars($member['rank']); ?> - <?php echo htmlspecialchars($member['department']); ?>)
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="notes">Assignment Notes (optional):</label>
-                    <textarea name="notes" id="notes" placeholder="Any specific instructions or requirements for this training assignment..."></textarea>
-                </div>
-                
-                <button type="submit" class="action-button">Assign Training</button>
-            </form>
-        </div>
-        
-        <!-- Bulk Assignment Tab -->
-        <div id="bulk-tab" class="tab-content">
-            <h2>👥 Bulk Assign Training to Multiple Crew</h2>
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
-                <input type="hidden" name="action" value="bulk_assign">
-                
-                <div class="form-group">
-                    <label for="bulk_module_id">Training Module:</label>
-                    <select name="module_id" id="bulk_module_id" required>
-                        <option value="">Select Training Module</option>
-                        <?php foreach ($modules as $module): ?>
-                        <option value="<?php echo $module['id']; ?>">
-                            [<?php echo htmlspecialchars($module['department']); ?>] 
-                            <?php echo htmlspecialchars($module['module_name']); ?>
-                            (<?php echo htmlspecialchars($module['certification_level']); ?>)
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Select Crew Members:</label>
-                    <div class="crew-grid">
-                        <?php foreach ($crew as $member): ?>
-                        <div class="crew-checkbox">
-                            <input type="checkbox" name="selected_crew[]" value="<?php echo $member['roster_id']; ?>" id="crew_<?php echo $member['roster_id']; ?>">
-                            <label for="crew_<?php echo $member['roster_id']; ?>">
-                                <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?><br>
-                                <small><?php echo htmlspecialchars($member['rank']); ?> - <?php echo htmlspecialchars($member['department']); ?></small>
-                            </label>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="bulk_notes">Bulk Assignment Notes (optional):</label>
-                    <textarea name="bulk_notes" id="bulk_notes" placeholder="Notes that will apply to all selected crew members..."></textarea>
-                </div>
-                
-                <button type="submit" class="action-button">Assign to Selected Crew</button>
-            </form>
-        </div>
-        
-        <!-- Manage Assignments Tab -->
-        <div id="manage-tab" class="tab-content">
-            <h2>📋 Manage Current Training Assignments</h2>
-            
-            <!-- Filters -->
-            <form method="GET" class="filters">
-                <div class="filter-group">
-                    <label>Training Module:</label>
-                    <select name="module_id">
-                        <option value="">All Modules</option>
-                        <?php foreach ($modules as $module): ?>
-                        <option value="<?php echo $module['id']; ?>" <?php echo $selected_module == $module['id'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($module['module_name']); ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Department:</label>
-                    <select name="department">
-                        <option value="">All Departments</option>
-                        <option value="MED/SCI" <?php echo $selected_department === 'MED/SCI' ? 'selected' : ''; ?>>MED/SCI</option>
-                        <option value="ENG/OPS" <?php echo $selected_department === 'ENG/OPS' ? 'selected' : ''; ?>>ENG/OPS</option>
-                        <option value="SEC/TAC" <?php echo $selected_department === 'SEC/TAC' ? 'selected' : ''; ?>>SEC/TAC</option>
-                        <option value="Command" <?php echo $selected_department === 'Command' ? 'selected' : ''; ?>>Command</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Status:</label>
-                    <select name="status">
-                        <option value="">All Statuses</option>
-                        <option value="assigned" <?php echo $selected_status === 'assigned' ? 'selected' : ''; ?>>Assigned</option>
-                        <option value="in_progress" <?php echo $selected_status === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                        <option value="completed" <?php echo $selected_status === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                        <option value="expired" <?php echo $selected_status === 'expired' ? 'selected' : ''; ?>>Expired</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>&nbsp;</label>
-                    <button type="submit" class="action-button">Apply Filters</button>
-                </div>
-            </form>
-            
-            <!-- Assignments Table -->
-            <table class="assignments-table">
-                <thead>
-                    <tr>
-                        <th>Crew Member</th>
-                        <th>Training Module</th>
-                        <th>Department</th>
-                        <th>Level</th>
-                        <th>Assigned Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($assignments as $assignment): ?>
-                    <tr>
-                        <td>
-                            <strong><?php echo htmlspecialchars($assignment['first_name'] . ' ' . $assignment['last_name']); ?></strong><br>
-                            <small><?php echo htmlspecialchars($assignment['current_rank']); ?> - <?php echo htmlspecialchars($assignment['current_department']); ?></small>
-                        </td>
-                        <td>
-                            <strong><?php echo htmlspecialchars($assignment['module_name']); ?></strong><br>
-                            <small><?php echo htmlspecialchars($assignment['module_code']); ?></small>
-                        </td>
-                        <td><?php echo htmlspecialchars($assignment['module_department']); ?></td>
-                        <td><?php echo htmlspecialchars($assignment['certification_level']); ?></td>
-                        <td><?php echo date('M j, Y', strtotime($assignment['assigned_date'])); ?></td>
-                        <td>
-                            <span class="status-badge status-<?php echo str_replace('_', '-', $assignment['status']); ?>">
-                                <?php echo ucfirst(str_replace('_', ' ', $assignment['status'])); ?>
-                            </span>
-                            <?php if ($assignment['completion_date']): ?>
-                            <br><small>Completed: <?php echo date('M j, Y', strtotime($assignment['completion_date'])); ?></small>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <div class="quick-status">
-                                <form method="POST" style="display: inline;">
-                                    <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
-                                    <input type="hidden" name="action" value="update_status">
-                                    <input type="hidden" name="competency_id" value="<?php echo $assignment['id']; ?>">
-                                    
-                                    <?php if ($assignment['status'] === 'assigned'): ?>
-                                    <button type="submit" name="status" value="in_progress" class="action-button" style="background: var(--gold); color: black; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Start</button>
-                                    <?php endif; ?>
-                                    
-                                    <?php if ($assignment['status'] === 'in_progress'): ?>
-                                    <button type="submit" name="status" value="completed" class="action-button" style="background: var(--green); color: black; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Complete</button>
-                                    <?php endif; ?>
-                                    
-                                    <?php if ($assignment['status'] !== 'completed'): ?>
-                                    <button type="submit" name="status" value="assigned" class="action-button" style="background: var(--blue); color: black; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Reset</button>
-                                    <?php endif; ?>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                    
-                    <?php if (empty($assignments)): ?>
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: var(--gold); padding: 2rem;">
-                            No training assignments found with current filters.
-                        </td>
-                    </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-        
-        <div style="text-align: center; margin: 2rem 0;">
-            <a href="../index.php" class="action-button">← Back to Main Site</a>
-            <a href="training_modules.php" class="action-button">📚 Manage Training Modules</a>
-        </div>
-    </div>
-    
-    <script>
-        function showTab(tabName) {
-            // Hide all tab contents
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Remove active class from all tabs
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab content
-            document.getElementById(tabName + '-tab').classList.add('active');
-            
-            // Add active class to clicked tab
-            event.target.classList.add('active');
-        }
-    </script>
-</body>
-</html>
+					
+					<!-- Tabs -->
+					<div class="tab-container">
+						<div class="tab-buttons">
+							<button class="tab-button active" onclick="showTab('individual')">Individual Assignment</button>
+							<button class="tab-button" onclick="showTab('bulk')">Bulk Assignment</button>
+							<button class="tab-button" onclick="showTab('manage')">Manage Assignments</button>
+						</div>
+					</div>
+		
+		<!-- Individual Assignment Tab -->
+		<div id="individual-tab" class="tab-content active">
+			<div class="assignment-container">
+				<h2>➕ Assign Training to Individual Crew Member</h2>
+				<form method="POST">
+					<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+					<input type="hidden" name="action" value="assign_training">
+					
+					<div class="form-grid">
+						<div class="form-group">
+							<label for="module_id">Training Module:</label>
+							<select name="module_id" id="module_id" required>
+								<option value="">Select Training Module</option>
+								<?php foreach ($modules as $module): ?>
+								<option value="<?php echo $module['id']; ?>">
+									[<?php echo htmlspecialchars($module['department']); ?>] 
+									<?php echo htmlspecialchars($module['module_name']); ?>
+									(<?php echo htmlspecialchars($module['certification_level']); ?>)
+								</option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+						
+						<div class="form-group">
+							<label for="roster_id">Crew Member:</label>
+							<select name="roster_id" id="roster_id" required>
+								<option value="">Select Crew Member</option>
+								<?php foreach ($crew as $member): ?>
+								<option value="<?php echo $member['roster_id']; ?>">
+									<?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?> 
+									(<?php echo htmlspecialchars($member['rank']); ?> - <?php echo htmlspecialchars($member['department']); ?>)
+								</option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+					</div>
+					
+					<div class="form-group">
+						<label for="notes">Assignment Notes (optional):</label>
+						<textarea name="notes" id="notes" placeholder="Any specific instructions or requirements for this training assignment..."></textarea>
+					</div>
+					
+					<button type="submit" class="action-button">Assign Training</button>
+				</form>
+			</div>
+		</div>
+		
+		<!-- Bulk Assignment Tab -->
+		<div id="bulk-tab" class="tab-content">
+			<div class="assignment-container">
+				<h2>👥 Bulk Assign Training to Multiple Crew</h2>
+				<form method="POST">
+					<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+					<input type="hidden" name="action" value="bulk_assign">
+					
+					<div class="form-group">
+						<label for="bulk_module_id">Training Module:</label>
+						<select name="module_id" id="bulk_module_id" required>
+							<option value="">Select Training Module</option>
+							<?php foreach ($modules as $module): ?>
+							<option value="<?php echo $module['id']; ?>">
+								[<?php echo htmlspecialchars($module['department']); ?>] 
+								<?php echo htmlspecialchars($module['module_name']); ?>
+								(<?php echo htmlspecialchars($module['certification_level']); ?>)
+							</option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+					
+					<div class="form-group">
+						<label>Select Crew Members:</label>
+						<div class="crew-grid">
+							<?php foreach ($crew as $member): ?>
+							<div class="crew-checkbox">
+								<input type="checkbox" name="selected_crew[]" value="<?php echo $member['roster_id']; ?>" id="crew_<?php echo $member['roster_id']; ?>">
+								<label for="crew_<?php echo $member['roster_id']; ?>">
+									<?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?><br>
+									<small><?php echo htmlspecialchars($member['rank']); ?> - <?php echo htmlspecialchars($member['department']); ?></small>
+								</label>
+							</div>
+							<?php endforeach; ?>
+						</div>
+					</div>
+					
+					<div class="form-group">
+						<label for="bulk_notes">Bulk Assignment Notes (optional):</label>
+						<textarea name="bulk_notes" id="bulk_notes" placeholder="Notes that will apply to all selected crew members..."></textarea>
+					</div>
+					
+					<button type="submit" class="action-button">Assign to Selected Crew</button>
+				</form>
+			</div>
+		</div>
+		
+		<!-- Manage Assignments Tab -->
+		<div id="manage-tab" class="tab-content">
+			<div class="assignment-container">
+				<h2>📋 Manage Current Training Assignments</h2>
+				
+				<!-- Filters -->
+				<form method="GET" class="filters">
+					<div class="filter-group">
+						<label>Training Module:</label>
+						<select name="module_id">
+							<option value="">All Modules</option>
+							<?php foreach ($modules as $module): ?>
+							<option value="<?php echo $module['id']; ?>" <?php echo $selected_module == $module['id'] ? 'selected' : ''; ?>>
+								<?php echo htmlspecialchars($module['module_name']); ?>
+							</option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+					
+					<div class="filter-group">
+						<label>Department:</label>
+						<select name="department">
+							<option value="">All Departments</option>
+							<option value="MED/SCI" <?php echo $selected_department === 'MED/SCI' ? 'selected' : ''; ?>>MED/SCI</option>
+							<option value="ENG/OPS" <?php echo $selected_department === 'ENG/OPS' ? 'selected' : ''; ?>>ENG/OPS</option>
+							<option value="SEC/TAC" <?php echo $selected_department === 'SEC/TAC' ? 'selected' : ''; ?>>SEC/TAC</option>
+							<option value="Command" <?php echo $selected_department === 'Command' ? 'selected' : ''; ?>>Command</option>
+						</select>
+					</div>
+					
+					<div class="filter-group">
+						<label>Status:</label>
+						<select name="status">
+							<option value="">All Statuses</option>
+							<option value="assigned" <?php echo $selected_status === 'assigned' ? 'selected' : ''; ?>>Assigned</option>
+							<option value="in_progress" <?php echo $selected_status === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+							<option value="completed" <?php echo $selected_status === 'completed' ? 'selected' : ''; ?>>Completed</option>
+							<option value="expired" <?php echo $selected_status === 'expired' ? 'selected' : ''; ?>>Expired</option>
+						</select>
+					</div>
+					
+					<div class="filter-group">
+						<label>&nbsp;</label>
+						<button type="submit" class="action-button">Apply Filters</button>
+					</div>
+				</form>
+				
+				<!-- Assignments Table -->
+				<table class="assignments-table">
+					<thead>
+						<tr>
+							<th>Crew Member</th>
+							<th>Training Module</th>
+							<th>Department</th>
+							<th>Level</th>
+							<th>Assigned Date</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ($assignments as $assignment): ?>
+						<tr>
+							<td>
+								<strong><?php echo htmlspecialchars($assignment['first_name'] . ' ' . $assignment['last_name']); ?></strong><br>
+								<small><?php echo htmlspecialchars($assignment['current_rank']); ?> - <?php echo htmlspecialchars($assignment['current_department']); ?></small>
+							</td>
+							<td>
+								<strong><?php echo htmlspecialchars($assignment['module_name']); ?></strong><br>
+								<small><?php echo htmlspecialchars($assignment['module_code']); ?></small>
+							</td>
+							<td><?php echo htmlspecialchars($assignment['module_department']); ?></td>
+							<td><?php echo htmlspecialchars($assignment['certification_level']); ?></td>
+							<td><?php echo date('M j, Y', strtotime($assignment['assigned_date'])); ?></td>
+							<td>
+								<span class="status-badge status-<?php echo str_replace('_', '-', $assignment['status']); ?>">
+									<?php echo ucfirst(str_replace('_', ' ', $assignment['status'])); ?>
+								</span>
+								<?php if ($assignment['completion_date']): ?>
+								<br><small>Completed: <?php echo date('M j, Y', strtotime($assignment['completion_date'])); ?></small>
+								<?php endif; ?>
+							</td>
+							<td>
+								<div class="quick-status">
+									<form method="POST" style="display: inline;">
+										<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+										<input type="hidden" name="action" value="update_status">
+										<input type="hidden" name="competency_id" value="<?php echo $assignment['id']; ?>">
+										
+										<?php if ($assignment['status'] === 'assigned'): ?>
+										<button type="submit" name="status" value="in_progress" class="action-button" style="background: var(--gold); color: black; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Start</button>
+										<?php endif; ?>
+										
+										<?php if ($assignment['status'] === 'in_progress'): ?>
+										<button type="submit" name="status" value="completed" class="action-button" style="background: var(--green); color: black; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Complete</button>
+										<?php endif; ?>
+										
+										<?php if ($assignment['status'] !== 'completed'): ?>
+										<button type="submit" name="status" value="assigned" class="action-button" style="background: var(--blue); color: black; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Reset</button>
+										<?php endif; ?>
+									</form>
+								</div>
+							</td>
+						</tr>
+						<?php endforeach; ?>
+						
+						<?php if (empty($assignments)): ?>
+						<tr>
+							<td colspan="7" style="text-align: center; color: var(--gold); padding: 2rem;">
+								No training assignments found with current filters.
+							</td>
+						</tr>
+						<?php endif; ?>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		
+		<div style="text-align: center; margin: 2rem 0;">
+			<a href="../index.php" class="action-button">← Back to Main Site</a>
+			<a href="training_modules.php" class="action-button">📚 Manage Training Modules</a>
+		</div>
+				</main>
+			</div>
+		</div>
+	</section>
+	
+	<script src="../assets/lcars.js"></script>
+	<script>
+		function showTab(tabName) {
+			// Hide all tab contents
+			const tabContents = document.querySelectorAll('.tab-content');
+			tabContents.forEach(content => content.classList.remove('active'));
+			
+			// Remove active class from all tab buttons
+			const tabButtons = document.querySelectorAll('.tab-button');
+			tabButtons.forEach(button => button.classList.remove('active'));
+			
+			// Show selected tab content
+			document.getElementById(tabName + '-tab').classList.add('active');
+			
+			// Add active class to clicked button
+			event.target.classList.add('active');
+			
+			// Play sound
+			playAudio('audio3');
+		}
+	</script>
