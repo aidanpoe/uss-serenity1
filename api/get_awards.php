@@ -15,6 +15,17 @@ try {
     
     $roster_id = (int)$_GET['roster_id'];
     
+    // Check if awards tables exist
+    $tables_check = $pdo->query("SHOW TABLES LIKE 'awards'");
+    if ($tables_check->rowCount() === 0) {
+        throw new Exception('Awards system not initialized. Please run setup_awards_system.php first.');
+    }
+    
+    $tables_check = $pdo->query("SHOW TABLES LIKE 'crew_awards'");
+    if ($tables_check->rowCount() === 0) {
+        throw new Exception('Awards system not initialized. Please run setup_awards_system.php first.');
+    }
+    
     // Get all awards for the specified crew member
     $stmt = $pdo->prepare("
         SELECT 

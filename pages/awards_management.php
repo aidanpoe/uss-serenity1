@@ -4,8 +4,8 @@ session_start();
 require_once '../includes/config.php';
 
 // Check if user is logged in and has command permissions
-if (!isset($_SESSION['steamid']) || !checkCommandPermissions()) {
-    header('Location: ../pages/login.php');
+if (!isset($_SESSION['steamid']) || !hasPermission('Command')) {
+    header('Location: login.php');
     exit();
 }
 
@@ -75,25 +75,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_award'])) {
 }
 
 // Get all available awards
-$awards_stmt = $pdo->query("SELECT * FROM awards ORDER BY order_precedence, name");
-$awards = $awards_stmt->fetchAll();
+try {
+    $awards_stmt = $pdo->query("SELECT * FROM awards ORDER BY order_precedence, name");
+    $awards = $awards_stmt->fetchAll();
+} catch (Exception $e) {
+    $awards = [];
+    $error = "Awards system not initialized. Please run setup_awards_system.php first.";
+}
 
 // Get all crew members
-$crew_stmt = $pdo->query("SELECT id, rank, first_name, last_name, department, position FROM roster ORDER BY rank, last_name, first_name");
-$crew_members = $crew_stmt->fetchAll();
+try {
+    $crew_stmt = $pdo->query("SELECT id, rank, first_name, last_name, department, position FROM roster ORDER BY rank, last_name, first_name");
+    $crew_members = $crew_stmt->fetchAll();
+} catch (Exception $e) {
+    $crew_members = [];
+    if (empty($error)) {
+        $error = "Error loading crew members: " . $e->getMessage();
+    }
+}
 
 // Get current award assignments
-$assignments_stmt = $pdo->query("
-    SELECT ca.*, a.name as award_name, a.type as award_type, 
-           r.rank, r.first_name, r.last_name,
-           aw.rank as awarding_rank, aw.first_name as awarding_first_name, aw.last_name as awarding_last_name
-    FROM crew_awards ca
-    JOIN awards a ON ca.award_id = a.id
-    JOIN roster r ON ca.roster_id = r.id
-    LEFT JOIN roster aw ON ca.awarded_by_roster_id = aw.id
-    ORDER BY ca.date_awarded DESC
-");
-$current_assignments = $assignments_stmt->fetchAll();
+try {
+    $assignments_stmt = $pdo->query("
+        SELECT ca.*, a.name as award_name, a.type as award_type, 
+               r.rank, r.first_name, r.last_name,
+               aw.rank as awarding_rank, aw.first_name as awarding_first_name, aw.last_name as awarding_last_name
+        FROM crew_awards ca
+        JOIN awards a ON ca.award_id = a.id
+        JOIN roster r ON ca.roster_id = r.id
+        LEFT JOIN roster aw ON ca.awarded_by_roster_id = aw.id
+        ORDER BY ca.date_awarded DESC
+    ");
+    $current_assignments = $assignments_stmt->fetchAll();
+} catch (Exception $e) {
+    $current_assignments = [];
+    if (empty($error)) {
+        $error = "Error loading award assignments: " . $e->getMessage();
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -284,9 +303,18 @@ $current_assignments = $assignments_stmt->fetchAll();
                     <?php endif; ?>
                     
                     <?php if ($error): ?>
-                        <div class="error"><?php echo htmlspecialchars($error); ?></div>
+                        <div class="error">
+                            <?php echo htmlspecialchars($error); ?>
+                            <?php if (strpos($error, 'not initialized') !== false): ?>
+                                <br><br>
+                                <a href="../setup_awards_system.php" style="color: var(--orange); text-decoration: underline;">
+                                    Click here to initialize the awards system
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     <?php endif; ?>
                     
+                    <?php if (!empty($awards) && !empty($crew_members)): ?>
                     <div class="awards-container">
                         <!-- Award Assignment Form -->
                         <div class="award-section">
@@ -415,9 +443,23 @@ $current_assignments = $assignments_stmt->fetchAll();
             </div>
         </div>
     </div>
+    <?php else: ?>
+        <div style="text-align: center; padding: 3rem; color: var(--orange);">
+            <h3>Awards System Not Available</h3>
+            <p>The awards system has not been initialized yet.</p>
+            <?php if (strpos($error, 'not initialized') !== false): ?>
+                <p><a href="../setup_awards_system.php" style="color: var(--bluey); text-decoration: underline;">Initialize Awards System</a></p>
+            <?php endif; ?>
+        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <script>
         // Award selection helper
+        <?php if (!empty($awards) && !empty($crew_members)): ?>
         document.getElementById('award_id').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             if (selectedOption.value) {
@@ -425,6 +467,7 @@ $current_assignments = $assignments_stmt->fetchAll();
                 console.log('Selected award:', selectedOption.text);
             }
         });
+        <?php endif; ?>
     </script>
 </body>
 </html>
