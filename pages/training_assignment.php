@@ -188,226 +188,284 @@ try {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Training Assignment - USS Serenity</title>
-    <link rel="stylesheet" href="../assets/lcars.css">
-    <style>
-        .assignment-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .tab-container {
-            display: flex;
-            margin-bottom: 2rem;
-        }
-        .tab {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid var(--blue);
-            padding: 1rem 2rem;
-            cursor: pointer;
-            border-bottom: none;
-            margin-right: 1rem;
-        }
-        .tab.active {
-            background: var(--blue);
-            color: black;
-        }
-        .tab-content {
-            background: rgba(0, 255, 255, 0.1);
-            border: 2px solid var(--blue);
-            border-radius: 10px;
-            padding: 2rem;
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .form-group label {
-            display: block;
-            color: var(--blue);
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .form-group select,
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--blue);
-            border-radius: 5px;
-            color: var(--green);
-            font-family: inherit;
-        }
-        .crew-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid var(--blue);
-            padding: 1rem;
-            border-radius: 5px;
-        }
-        .crew-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 5px;
-        }
-        .crew-checkbox input {
-            width: auto;
-        }
-        .assignments-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-        }
-        .assignments-table th,
-        .assignments-table td {
-            padding: 1rem;
-            border: 1px solid var(--blue);
-            text-align: left;
-        }
-        .assignments-table th {
-            background: var(--blue);
-            color: black;
-            font-weight: bold;
-        }
-        .assignments-table tr:nth-child(even) {
-            background: rgba(0, 255, 255, 0.05);
-        }
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        .status-assigned { background: var(--blue); color: black; }
-        .status-in-progress { background: var(--gold); color: black; }
-        .status-completed { background: var(--green); color: black; }
-        .status-expired { background: var(--red); color: white; }
-        .filters {
-            display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .filter-group label {
-            color: var(--blue);
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .filter-group select {
-            padding: 0.5rem;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--blue);
-            border-radius: 5px;
-            color: var(--green);
-        }
-        .quick-status {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .quick-status button {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .stats-bar {
-            display: flex;
-            gap: 2rem;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: rgba(255, 153, 0, 0.1);
-            border: 2px solid var(--gold);
-            border-radius: 10px;
-        }
-        .stat-item {
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--gold);
-        }
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--blue);
-        }
-    </style>
+	<title>USS-Serenity - Training Assignment</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="format-detection" content="date=no">
+	<link rel="stylesheet" type="text/css" href="../assets/classic.css">
+	<style>
+		.assignment-container {
+			background: rgba(85, 102, 255, 0.1);
+			padding: 2rem;
+			border-radius: 15px;
+			margin: 2rem 0;
+			border: 2px solid var(--blue);
+		}
+		.tab-container {
+			margin: 2rem 0;
+		}
+		.tab-buttons {
+			display: flex;
+			gap: 0.5rem;
+			margin-bottom: 1rem;
+		}
+		.tab-button {
+			padding: 0.8rem 1.5rem;
+			background: rgba(0,0,0,0.5);
+			color: var(--blue);
+			border: 1px solid var(--blue);
+			border-radius: 5px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+		.tab-button.active {
+			background: var(--blue);
+			color: black;
+		}
+		.tab-content {
+			display: none;
+		}
+		.tab-content.active {
+			display: block;
+		}
+		.form-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 1rem;
+			margin: 1rem 0;
+		}
+		.form-group {
+			margin-bottom: 1rem;
+		}
+		.form-group label {
+			display: block;
+			color: var(--blue);
+			font-weight: bold;
+			margin-bottom: 0.5rem;
+		}
+		.form-group select,
+		.form-group input,
+		.form-group textarea {
+			width: 100%;
+			padding: 0.75rem;
+			background: rgba(0, 0, 0, 0.8);
+			border: 1px solid var(--blue);
+			border-radius: 5px;
+			color: var(--green);
+			font-family: inherit;
+		}
+		.crew-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			gap: 1rem;
+			margin: 1rem 0;
+			max-height: 400px;
+			overflow-y: auto;
+			border: 1px solid var(--blue);
+			padding: 1rem;
+			border-radius: 5px;
+		}
+		.crew-checkbox {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.5rem;
+			background: rgba(0, 0, 0, 0.6);
+			border-radius: 5px;
+		}
+		.crew-checkbox input {
+			width: auto;
+		}
+		.assignments-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 1rem 0;
+		}
+		.assignments-table th,
+		.assignments-table td {
+			padding: 1rem;
+			border: 1px solid var(--blue);
+			text-align: left;
+		}
+		.assignments-table th {
+			background: var(--blue);
+			color: black;
+			font-weight: bold;
+		}
+		.assignments-table tr:nth-child(even) {
+			background: rgba(0, 255, 255, 0.05);
+		}
+		.status-badge {
+			padding: 0.25rem 0.75rem;
+			border-radius: 15px;
+			font-size: 0.8rem;
+			font-weight: bold;
+		}
+		.status-assigned { background: var(--blue); color: black; }
+		.status-in-progress { background: var(--gold); color: black; }
+		.status-completed { background: var(--green); color: black; }
+		.status-expired { background: var(--red); color: white; }
+		.filters {
+			display: flex;
+			gap: 1rem;
+			margin: 1rem 0;
+			flex-wrap: wrap;
+		}
+		.filter-group {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+		.filter-group label {
+			color: var(--blue);
+			font-weight: bold;
+			font-size: 0.9rem;
+		}
+		.filter-group select {
+			padding: 0.5rem;
+			background: rgba(0, 0, 0, 0.8);
+			border: 1px solid var(--blue);
+			border-radius: 5px;
+			color: var(--green);
+		}
+		.stats-bar {
+			display: flex;
+			gap: 2rem;
+			margin: 1rem 0;
+			padding: 1rem;
+			background: rgba(255, 153, 0, 0.1);
+			border: 2px solid var(--gold);
+			border-radius: 10px;
+		}
+		.stat-item {
+			text-align: center;
+		}
+		.stat-number {
+			font-size: 1.5rem;
+			font-weight: bold;
+			color: var(--gold);
+		}
+		.stat-label {
+			font-size: 0.9rem;
+			color: var(--blue);
+		}
+		.success-message {
+			background: rgba(0, 255, 0, 0.2);
+			border: 2px solid var(--green);
+			padding: 1rem;
+			border-radius: 10px;
+			margin: 1rem 0;
+			color: var(--green);
+		}
+		.error-message {
+			background: rgba(255, 0, 0, 0.2);
+			border: 2px solid var(--red);
+			padding: 1rem;
+			border-radius: 10px;
+			margin: 1rem 0;
+			color: var(--red);
+		}
+	</style>
 </head>
 <body>
-    <div class="assignment-container">
-        <h1>👥 Training Assignment Management</h1>
-        <p>Assign training modules to crew members and track their progress</p>
-        
-        <?php if ($success): ?>
-        <div style="background: rgba(0, 255, 0, 0.2); border: 2px solid var(--green); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
-            <p style="color: var(--green);">✅ <?php echo htmlspecialchars($success); ?></p>
-        </div>
-        <?php endif; ?>
-        
-        <?php if ($error): ?>
-        <div style="background: rgba(255, 0, 0, 0.2); border: 2px solid var(--red); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
-            <p style="color: var(--red);">❌ <?php echo htmlspecialchars($error); ?></p>
-        </div>
-        <?php endif; ?>
-        
-        <!-- Statistics Bar -->
-        <div class="stats-bar">
-            <?php
-            $stats = [
-                'total_assignments' => count($assignments),
-                'assigned' => count(array_filter($assignments, function($a) { return $a['status'] === 'assigned'; })),
-                'in_progress' => count(array_filter($assignments, function($a) { return $a['status'] === 'in_progress'; })),
-                'completed' => count(array_filter($assignments, function($a) { return $a['status'] === 'completed'; }))
-            ];
-            ?>
-            <div class="stat-item">
-                <div class="stat-number"><?php echo $stats['total_assignments']; ?></div>
-                <div class="stat-label">Total Assignments</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number"><?php echo $stats['assigned']; ?></div>
-                <div class="stat-label">Assigned</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number"><?php echo $stats['in_progress']; ?></div>
-                <div class="stat-label">In Progress</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number"><?php echo $stats['completed']; ?></div>
-                <div class="stat-label">Completed</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number"><?php echo number_format($stats['total_assignments'] > 0 ? ($stats['completed'] / $stats['total_assignments']) * 100 : 0, 1); ?>%</div>
-                <div class="stat-label">Completion Rate</div>
-            </div>
-        </div>
+	<audio id="audio1" src="../assets/beep1.mp3" preload="auto"></audio>
+	<audio id="audio2" src="../assets/beep2.mp3" preload="auto"></audio>
+	<audio id="audio3" src="../assets/beep3.mp3" preload="auto"></audio>
+	<audio id="audio4" src="../assets/beep4.mp3" preload="auto"></audio>
+	<section class="wrap-standard" id="column-3">
+		<div class="wrap">
+			<div class="left-frame-top">
+				<button onclick="playSoundAndRedirect('audio2', '../index.php')" class="panel-1-button">LCARS</button>
+				<div class="panel-2">TRAINING<span class="hop">-ASSIGN</span></div>
+			</div>
+			<div class="right-frame-top">
+				<div class="banner">TRAINING ASSIGNMENT &#149; USS-SERENITY</div>
+				<div class="data-cascade-button-group">
+					<nav> 
+						<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>
+						<button onclick="playSoundAndRedirect('audio2', 'command.php')">COMMAND</button>
+						<button onclick="playSoundAndRedirect('audio2', 'roster.php')">ROSTER</button>
+						<button onclick="playSoundAndRedirect('audio2', '#')" style="background-color: var(--red);">TRAINING</button>
+					</nav>
+				</div>
+				<div class="bar-panel first-bar-panel">
+					<div class="bar-1"></div>
+					<div class="bar-2"></div>
+					<div class="bar-3"></div>
+					<div class="bar-4"></div>
+					<div class="bar-5"></div>
+				</div>
+			</div>
+		</div>
+		<div class="wrap" id="gap">
+			<div class="left-frame">
+				<button onclick="topFunction(); playSoundAndRedirect('audio4', '#')" id="topBtn"><span class="hop">screen</span> top</button>
+				<div>
+					<div class="panel-3">ASSIGN<span class="hop">-CTRL</span></div>
+					<div class="panel-4">TOTAL<span class="hop">-<?php echo count($assignments); ?></span></div>
+					<div class="panel-5">PENDING<span class="hop">-<?php echo count(array_filter($assignments, function($a) { return $a['status'] === 'assigned'; })); ?></span></div>
+					<div class="panel-6">ACTIVE<span class="hop">-<?php echo count(array_filter($assignments, function($a) { return $a['status'] === 'in_progress'; })); ?></span></div>
+					<div class="panel-7">COMPLETE<span class="hop">-<?php echo count(array_filter($assignments, function($a) { return $a['status'] === 'completed'; })); ?></span></div>
+					<div class="panel-8">ACCESS<span class="hop">-GRANTED</span></div>
+					<div class="panel-9">COMMAND<span class="hop">-ONLY</span></div>
+				</div>
+				<div>
+					<div class="button-row">
+						<button onclick="playSoundAndRedirect('audio3', 'training_modules.php')" class="f1-button">MODULES</button>
+						<button onclick="playSoundAndRedirect('audio3', '#')" class="f1-button">ASSIGN</button>
+					</div>
+				</div>
+			</div>
+			<div class="right-frame">
+				<main>
+					<h1>👥 Training Assignment Management</h1>
+					<p>Assign training modules to crew members and track their progress</p>
+					
+					<?php if ($success): ?>
+					<div class="success-message">
+						<p>✅ <?php echo htmlspecialchars($success); ?></p>
+					</div>
+					<?php endif; ?>
+					
+					<?php if ($error): ?>
+					<div class="error-message">
+						<p>❌ <?php echo htmlspecialchars($error); ?></p>
+					</div>
+					<?php endif; ?>
+					
+					<!-- Statistics Bar -->
+					<div class="stats-bar">
+						<?php
+						$stats = [
+							'total_assignments' => count($assignments),
+							'assigned' => count(array_filter($assignments, function($a) { return $a['status'] === 'assigned'; })),
+							'in_progress' => count(array_filter($assignments, function($a) { return $a['status'] === 'in_progress'; })),
+							'completed' => count(array_filter($assignments, function($a) { return $a['status'] === 'completed'; }))
+						];
+						?>
+						<div class="stat-item">
+							<div class="stat-number"><?php echo $stats['total_assignments']; ?></div>
+							<div class="stat-label">Total Assignments</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-number"><?php echo $stats['assigned']; ?></div>
+							<div class="stat-label">Assigned</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-number"><?php echo $stats['in_progress']; ?></div>
+							<div class="stat-label">In Progress</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-number"><?php echo $stats['completed']; ?></div>
+							<div class="stat-label">Completed</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-number"><?php echo number_format($stats['total_assignments'] > 0 ? ($stats['completed'] / $stats['total_assignments']) * 100 : 0, 1); ?>%</div>
+							<div class="stat-label">Completion Rate</div>
+						</div>
+					</div>
         
         <!-- Tabs -->
         <div class="tab-container">

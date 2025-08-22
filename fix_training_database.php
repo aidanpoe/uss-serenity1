@@ -19,6 +19,7 @@ try {
         
         $hasUserId = false;
         $hasRosterId = false;
+        $hasAssignedBy = false;
         
         foreach ($columns as $column) {
             if ($column['Field'] === 'user_id') {
@@ -26,6 +27,9 @@ try {
             }
             if ($column['Field'] === 'roster_id') {
                 $hasRosterId = true;
+            }
+            if ($column['Field'] === 'assigned_by') {
+                $hasAssignedBy = true;
             }
         }
         
@@ -90,6 +94,12 @@ try {
             // Add foreign key constraint
             $pdo->exec("ALTER TABLE crew_competencies ADD CONSTRAINT fk_cc_roster FOREIGN KEY (roster_id) REFERENCES roster(id) ON DELETE CASCADE");
             echo "<p>✅ Added foreign key constraint</p>";
+            
+            // Ensure assigned_by column exists
+            if (!$hasAssignedBy) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN assigned_by INT NOT NULL DEFAULT 1");
+                echo "<p>✅ Added assigned_by column</p>";
+            }
             
             // Update unique constraint
             $pdo->exec("ALTER TABLE crew_competencies DROP INDEX IF EXISTS unique_assignment");
