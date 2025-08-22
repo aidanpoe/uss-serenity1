@@ -279,6 +279,7 @@ try {
 					<div class="tab-container">
 						<div class="tab-buttons">
 							<button class="tab-button active" onclick="showTab('accounts')">👥 Account Management</button>
+							<button class="tab-button" onclick="showTab('logs')">🔍 Login Logs</button>
 							<button class="tab-button" onclick="showTab('deceased')">💀 Deceased Status</button>
 							<button class="tab-button" onclick="showTab('memorial')">🕯️ Memorial Registry</button>
 						</div>
@@ -340,6 +341,70 @@ try {
 										<?php endif; ?>
 									</div>
 									<?php endforeach; ?>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Login Logs Tab -->
+						<div id="logs" class="tab-content">
+							<div class="management-container">
+								<h3>User Login Activity & Logs</h3>
+								<p style="color: var(--blue);"><em>Monitor user login activity and account status - Command access only</em></p>
+								
+								<div style="text-align: center; margin: 2rem 0;">
+									<a href="admin_login_logs.php" class="action-button" style="background-color: var(--blue); color: black; padding: 1rem 2rem; text-decoration: none; border-radius: 10px; font-size: 1.1rem;">
+										🔍 View Detailed Login Logs
+									</a>
+								</div>
+								
+								<div style="background: rgba(255, 153, 0, 0.1); border: 2px solid var(--gold); border-radius: 10px; padding: 1.5rem; margin: 1rem 0;">
+									<h4 style="color: var(--gold); margin-top: 0;">📊 Quick Activity Summary</h4>
+									<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+										<?php
+										// Quick stats for this page
+										$quickStats = $pdo->query("
+											SELECT 
+												COUNT(*) as total,
+												SUM(CASE WHEN last_login > DATE_SUB(NOW(), INTERVAL 1 DAY) THEN 1 ELSE 0 END) as today,
+												SUM(CASE WHEN last_login > DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as week,
+												SUM(CASE WHEN last_login IS NULL THEN 1 ELSE 0 END) as never
+											FROM users
+										")->fetch();
+										?>
+										<div style="text-align: center; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 5px;">
+											<div style="font-size: 1.5rem; color: var(--gold);"><?php echo $quickStats['total']; ?></div>
+											<div>Total Users</div>
+										</div>
+										<div style="text-align: center; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 5px;">
+											<div style="font-size: 1.5rem; color: var(--green);"><?php echo $quickStats['today']; ?></div>
+											<div>Active Today</div>
+										</div>
+										<div style="text-align: center; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 5px;">
+											<div style="font-size: 1.5rem; color: var(--blue);"><?php echo $quickStats['week']; ?></div>
+											<div>Active This Week</div>
+										</div>
+										<div style="text-align: center; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 5px;">
+											<div style="font-size: 1.5rem; color: var(--red);"><?php echo $quickStats['never']; ?></div>
+											<div>Never Logged In</div>
+										</div>
+									</div>
+									
+									<h4 style="color: var(--gold);">Available Information:</h4>
+									<ul style="color: var(--blue);">
+										<li><strong>Last Login Times:</strong> When each user last accessed the system</li>
+										<li><strong>Activity Status:</strong> Real-time activity classification (Online, Today, This Week, etc.)</li>
+										<li><strong>Account Age:</strong> When accounts were created</li>
+										<li><strong>Inactive Detection:</strong> Users who haven't logged in for extended periods</li>
+										<li><strong>GDPR Compliance:</strong> Automatic cleanup of old login data (12+ months)</li>
+									</ul>
+									
+									<h4 style="color: var(--gold);">Privacy Features:</h4>
+									<ul style="color: var(--green);">
+										<li>✅ No IP addresses logged (privacy by design)</li>
+										<li>✅ Automatic data retention enforcement</li>
+										<li>✅ GDPR compliant logging practices</li>
+										<li>✅ Admin-only access to login information</li>
+									</ul>
 								</div>
 							</div>
 						</div>
