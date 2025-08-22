@@ -411,87 +411,6 @@ try {
         }
     </style>
 </head>
-        
-        .award-name {
-            color: var(--orange);
-            font-weight: bold;
-        }
-        
-        .award-details {
-            color: var(--bluey);
-            font-size: 0.9em;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            color: var(--orange);
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        .form-group select,
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--bluey);
-            color: var(--bluey);
-            border-radius: 4px;
-        }
-        
-        .form-group textarea {
-            height: 80px;
-            resize: vertical;
-        }
-        
-        .btn-assign {
-            background: var(--orange);
-            color: black;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .btn-remove {
-            background: var(--red);
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8em;
-        }
-        
-        .message {
-            background: rgba(0, 255, 0, 0.1);
-            border: 1px solid #00ff00;
-            color: #00ff00;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        
-        .error {
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid #ff0000;
-            color: #ff0000;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        
-        .award-type-medal { color: #FFD700; }
-        .award-type-ribbon { color: #87CEEB; }
-        .award-type-badge { color: #32CD32; }
-    </style>
-</head>
 <body>
     <div class="container">
         <!-- LCARS Header -->
@@ -697,23 +616,19 @@ try {
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php else: ?>
+                        <div style="text-align: center; padding: 3rem; color: var(--orange);">
+                            <h3>Awards System Not Available</h3>
+                            <p>The awards system has not been initialized yet.</p>
+                            <?php if (strpos($error, 'not initialized') !== false): ?>
+                                <p><a href="../setup_awards_system.php" style="color: var(--bluey); text-decoration: underline;">Initialize Awards System</a></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
-    <?php else: ?>
-        <div style="text-align: center; padding: 3rem; color: var(--orange);">
-            <h3>Awards System Not Available</h3>
-            <p>The awards system has not been initialized yet.</p>
-            <?php if (strpos($error, 'not initialized') !== false): ?>
-                <p><a href="../setup_awards_system.php" style="color: var(--bluey); text-decoration: underline;">Initialize Awards System</a></p>
-            <?php endif; ?>
-        </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
 
     <script>
         // Award selection helper
