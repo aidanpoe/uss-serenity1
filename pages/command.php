@@ -295,6 +295,8 @@ if (!function_exists('canEditPersonnelFiles')) {
 					<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>
 					<button onclick="playSoundAndRedirect('audio2', 'roster.php')">ROSTER</button>
 					<button onclick="playSoundAndRedirect('audio2', '#')" style="background-color: var(--red);">COMMAND</button>
+					<button onclick="playSoundAndRedirect('audio2', 'awards_management.php')">AWARDS</button>
+					<button onclick="playSoundAndRedirect('audio2', 'admin_management.php')">ADMIN</button>
 					<button onclick="playSoundAndRedirect('audio2', 'training_modules.php')">TRAINING</button>
 				</nav>
 			</div>
@@ -361,6 +363,25 @@ if (!function_exists('canEditPersonnelFiles')) {
 							<p>No command officers found in database.</p>
 						</div>
 					<?php endif; ?>
+				</div>
+				
+				<!-- Command Tools Quick Access -->
+				<div style="background: rgba(204, 68, 68, 0.1); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--red);">
+					<h3 style="color: var(--red); text-align: center; margin-bottom: 1.5rem;">⭐ Command Tools</h3>
+					<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+						<button onclick="playSoundAndRedirect('audio2', 'roster.php')" style="background-color: var(--red); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold;">
+							👥 Ship's Roster<br><small style="font-weight: normal;">Complete crew manifest</small>
+						</button>
+						<button onclick="playSoundAndRedirect('audio2', 'awards_management.php')" style="background-color: var(--gold); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold;">
+							🏅 Awards Management<br><small style="font-weight: normal;">Manage crew awards & recommendations</small>
+						</button>
+						<button onclick="playSoundAndRedirect('audio2', 'admin_management.php')" style="background-color: var(--orange); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold;">
+							⚙️ Admin Panel<br><small style="font-weight: normal;">Administrative controls</small>
+						</button>
+						<button onclick="playSoundAndRedirect('audio2', 'training_modules.php')" style="background-color: var(--green); color: black; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold;">
+							🎓 Training System<br><small style="font-weight: normal;">Crew training & certifications</small>
+						</button>
+					</div>
 				</div>
 				
 				<?php if (hasPermission('Command')): ?>
