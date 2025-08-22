@@ -559,7 +559,7 @@ function formatICDateOnly($datetime) {
 /**
  * Format a datetime for in-character display (full datetime, adds 360 years)
  */
-function formatICDateTime($datetime) {
-    return formatICDate($datetime, 'Y-m-d H:i');
+function formatICDateTime($datetime, $format = 'Y-m-d H:i') {
+    return formatICDate($datetime, $format);
 }
 ?>
