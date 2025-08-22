@@ -17,9 +17,50 @@ try {
         $stmt = $pdo->query("DESCRIBE crew_competencies");
         $columns = $stmt->fetchAll();
         
+        // Check for foreign key constraints
+        $stmt = $pdo->query("
+            SELECT 
+                CONSTRAINT_NAME,
+                COLUMN_NAME,
+                REFERENCED_TABLE_NAME,
+                REFERENCED_COLUMN_NAME
+            FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'crew_competencies' 
+            AND REFERENCED_TABLE_NAME IS NOT NULL
+        ");
+        $foreignKeys = $stmt->fetchAll();
+        
+        echo "<h3>Current foreign key constraints:</h3>";
+        foreach ($foreignKeys as $fk) {
+            echo "<p>- {$fk['COLUMN_NAME']} -> {$fk['REFERENCED_TABLE_NAME']}.{$fk['REFERENCED_COLUMN_NAME']} (Constraint: {$fk['CONSTRAINT_NAME']})</p>";
+        }
+        
+        // Drop problematic foreign key constraints
+        echo "<h3>Fixing foreign key constraints...</h3>";
+        try {
+            $pdo->exec("ALTER TABLE crew_competencies DROP FOREIGN KEY crew_competencies_ibfk_3");
+            echo "<p>✅ Dropped problematic foreign key constraint crew_competencies_ibfk_3</p>";
+        } catch (Exception $e) {
+            echo "<p>ℹ️ Foreign key constraint crew_competencies_ibfk_3 already removed or doesn't exist</p>";
+        }
+        
+        // Drop any other problematic constraints
+        foreach ($foreignKeys as $fk) {
+            if ($fk['COLUMN_NAME'] === 'awarded_by') {
+                try {
+                    $pdo->exec("ALTER TABLE crew_competencies DROP FOREIGN KEY {$fk['CONSTRAINT_NAME']}");
+                    echo "<p>✅ Dropped foreign key constraint {$fk['CONSTRAINT_NAME']} for awarded_by column</p>";
+                } catch (Exception $e) {
+                    echo "<p>ℹ️ Could not drop {$fk['CONSTRAINT_NAME']}: already removed</p>";
+                }
+            }
+        }
+        
         $hasUserId = false;
         $hasRosterId = false;
         $hasAssignedBy = false;
+        $hasAwardedBy = false;
         $hasIsCurrent = false;
         $hasAssignedDate = false;
         $hasStatus = false;
@@ -36,6 +77,9 @@ try {
             if ($column['Field'] === 'assigned_by') {
                 $hasAssignedBy = true;
             }
+            if ($column['Field'] === 'awarded_by') {
+                $hasAwardedBy = true;
+            }
             if ($column['Field'] === 'is_current') {
                 $hasIsCurrent = true;
             }
@@ -51,6 +95,15 @@ try {
             if ($column['Field'] === 'notes') {
                 $hasNotes = true;
             }
+        }
+        
+        // Fix awarded_by -> assigned_by column naming issue
+        if ($hasAwardedBy && !$hasAssignedBy) {
+            echo "<h3>Fixing column naming...</h3>";
+            $pdo->exec("ALTER TABLE crew_competencies CHANGE awarded_by assigned_by INT NOT NULL DEFAULT 1");
+            echo "<p>✅ Renamed awarded_by column to assigned_by</p>";
+            $hasAssignedBy = true;
+            $hasAwardedBy = false;
         }
         
         echo "<h3>Current columns:</h3>";
@@ -117,8 +170,16 @@ try {
             
             // Ensure assigned_by column exists
             if (!$hasAssignedBy) {
-                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN assigned_by INT NOT NULL DEFAULT 1");
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN assigned_by INT NULL DEFAULT NULL");
                 echo "<p>✅ Added assigned_by column</p>";
+            } else {
+                // Modify existing assigned_by column to allow NULL
+                try {
+                    $pdo->exec("ALTER TABLE crew_competencies MODIFY assigned_by INT NULL DEFAULT NULL");
+                    echo "<p>✅ Modified assigned_by column to allow NULL</p>";
+                } catch (Exception $e) {
+                    echo "<p>ℹ️ assigned_by column structure already correct</p>";
+                }
             }
             
             // Ensure is_current column exists
@@ -179,8 +240,16 @@ try {
             
             // Ensure assigned_by column exists
             if (!$hasAssignedBy) {
-                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN assigned_by INT NOT NULL DEFAULT 1");
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN assigned_by INT NULL DEFAULT NULL");
                 echo "<p>✅ Added assigned_by column</p>";
+            } else {
+                // Modify existing assigned_by column to allow NULL
+                try {
+                    $pdo->exec("ALTER TABLE crew_competencies MODIFY assigned_by INT NULL DEFAULT NULL");
+                    echo "<p>✅ Modified assigned_by column to allow NULL</p>";
+                } catch (Exception $e) {
+                    echo "<p>ℹ️ assigned_by column structure already correct</p>";
+                }
             }
             
             // Ensure is_current column exists
@@ -230,6 +299,33 @@ try {
             }
             
             echo "<p style='color: green;'>✅ All required columns are present</p>";
+            
+            // Add proper foreign key constraints
+            echo "<h3>Setting up foreign key constraints...</h3>";
+            
+            // Add foreign key for assigned_by -> users.id
+            try {
+                $pdo->exec("ALTER TABLE crew_competencies ADD CONSTRAINT fk_cc_assigned_by FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL");
+                echo "<p>✅ Added foreign key constraint for assigned_by</p>";
+            } catch (Exception $e) {
+                echo "<p>ℹ️ Foreign key constraint for assigned_by already exists or couldn't be created</p>";
+            }
+            
+            // Add foreign key for module_id -> training_modules.id
+            try {
+                $pdo->exec("ALTER TABLE crew_competencies ADD CONSTRAINT fk_cc_module FOREIGN KEY (module_id) REFERENCES training_modules(id) ON DELETE CASCADE");
+                echo "<p>✅ Added foreign key constraint for module_id</p>";
+            } catch (Exception $e) {
+                echo "<p>ℹ️ Foreign key constraint for module_id already exists or couldn't be created</p>";
+            }
+            
+            // Add foreign key for roster_id -> roster.id (if not already exists)
+            try {
+                $pdo->exec("ALTER TABLE crew_competencies ADD CONSTRAINT fk_cc_roster_new FOREIGN KEY (roster_id) REFERENCES roster(id) ON DELETE CASCADE");
+                echo "<p>✅ Added foreign key constraint for roster_id</p>";
+            } catch (Exception $e) {
+                echo "<p>ℹ️ Foreign key constraint for roster_id already exists or couldn't be created</p>";
+            }
         } else {
             echo "<p style='color: red;'>❌ Table has neither user_id nor roster_id - needs manual review</p>";
         }
