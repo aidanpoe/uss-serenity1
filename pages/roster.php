@@ -1122,11 +1122,15 @@ $ranks = [
 							</div>
 							<?php endif; ?>
 							
-							<!-- Competencies Button - Available to Everyone -->
-							<div style="margin-top: 0.5rem;">
+							<!-- Competencies and Awards Buttons - Available to Everyone -->
+							<div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
 								<button onclick="showCompetencies(<?php echo $crew_member['id']; ?>, '<?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name'], ENT_QUOTES); ?>')" 
 								        style="background-color: var(--gold); color: black; border: none; padding: 0.3rem 0.8rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">
 									Competencies
+								</button>
+								<button onclick="showAwards(<?php echo $crew_member['id']; ?>, '<?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name'], ENT_QUOTES); ?>')" 
+								        style="background-color: var(--orange); color: black; border: none; padding: 0.3rem 0.8rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">
+									Awards (<?php echo $crew_member['award_count'] ?? 0; ?>)
 								</button>
 							</div>
 						</div>
@@ -1207,6 +1211,22 @@ $ranks = [
 			</div>
 			<div class="competencies-footer">
 				<button onclick="closeCompetencies()" class="lcars-close-button">CLOSE DATABASE ACCESS</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Awards Modal -->
+	<div id="awards-modal" class="competencies-modal" style="display: none;">
+		<div class="competencies-modal-content">
+			<div class="competencies-header">
+				<div class="competencies-title">STARFLEET AWARDS & COMMENDATIONS</div>
+				<div class="competencies-subtitle" id="awards-crew-name-display"></div>
+			</div>
+			<div class="competencies-body" id="awards-content">
+				<div class="loading-message">Loading awards records...</div>
+			</div>
+			<div class="competencies-footer">
+				<button onclick="closeAwards()" class="lcars-close-button">CLOSE DATABASE ACCESS</button>
 			</div>
 		</div>
 	</div>
@@ -1302,6 +1322,138 @@ $ranks = [
 				playAudio('audio2');
 			}
 		}
+
+		// Awards Modal Functions
+		function showAwards(rosterId, crewName) {
+			document.getElementById('awards-crew-name-display').textContent = crewName;
+			document.getElementById('awards-modal').style.display = 'flex';
+			document.getElementById('awards-content').innerHTML = '<div class="loading-message">Loading awards records...</div>';
+			
+			// Play LCARS sound
+			if (typeof playAudio !== 'undefined') {
+				playAudio('audio3');
+			}
+			
+			// Fetch awards data
+			fetch('../api/get_awards.php?roster_id=' + rosterId)
+				.then(response => response.json())
+				.then(data => {
+					displayAwards(data);
+				})
+				.catch(error => {
+					document.getElementById('awards-content').innerHTML = '<div class="error-message">Error loading awards data: ' + error.message + '</div>';
+				});
+		}
+
+		function displayAwards(response) {
+			const content = document.getElementById('awards-content');
+			
+			if (!response.success) {
+				content.innerHTML = '<div class="error-message">Error: ' + response.error + '</div>';
+				return;
+			}
+			
+			const data = response.data;
+			let html = '';
+			
+			if (data.total_count === 0) {
+				html = `
+					<div class="no-awards-message">
+						<div style="text-align: center; color: var(--orange); font-size: 1.2rem; margin: 2rem 0;">
+							NO AWARDS OR COMMENDATIONS ON RECORD
+						</div>
+						<div style="text-align: center; color: var(--bluey); font-size: 0.9rem;">
+							This crew member has not yet received any Starfleet awards or commendations.
+						</div>
+					</div>
+				`;
+			} else {
+				html = `
+					<div class="awards-summary">
+						<div style="text-align: center; color: var(--orange); font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--orange); padding-bottom: 0.5rem;">
+							TOTAL AWARDS: ${data.total_count}
+						</div>
+					</div>
+				`;
+				
+				// Display Medals
+				if (data.medals.length > 0) {
+					html += `
+						<div class="award-section">
+							<h3 style="color: #FFD700; margin-bottom: 1rem;">🏅 MEDALS (${data.medals.length})</h3>
+							<div class="awards-grid">
+					`;
+					data.medals.forEach(award => {
+						html += `
+							<div class="award-item medal">
+								<div class="award-name">${award.name}</div>
+								${award.specialization ? `<div class="award-dept">${award.specialization}</div>` : ''}
+								<div class="award-date">Awarded: ${award.date_awarded}</div>
+								${award.awarded_by ? `<div class="award-by">By: ${award.awarded_by.rank} ${award.awarded_by.name}</div>` : ''}
+								${award.citation ? `<div class="award-citation">"${award.citation}"</div>` : ''}
+								<div class="award-description">${award.description}</div>
+							</div>
+						`;
+					});
+					html += '</div></div>';
+				}
+				
+				// Display Ribbons
+				if (data.ribbons.length > 0) {
+					html += `
+						<div class="award-section">
+							<h3 style="color: #87CEEB; margin-bottom: 1rem;">🎗️ RIBBONS (${data.ribbons.length})</h3>
+							<div class="awards-grid">
+					`;
+					data.ribbons.forEach(award => {
+						html += `
+							<div class="award-item ribbon">
+								<div class="award-name">${award.name}</div>
+								${award.specialization ? `<div class="award-dept">${award.specialization}</div>` : ''}
+								<div class="award-date">Awarded: ${award.date_awarded}</div>
+								${award.awarded_by ? `<div class="award-by">By: ${award.awarded_by.rank} ${award.awarded_by.name}</div>` : ''}
+								${award.citation ? `<div class="award-citation">"${award.citation}"</div>` : ''}
+								<div class="award-description">${award.description}</div>
+							</div>
+						`;
+					});
+					html += '</div></div>';
+				}
+				
+				// Display Badges
+				if (data.badges.length > 0) {
+					html += `
+						<div class="award-section">
+							<h3 style="color: #32CD32; margin-bottom: 1rem;">🛡️ BADGES (${data.badges.length})</h3>
+							<div class="awards-grid">
+					`;
+					data.badges.forEach(award => {
+						html += `
+							<div class="award-item badge">
+								<div class="award-name">${award.name}</div>
+								${award.specialization ? `<div class="award-dept">${award.specialization}</div>` : ''}
+								<div class="award-date">Awarded: ${award.date_awarded}</div>
+								${award.awarded_by ? `<div class="award-by">By: ${award.awarded_by.rank} ${award.awarded_by.name}</div>` : ''}
+								${award.citation ? `<div class="award-citation">"${award.citation}"</div>` : ''}
+								<div class="award-description">${award.description}</div>
+							</div>
+						`;
+					});
+					html += '</div></div>';
+				}
+			}
+			
+			content.innerHTML = html;
+		}
+
+		function closeAwards() {
+			document.getElementById('awards-modal').style.display = 'none';
+			
+			// Play LCARS sound
+			if (typeof playAudio !== 'undefined') {
+				playAudio('audio2');
+			}
+		}
 		
 		// Close modal when clicking outside
 		document.getElementById('competencies-modal').addEventListener('click', function(e) {
@@ -1309,11 +1461,18 @@ $ranks = [
 				closeCompetencies();
 			}
 		});
+
+		document.getElementById('awards-modal').addEventListener('click', function(e) {
+			if (e.target === this) {
+				closeAwards();
+			}
+		});
 		
 		// Close modal with Escape key
 		document.addEventListener('keydown', function(e) {
 			if (e.key === 'Escape') {
 				closeCompetencies();
+				closeAwards();
 			}
 		});
 	</script>
@@ -1503,6 +1662,86 @@ $ranks = [
 			padding: 0.5rem;
 			background: rgba(0, 255, 0, 0.1);
 			border-radius: 3px;
+		}
+		
+		/* Awards Modal Styles */
+		.awards-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+			gap: 1rem;
+			margin-bottom: 2rem;
+		}
+		
+		.award-section {
+			margin-bottom: 2rem;
+		}
+		
+		.award-item {
+			background: rgba(0, 0, 0, 0.3);
+			border-radius: 8px;
+			padding: 1rem;
+			border-left: 4px solid;
+		}
+		
+		.award-item.medal {
+			border-left-color: #FFD700;
+			background: rgba(255, 215, 0, 0.1);
+		}
+		
+		.award-item.ribbon {
+			border-left-color: #87CEEB;
+			background: rgba(135, 206, 235, 0.1);
+		}
+		
+		.award-item.badge {
+			border-left-color: #32CD32;
+			background: rgba(50, 205, 50, 0.1);
+		}
+		
+		.award-name {
+			font-size: 1.1rem;
+			font-weight: bold;
+			color: var(--orange);
+			margin-bottom: 0.5rem;
+		}
+		
+		.award-dept {
+			font-size: 0.9rem;
+			color: var(--bluey);
+			font-weight: bold;
+			margin-bottom: 0.3rem;
+		}
+		
+		.award-date {
+			font-size: 0.8rem;
+			color: var(--green);
+			margin-bottom: 0.3rem;
+		}
+		
+		.award-by {
+			font-size: 0.8rem;
+			color: var(--bluey);
+			margin-bottom: 0.5rem;
+		}
+		
+		.award-citation {
+			font-style: italic;
+			color: var(--gold);
+			margin-bottom: 0.5rem;
+			padding: 0.5rem;
+			background: rgba(255, 215, 0, 0.1);
+			border-radius: 3px;
+		}
+		
+		.award-description {
+			font-size: 0.9rem;
+			color: var(--bluey);
+			line-height: 1.4;
+		}
+		
+		.no-awards-message {
+			text-align: center;
+			padding: 2rem;
 		}
 	</style>
 	
