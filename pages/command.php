@@ -557,7 +557,7 @@ try {
 											<div style="margin-top: 1rem;">
 												<small style="color: var(--orange);">
 													Recommended by: <?php echo htmlspecialchars($recommendation['submitted_by'] ?? 'Unknown'); ?> 
-													on <?php echo htmlspecialchars($recommendation['submitted_at'] ?? 'Unknown date'); ?>
+													on <?php echo htmlspecialchars($recommendation['submitted_at'] ? formatICDateTime($recommendation['submitted_at']) : 'Unknown date'); ?>
 												</small><br>
 												<small style="color: var(--gold);">
 													Status: <strong><?php echo htmlspecialchars($recommendation['status'] ?? 'Pending'); ?></strong>

@@ -782,7 +782,7 @@ try {
 									<div class="file-meta">
 										<div>
 											<strong>Uploaded by:</strong> <?php echo htmlspecialchars(($file['first_name'] ?? 'Unknown') . ' ' . ($file['last_name'] ?? 'User')); ?><br>
-											<strong>Date:</strong> <?php echo date('M j, Y H:i', strtotime($file['upload_date'])); ?>
+											<strong>Date:</strong> <?php echo formatICDateTime($file['upload_date']); ?>
 										</div>
 										<div>
 											<strong>File:</strong> <?php echo htmlspecialchars($file['original_filename']); ?><br>
@@ -822,7 +822,7 @@ try {
 									<div class="file-meta">
 										<div>
 											<strong>Uploaded by:</strong> <?php echo htmlspecialchars(($file['first_name'] ?? 'Unknown') . ' ' . ($file['last_name'] ?? 'User')); ?><br>
-											<strong>Date:</strong> <?php echo date('M j, Y H:i', strtotime($file['upload_date'])); ?>
+											<strong>Date:</strong> <?php echo formatICDateTime($file['upload_date']); ?>
 										</div>
 										<div>
 											<strong>File:</strong> <?php echo htmlspecialchars($file['original_filename']); ?><br>
@@ -862,7 +862,7 @@ try {
 									<div class="file-meta">
 										<div>
 											<strong>Uploaded by:</strong> <?php echo htmlspecialchars(($file['first_name'] ?? 'Unknown') . ' ' . ($file['last_name'] ?? 'User')); ?><br>
-											<strong>Date:</strong> <?php echo date('M j, Y H:i', strtotime($file['upload_date'])); ?>
+											<strong>Date:</strong> <?php echo formatICDateTime($file['upload_date']); ?>
 										</div>
 										<div>
 											<strong>File:</strong> <?php echo htmlspecialchars($file['original_filename']); ?><br>
@@ -902,7 +902,7 @@ try {
 									<div class="file-meta">
 										<div>
 											<strong>Uploaded by:</strong> <?php echo htmlspecialchars(($file['first_name'] ?? 'Unknown') . ' ' . ($file['last_name'] ?? 'User')); ?><br>
-											<strong>Date:</strong> <?php echo date('M j, Y H:i', strtotime($file['upload_date'])); ?>
+											<strong>Date:</strong> <?php echo formatICDateTime($file['upload_date']); ?>
 										</div>
 										<div>
 											<strong>File:</strong> <?php echo htmlspecialchars($file['original_filename']); ?><br>
@@ -950,10 +950,10 @@ try {
 										</span>
 									</div>
 									<div style="font-size: 0.8rem; opacity: 0.7;">
-										<?php echo date('M j, Y', strtotime($log['action_date'])); ?>
+										<?php echo formatICDateOnly($log['action_date']); ?>
 									</div>
 									<div style="font-size: 0.8rem; opacity: 0.7;">
-										<?php echo date('H:i', strtotime($log['action_date'])); ?>
+										<?php echo formatICDateTime($log['action_date'], 'H:i'); ?>
 									</div>
 								</div>
 								<?php endforeach; ?>
