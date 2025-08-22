@@ -122,52 +122,295 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>USS-Serenity - Awards Management</title>
     <link rel="stylesheet" href="../assets/lcars.css">
+    <link rel="stylesheet" href="../assets/lower-decks.css">
     <style>
-        .awards-container {
+        .content-area {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .awards-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
+            gap: 2rem;
+            margin: 2rem 0;
         }
         
-        .award-section {
-            background: rgba(153, 153, 204, 0.1);
+        .award-panel {
+            background: linear-gradient(145deg, rgba(153, 153, 204, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
             border: 2px solid var(--bluey);
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 1.5rem;
+            position: relative;
         }
         
-        .award-form {
-            background: rgba(255, 153, 0, 0.1);
-            border: 2px solid var(--orange);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .award-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--orange) 0%, var(--bluey) 50%, var(--orange) 100%);
+            border-radius: 15px 15px 0 0;
         }
         
-        .award-list {
-            max-height: 400px;
-            overflow-y: auto;
+        .panel-header {
+            color: var(--orange);
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .lcars-form {
+            background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--bluey);
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
         }
         
-        .award-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
+        .form-row {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            color: var(--orange);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        .lcars-input,
+        .lcars-select,
+        .lcars-textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--bluey);
+            border-radius: 5px;
+            color: var(--bluey);
+            font-family: 'Antonio', sans-serif;
+            font-size: 1rem;
+        }
+        
+        .lcars-input:focus,
+        .lcars-select:focus,
+        .lcars-textarea:focus {
+            border-color: var(--orange);
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
+        }
+        
+        .lcars-button {
+            background: linear-gradient(145deg, var(--orange) 0%, #ff6600 100%);
+            color: black;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Antonio', sans-serif;
+        }
+        
+        .lcars-button:hover {
+            background: linear-gradient(145deg, #ff6600 0%, var(--orange) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 153, 0, 0.4);
+        }
+        
+        .lcars-button.danger {
+            background: linear-gradient(145deg, var(--red) 0%, #cc0000 100%);
+            color: white;
+        }
+        
+        .lcars-button.danger:hover {
+            background: linear-gradient(145deg, #cc0000 0%, var(--red) 100%);
+            box-shadow: 0 5px 15px rgba(204, 68, 68, 0.4);
+        }
+        
+        .awards-display {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--bluey);
+            border-radius: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .award-category {
+            background: linear-gradient(90deg, var(--orange) 0%, transparent 100%);
+            color: black;
+            padding: 0.8rem 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--bluey);
+        }
+        
+        .award-entry {
+            padding: 1rem;
             border-bottom: 1px solid rgba(153, 153, 204, 0.3);
+            transition: background 0.3s ease;
         }
         
-        .award-item:last-child {
+        .award-entry:hover {
+            background: rgba(153, 153, 204, 0.1);
+        }
+        
+        .award-entry:last-child {
             border-bottom: none;
         }
         
-        .award-info {
+        .award-title {
+            color: var(--orange);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .award-type {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        
+        .award-type.medal {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: black;
+        }
+        
+        .award-type.ribbon {
+            background: linear-gradient(45deg, #87CEEB, #4682B4);
+            color: black;
+        }
+        
+        .award-type.badge {
+            background: linear-gradient(45deg, #32CD32, #228B22);
+            color: black;
+        }
+        
+        .award-details {
+            color: var(--bluey);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .award-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .award-dept {
+            color: var(--green);
+            font-weight: bold;
+        }
+        
+        .award-rank {
+            color: var(--gold);
+        }
+        
+        .assignments-panel {
+            grid-column: 1 / -1;
+        }
+        
+        .assignment-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--bluey);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .assignment-info {
             flex: 1;
         }
+        
+        .recipient-name {
+            color: var(--orange);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .award-name {
+            color: var(--bluey);
+            margin: 0.3rem 0;
+        }
+        
+        .assignment-meta {
+            color: var(--green);
+            font-size: 0.9rem;
+        }
+        
+        .citation {
+            color: var(--gold);
+            font-style: italic;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 5px;
+        }
+        
+        .message-panel {
+            background: linear-gradient(145deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+            border: 2px solid var(--green);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: var(--green);
+        }
+        
+        .error-panel {
+            background: linear-gradient(145deg, rgba(204, 68, 68, 0.2) 0%, rgba(0, 0, 0, 0.3) 100%);
+            border: 2px solid var(--red);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: var(--red);
+        }
+        
+        .scrollbar-style {
+            scrollbar-width: thin;
+            scrollbar-color: var(--orange) rgba(0, 0, 0, 0.3);
+        }
+        
+        .scrollbar-style::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .scrollbar-style::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        .scrollbar-style::-webkit-scrollbar-thumb {
+            background: var(--orange);
+            border-radius: 4px;
+        }
+        
+        .scrollbar-style::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+    </style>
+</head>
         
         .award-name {
             color: var(--orange);
@@ -296,33 +539,33 @@ try {
                 <div class="panel-3">USS<span class="hop">-SERENITY</span></div>
                 
                 <div class="content-area">
-                    <h1 style="color: var(--orange);">Starfleet Awards Management</h1>
+                    <h1 style="color: var(--orange); text-align: center; margin-bottom: 2rem; font-size: 2rem; text-transform: uppercase; letter-spacing: 3px;">Starfleet Awards Management</h1>
                     
                     <?php if ($message): ?>
-                        <div class="message"><?php echo htmlspecialchars($message); ?></div>
+                        <div class="message-panel"><?php echo htmlspecialchars($message); ?></div>
                     <?php endif; ?>
                     
                     <?php if ($error): ?>
-                        <div class="error">
+                        <div class="error-panel">
                             <?php echo htmlspecialchars($error); ?>
                             <?php if (strpos($error, 'not initialized') !== false): ?>
                                 <br><br>
-                                <a href="../setup_awards_system.php" style="color: var(--orange); text-decoration: underline;">
-                                    Click here to initialize the awards system
+                                <a href="../setup_awards_system.php" style="color: var(--orange); text-decoration: underline; font-weight: bold;">
+                                    → INITIALIZE AWARDS SYSTEM
                                 </a>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
                     
                     <?php if (!empty($awards) && !empty($crew_members)): ?>
-                    <div class="awards-container">
-                        <!-- Award Assignment Form -->
-                        <div class="award-section">
-                            <h2 style="color: var(--orange);">Assign Award</h2>
-                            <form method="POST" class="award-form">
-                                <div class="form-group">
-                                    <label for="roster_id">Crew Member:</label>
-                                    <select name="roster_id" id="roster_id" required>
+                    <div class="awards-grid">
+                        <!-- Award Assignment Panel -->
+                        <div class="award-panel">
+                            <div class="panel-header">🏅 Assign Award</div>
+                            <form method="POST" class="lcars-form">
+                                <div class="form-row">
+                                    <label for="roster_id" class="form-label">Crew Member:</label>
+                                    <select name="roster_id" id="roster_id" class="lcars-select" required>
                                         <option value="">Select crew member...</option>
                                         <?php foreach ($crew_members as $member): ?>
                                             <option value="<?php echo $member['id']; ?>">
@@ -332,9 +575,9 @@ try {
                                     </select>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label for="award_id">Award:</label>
-                                    <select name="award_id" id="award_id" required>
+                                <div class="form-row">
+                                    <label for="award_id" class="form-label">Award:</label>
+                                    <select name="award_id" id="award_id" class="lcars-select" required>
                                         <option value="">Select award...</option>
                                         <?php 
                                         $current_type = '';
@@ -356,83 +599,98 @@ try {
                                     </select>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label for="date_awarded">Date Awarded:</label>
-                                    <input type="date" name="date_awarded" id="date_awarded" value="<?php echo date('Y-m-d'); ?>" required>
+                                <div class="form-row">
+                                    <label for="date_awarded" class="form-label">Date Awarded:</label>
+                                    <input type="date" name="date_awarded" id="date_awarded" class="lcars-input" value="<?php echo date('Y-m-d'); ?>" required>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label for="citation">Citation (Optional):</label>
-                                    <textarea name="citation" id="citation" placeholder="Brief description of why this award was given..."></textarea>
+                                <div class="form-row">
+                                    <label for="citation" class="form-label">Citation (Optional):</label>
+                                    <textarea name="citation" id="citation" class="lcars-textarea" rows="3" placeholder="Brief description of why this award was given..."></textarea>
                                 </div>
                                 
-                                <button type="submit" name="assign_award" class="btn-assign">ASSIGN AWARD</button>
+                                <div style="text-align: center; margin-top: 1.5rem;">
+                                    <button type="submit" name="assign_award" class="lcars-button">
+                                        ⚡ ASSIGN AWARD
+                                    </button>
+                                </div>
                             </form>
                         </div>
                         
-                        <!-- Available Awards List -->
-                        <div class="award-section">
-                            <h2 style="color: var(--orange);">Available Awards</h2>
-                            <div class="award-list">
+                        <!-- Available Awards Panel -->
+                        <div class="award-panel">
+                            <div class="panel-header">📋 Available Awards</div>
+                            <div class="awards-display scrollbar-style">
                                 <?php 
                                 $current_type = '';
                                 foreach ($awards as $award): 
                                     if ($award['type'] !== $current_type) {
                                         if ($current_type !== '') echo '</div>';
-                                        echo '<h3 style="color: var(--orange); margin: 15px 0 5px 0;">' . htmlspecialchars($award['type'] . 's') . '</h3>';
-                                        echo '<div style="margin-left: 10px;">';
+                                        echo '<div class="award-category">' . htmlspecialchars($award['type'] . 's') . '</div>';
                                         $current_type = $award['type'];
                                     }
                                 ?>
-                                    <div class="award-item">
-                                        <div class="award-info">
-                                            <div class="award-name award-type-<?php echo strtolower($award['type']); ?>">
-                                                <?php echo htmlspecialchars($award['name']); ?>
-                                            </div>
-                                            <div class="award-details">
-                                                <?php if ($award['specialization']): ?>
-                                                    Department: <?php echo htmlspecialchars($award['specialization']); ?> | 
-                                                <?php endif; ?>
-                                                Min. Rank: <?php echo htmlspecialchars($award['minimum_rank']); ?><br>
-                                                <?php echo htmlspecialchars($award['description']); ?>
-                                            </div>
+                                    <div class="award-entry">
+                                        <div class="award-title"><?php echo htmlspecialchars($award['name']); ?></div>
+                                        <div class="award-type <?php echo strtolower($award['type']); ?>">
+                                            <?php echo htmlspecialchars($award['type']); ?>
+                                        </div>
+                                        <div class="award-details">
+                                            <?php echo htmlspecialchars($award['description']); ?>
+                                        </div>
+                                        <div class="award-meta">
+                                            <?php if ($award['specialization']): ?>
+                                                <span class="award-dept">📡 <?php echo htmlspecialchars($award['specialization']); ?></span>
+                                            <?php endif; ?>
+                                            <span class="award-rank">⭐ Min. Rank: <?php echo htmlspecialchars($award['minimum_rank']); ?></span>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                                <?php if ($current_type !== '') echo '</div>'; ?>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Current Award Assignments -->
-                    <div class="award-section" style="grid-column: 1 / -1;">
-                        <h2 style="color: var(--orange);">Current Award Assignments</h2>
-                        <div class="award-list">
+                    <div class="award-panel assignments-panel">
+                        <div class="panel-header">🎖️ Current Award Assignments</div>
+                        <div class="awards-display scrollbar-style">
                             <?php if (empty($current_assignments)): ?>
-                                <p style="color: var(--bluey); text-align: center; padding: 20px;">No awards have been assigned yet.</p>
+                                <div style="text-align: center; padding: 3rem; color: var(--bluey);">
+                                    <h4>No Awards Assigned</h4>
+                                    <p>No awards have been assigned to crew members yet.</p>
+                                </div>
                             <?php else: ?>
                                 <?php foreach ($current_assignments as $assignment): ?>
-                                    <div class="award-item">
-                                        <div class="award-info">
-                                            <div class="award-name award-type-<?php echo strtolower($assignment['award_type']); ?>">
+                                    <div class="assignment-item">
+                                        <div class="assignment-info">
+                                            <div class="recipient-name">
+                                                <?php echo htmlspecialchars($assignment['rank'] . ' ' . $assignment['first_name'] . ' ' . $assignment['last_name']); ?>
+                                            </div>
+                                            <div class="award-name">
+                                                <span class="award-type <?php echo strtolower($assignment['award_type']); ?>">
+                                                    <?php echo htmlspecialchars($assignment['award_type']); ?>
+                                                </span>
                                                 <?php echo htmlspecialchars($assignment['award_name']); ?>
                                             </div>
-                                            <div class="award-details">
-                                                Awarded to: <?php echo htmlspecialchars($assignment['rank'] . ' ' . $assignment['first_name'] . ' ' . $assignment['last_name']); ?><br>
-                                                Date: <?php echo htmlspecialchars($assignment['date_awarded']); ?> | 
-                                                <?php if ($assignment['awarding_first_name']): ?>
-                                                    By: <?php echo htmlspecialchars($assignment['awarding_rank'] . ' ' . $assignment['awarding_first_name'] . ' ' . $assignment['awarding_last_name']); ?>
+                                            <div class="assignment-meta">
+                                                📅 Awarded: <?php echo htmlspecialchars($assignment['date_awarded']); ?> | 
+                                                👤 By: <?php if ($assignment['awarding_first_name']): ?>
+                                                    <?php echo htmlspecialchars($assignment['awarding_rank'] . ' ' . $assignment['awarding_first_name'] . ' ' . $assignment['awarding_last_name']); ?>
                                                 <?php else: ?>
-                                                    By: System
-                                                <?php endif; ?>
-                                                <?php if ($assignment['citation']): ?>
-                                                    <br>Citation: <?php echo htmlspecialchars($assignment['citation']); ?>
+                                                    System
                                                 <?php endif; ?>
                                             </div>
+                                            <?php if ($assignment['citation']): ?>
+                                                <div class="citation">
+                                                    "<?php echo htmlspecialchars($assignment['citation']); ?>"
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
-                                        <form method="POST" style="margin-left: 10px;">
+                                        <form method="POST">
                                             <input type="hidden" name="crew_award_id" value="<?php echo $assignment['id']; ?>">
-                                            <button type="submit" name="remove_award" class="btn-remove" onclick="return confirm('Are you sure you want to remove this award?')">REMOVE</button>
+                                            <button type="submit" name="remove_award" class="lcars-button danger" onclick="return confirm('Are you sure you want to remove this award?')">
+                                                🗑️ REMOVE
+                                            </button>
                                         </form>
                                     </div>
                                 <?php endforeach; ?>
