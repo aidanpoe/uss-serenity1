@@ -747,7 +747,7 @@ try {
                                 
                                 <div class="form-group">
                                     <label for="date_awarded">Date Awarded:</label>
-                                    <input type="date" name="date_awarded" id="date_awarded" value="<?php echo date('Y-m-d'); ?>" required>
+                                    <input type="date" name="date_awarded" id="date_awarded" value="<?php echo formatICDateOnly(date('Y-m-d')); ?>" required>
                                 </div>
                                 
                                 <div class="form-group">

@@ -67,7 +67,7 @@ try {
             'type' => $award['award_type'],
             'specialization' => $award['specialization'],
             'description' => $award['description'],
-            'date_awarded' => $award['date_awarded'] ? formatICDateOnly($award['date_awarded']) : null,
+            'date_awarded' => $award['date_awarded'], // Keep as-is since forms now submit IC dates
             'citation' => $award['citation'],
             'awarded_by' => null
         ];
