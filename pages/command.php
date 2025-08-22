@@ -213,7 +213,6 @@ try {
 									<?php endif; ?>
 									<?php if (hasPermission('Captain') || hasPermission('Command')): ?>
 									<button onclick="playSoundAndRedirect('audio2', 'training_modules.php')" style="background-color: var(--green); color: black; border: none; padding: 0.75rem; border-radius: 5px;">🎓 Training Modules</button>
-									<button onclick="playSoundAndRedirect('audio2', 'training_assignment.php')" style="background-color: var(--purple); color: white; border: none; padding: 0.75rem; border-radius: 5px;">👥 Training Assignment</button>
 									<button onclick="playSoundAndRedirect('audio2', 'admin_management.php')" style="background-color: var(--red); color: white; border: none; padding: 0.75rem; border-radius: 5px;">⚠️ Admin Management</button>
 									<?php endif; ?>
 									<?php if (hasPermission('Captain')): ?>

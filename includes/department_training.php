@@ -146,7 +146,8 @@ function renderDepartmentTrainingSection($department, $department_display_name) 
     
     $current_dept = '';
     foreach ($modules as $module) {
-        $module_dept = $module['department'] === 'All' ? 'Universal' : $department_display_name;
+        // Use actual department name from database, but display "Universal" for "All"
+        $module_dept = $module['department'] === 'All' ? 'Universal' : $module['department'];
         if ($module_dept !== $current_dept) {
             if ($current_dept !== '') echo '</optgroup>';
             echo '<optgroup label="' . htmlspecialchars($module_dept) . '">';
