@@ -307,7 +307,7 @@ try {
 									<span class="status-badge status-<?php echo strtolower(str_replace(' ', '', $report['status'])); ?>"><?php echo $report['status']; ?></span>
 								</div>
 								<p style="font-size: 0.9rem;"><?php echo htmlspecialchars(substr($report['description'], 0, 100)) . (strlen($report['description']) > 100 ? '...' : ''); ?></p>
-								<small><?php echo date('M j, Y H:i', strtotime($report['created_at'])); ?></small>
+								<small><?php echo formatICDateTime($report['created_at']); ?></small>
 							</div>
 							<?php endforeach; ?>
 							<?php endif; ?>
@@ -328,7 +328,7 @@ try {
 									<span class="status-badge status-<?php echo strtolower(str_replace(' ', '', $report['status'])); ?>"><?php echo $report['status']; ?></span>
 								</div>
 								<p style="font-size: 0.9rem;"><?php echo htmlspecialchars(substr($report['description'], 0, 100)) . (strlen($report['description']) > 100 ? '...' : ''); ?></p>
-								<small><?php echo date('M j, Y H:i', strtotime($report['created_at'])); ?></small>
+								<small><?php echo formatICDateTime($report['created_at']); ?></small>
 							</div>
 							<?php endforeach; ?>
 							<?php endif; ?>
@@ -349,7 +349,7 @@ try {
 									<span class="status-badge status-<?php echo strtolower(str_replace(' ', '', $report['status'])); ?>"><?php echo $report['status']; ?></span>
 								</div>
 								<p style="font-size: 0.9rem;"><?php echo htmlspecialchars(substr($report['description'], 0, 100)) . (strlen($report['description']) > 100 ? '...' : ''); ?></p>
-								<small><?php echo date('M j, Y H:i', strtotime($report['created_at'])); ?></small>
+								<small><?php echo formatICDateTime($report['created_at']); ?></small>
 							</div>
 							<?php endforeach; ?>
 							<?php endif; ?>
@@ -370,7 +370,7 @@ try {
 									<span class="status-badge status-<?php echo strtolower(str_replace(' ', '', $suggestion['status'])); ?>"><?php echo $suggestion['status']; ?></span>
 								</div>
 								<p style="font-size: 0.9rem;"><?php echo htmlspecialchars(substr($suggestion['description'], 0, 100)) . (strlen($suggestion['description']) > 100 ? '...' : ''); ?></p>
-								<small><?php echo date('M j, Y H:i', strtotime($suggestion['created_at'])); ?></small>
+								<small><?php echo formatICDateTime($suggestion['created_at']); ?></small>
 							</div>
 							<?php endforeach; ?>
 							<?php endif; ?>

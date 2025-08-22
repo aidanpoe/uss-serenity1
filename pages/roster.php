@@ -1302,8 +1302,8 @@ $ranks = [
 						<div class="competency-details">
 							<div class="competency-code">${comp.module_code}</div>
 							<div class="competency-level">Level: ${comp.certification_level}</div>
-							<div class="competency-date">Assigned: ${new Date(comp.assigned_date).toLocaleDateString()}</div>
-							${comp.completion_date ? `<div class="completion-date">Completed: ${new Date(comp.completion_date).toLocaleDateString()}</div>` : ''}
+							<div class="competency-date">Assigned: ${comp.assigned_date}</div>
+							${comp.completion_date ? `<div class="completion-date">Completed: ${comp.completion_date}</div>` : ''}
 							${comp.notes ? `<div class="competency-notes">${comp.notes}</div>` : ''}
 						</div>
 					</div>`;

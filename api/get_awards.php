@@ -67,7 +67,7 @@ try {
             'type' => $award['award_type'],
             'specialization' => $award['specialization'],
             'description' => $award['description'],
-            'date_awarded' => $award['date_awarded'],
+            'date_awarded' => $award['date_awarded'] ? formatICDateOnly($award['date_awarded']) : null,
             'citation' => $award['citation'],
             'awarded_by' => null
         ];

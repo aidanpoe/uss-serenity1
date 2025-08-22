@@ -1267,8 +1267,8 @@ try {
                             <td style="padding: 0.5rem; color: var(--blue); font-size: 0.9rem;">
                                 <?php 
                                 $timestamp = strtotime($log['timestamp']);
-                                $formatted_date = date('Y-m-d', $timestamp);
-                                $formatted_time = date('H:i:s', $timestamp);
+                                $formatted_date = formatICDateOnly($log['timestamp']);
+                                $formatted_time = formatICDateTime($log['timestamp'], 'H:i:s');
                                 ?>
                                 <div><?php echo $formatted_date; ?></div>
                                 <div style="color: var(--orange); font-size: 0.8rem;"><?php echo $formatted_time; ?></div>

@@ -52,8 +52,8 @@ try {
             'certification_level' => $comp['certification_level'],
             'description' => $comp['description'],
             'status' => $comp['status'],
-            'assigned_date' => $comp['assigned_date'],
-            'completion_date' => $comp['completion_date'],
+            'assigned_date' => $comp['assigned_date'] ? formatICDateOnly($comp['assigned_date']) : null,
+            'completion_date' => $comp['completion_date'] ? formatICDateOnly($comp['completion_date']) : null,
             'notes' => $comp['notes'],
             'completion_notes' => $comp['completion_notes'],
             'assigned_by_name' => $comp['assigned_by_name']
