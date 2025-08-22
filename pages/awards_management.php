@@ -237,6 +237,49 @@ try {
             padding: 1rem;
         }
         
+        .award-type-section {
+            margin-bottom: 2rem;
+        }
+        
+        .award-type-header {
+            background: var(--orange);
+            color: black;
+            padding: 0.8rem 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        
+        .award-type-container {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 0.5rem;
+            border: 1px solid var(--bluey);
+        }
+        
+        .award-type-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .award-type-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+        
+        .award-type-container::-webkit-scrollbar-thumb {
+            background: var(--orange);
+            border-radius: 3px;
+        }
+        
+        .award-type-container::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+        
         .award-category {
             background: var(--orange);
             color: black;
@@ -248,13 +291,20 @@ try {
         }
         
         .award-entry {
-            padding: 1rem;
-            border-bottom: 1px solid var(--bluey);
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(153, 153, 204, 0.2);
             transition: background 0.3s ease;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
         }
         
         .award-entry:hover {
             background: rgba(153, 153, 204, 0.1);
+        }
+        
+        .award-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
         }
         
         .award-title {
@@ -297,6 +347,11 @@ try {
         .award-meta {
             font-size: 0.8rem;
             color: var(--green);
+            margin-top: 0.5rem;
+            padding: 0.3rem 0.5rem;
+            background: rgba(0, 255, 0, 0.05);
+            border-radius: 3px;
+            border-left: 3px solid var(--green);
         }
         
         .assignment-item {
@@ -502,26 +557,45 @@ try {
                             <div class="panel-header">📋 Available Awards</div>
                             <div class="awards-display">
                                 <?php 
-                                $current_type = '';
-                                foreach ($awards as $award): 
-                                    if ($award['type'] !== $current_type) {
-                                        echo '<div class="award-category">' . htmlspecialchars($award['type'] . 's') . '</div>';
-                                        $current_type = $award['type'];
-                                    }
+                                // Group awards by type
+                                $awards_by_type = [];
+                                foreach ($awards as $award) {
+                                    $awards_by_type[$award['type']][] = $award;
+                                }
+                                
+                                // Display each type in its own section
+                                foreach ($awards_by_type as $type => $type_awards): 
                                 ?>
-                                    <div class="award-entry">
-                                        <div class="award-title"><?php echo htmlspecialchars($award['name']); ?></div>
-                                        <div class="award-type <?php echo strtolower($award['type']); ?>">
-                                            <?php echo htmlspecialchars($award['type']); ?>
+                                    <div class="award-type-section">
+                                        <div class="award-type-header">
+                                            <?php 
+                                            $icon = '';
+                                            switch($type) {
+                                                case 'Medal': $icon = '🏅'; break;
+                                                case 'Ribbon': $icon = '🎗️'; break;
+                                                case 'Badge': $icon = '🏆'; break;
+                                                default: $icon = '⭐'; break;
+                                            }
+                                            echo $icon . ' ' . htmlspecialchars($type . 's'); 
+                                            ?>
                                         </div>
-                                        <div class="award-details">
-                                            <?php echo htmlspecialchars($award['description']); ?>
-                                        </div>
-                                        <div class="award-meta">
-                                            <?php if ($award['specialization']): ?>
-                                                📡 <?php echo htmlspecialchars($award['specialization']); ?> | 
-                                            <?php endif; ?>
-                                            ⭐ Rank: <?php echo htmlspecialchars($award['minimum_rank']); ?>
+                                        <div class="award-type-container">
+                                            <?php foreach ($type_awards as $award): ?>
+                                                <div class="award-entry">
+                                                    <div class="award-title"><?php echo htmlspecialchars($award['name']); ?></div>
+                                                    <div class="award-type <?php echo strtolower($award['type']); ?>">
+                                                        <?php echo htmlspecialchars($award['type']); ?>
+                                                    </div>
+                                                    <div class="award-details">
+                                                        <?php echo htmlspecialchars($award['description']); ?>
+                                                    </div>
+                                                    <?php if ($award['specialization']): ?>
+                                                        <div class="award-meta">
+                                                            📡 <?php echo htmlspecialchars($award['specialization']); ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endforeach; ?>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
