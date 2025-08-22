@@ -1,8 +1,14 @@
 <?php
 require_once '../includes/config.php';
+require_once '../includes/department_training.php';
 
 // Update last active timestamp for current character
 updateLastActive();
+
+// Handle department training if user has permission
+if (hasPermission('SEC/TAC') || hasPermission('Command')) {
+    handleDepartmentTraining('Security');
+}
 
 // Handle security report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'security_report') {
@@ -133,7 +139,7 @@ try {
 						<button onclick="playSoundAndRedirect('audio2', '#')" style="background-color: var(--gold);">SEC/TAC</button>
 						<button onclick="playSoundAndRedirect('audio2', 'criminal_records.php')">CRIMINAL</button>
 						<button onclick="playSoundAndRedirect('audio2', 'security_resolved.php')">RESOLVED</button>
-						<button onclick="playSoundAndRedirect('audio2', 'training.php')">TRAINING</button>
+						<button onclick="playSoundAndRedirect('audio2', 'training_modules.php')">TRAINING</button>
 					</nav>
 				</div>
 				<div class="bar-panel first-bar-panel">
@@ -336,6 +342,11 @@ try {
 							<?php endforeach; ?>
 						</div>
 					</div>
+					<?php endif; ?>
+					
+					<?php if (hasPermission('SEC/TAC') || hasPermission('Command')): ?>
+					<!-- Department Training Section -->
+					<?php renderDepartmentTrainingSection('Security', 'Security & Tactical'); ?>
 					<?php endif; ?>
 					
 					<div style="background: rgba(255, 170, 0, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">

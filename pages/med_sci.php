@@ -1,8 +1,14 @@
 <?php
 require_once '../includes/config.php';
+require_once '../includes/department_training.php';
 
 // Update last active timestamp for current character
 updateLastActive();
+
+// Handle department training if user has permission
+if (hasPermission('MED/SCI') || hasPermission('Command')) {
+    handleDepartmentTraining('Medical');
+}
 
 // Handle adding new patients (MED/SCI only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_patient') {
@@ -192,7 +198,7 @@ try {
 						<button onclick="playSoundAndRedirect('audio2', '#')" style="background-color: var(--blue);">MED/SCI</button>
 						<button onclick="playSoundAndRedirect('audio2', 'medical_patients.php')">PATIENTS</button>
 						<button onclick="playSoundAndRedirect('audio2', 'medical_resolved.php')">RESOLVED</button>
-						<button onclick="playSoundAndRedirect('audio2', 'training.php')">TRAINING</button>
+						<button onclick="playSoundAndRedirect('audio2', 'training_modules.php')">TRAINING</button>
 					</nav>
 				</div>
 				<div class="bar-panel first-bar-panel">
@@ -462,6 +468,11 @@ try {
 							<?php endforeach; ?>
 						</div>
 					</div>
+					<?php endif; ?>
+					
+					<?php if (hasPermission('MED/SCI') || hasPermission('Command')): ?>
+					<!-- Department Training Section -->
+					<?php renderDepartmentTrainingSection('Medical', 'Medical & Science'); ?>
 					<?php endif; ?>
 					
 					<div style="background: rgba(85, 102, 255, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">

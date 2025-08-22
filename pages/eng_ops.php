@@ -1,8 +1,14 @@
 <?php
 require_once '../includes/config.php';
+require_once '../includes/department_training.php';
 
 // Update last active timestamp for current character
 updateLastActive();
+
+// Handle department training if user has permission
+if (hasPermission('ENG/OPS') || hasPermission('Command')) {
+    handleDepartmentTraining('Engineering');
+}
 
 // Handle fault report submission
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'fault_report') {
@@ -139,7 +145,7 @@ try {
 						<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>
 						<button onclick="playSoundAndRedirect('audio2', 'roster.php')">ROSTER</button>
 						<button onclick="playSoundAndRedirect('audio2', '#')" style="background-color: var(--orange);">ENG/OPS</button>
-						<button onclick="playSoundAndRedirect('audio2', 'training.php')">TRAINING</button>
+						<button onclick="playSoundAndRedirect('audio2', 'training_modules.php')">TRAINING</button>
 					</nav>
 				</div>
 				<div class="bar-panel first-bar-panel">
@@ -401,6 +407,11 @@ try {
 							<?php endforeach; ?>
 						</div>
 					</div>
+					<?php endif; ?>
+					
+					<?php if (hasPermission('ENG/OPS') || hasPermission('Command')): ?>
+					<!-- Department Training Section -->
+					<?php renderDepartmentTrainingSection('Engineering', 'Engineering'); ?>
 					<?php endif; ?>
 					
 					<div style="background: rgba(255, 136, 0, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">
