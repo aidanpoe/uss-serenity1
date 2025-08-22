@@ -131,7 +131,7 @@ try {
         
         .awards-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1.5fr;
             gap: 2rem;
             margin: 2rem 0;
         }
@@ -140,7 +140,7 @@ try {
             background: rgba(0, 0, 0, 0.7);
             border: 2px solid var(--bluey);
             border-radius: 15px;
-            padding: 1.5rem;
+            padding: 2rem;
             margin-bottom: 2rem;
         }
         
@@ -230,11 +230,12 @@ try {
         }
         
         .awards-display {
-            max-height: 400px;
+            max-height: 600px;
             overflow-y: auto;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
-            padding: 1rem;
+            padding: 1.5rem;
+            min-height: 500px;
         }
         
         .award-type-section {
@@ -254,29 +255,51 @@ try {
         }
         
         .award-type-container {
-            max-height: 200px;
+            max-height: 300px;
+            min-height: 150px;
             overflow-y: auto;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
-            padding: 0.5rem;
+            padding: 1rem;
             border: 1px solid var(--bluey);
         }
         
         .award-type-container::-webkit-scrollbar {
-            width: 6px;
+            width: 10px;
         }
         
         .award-type-container::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
         }
         
         .award-type-container::-webkit-scrollbar-thumb {
             background: var(--orange);
-            border-radius: 3px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.3);
         }
         
         .award-type-container::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+        
+        /* Main awards display scrollbar */
+        .awards-display::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        .awards-display::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 6px;
+        }
+        
+        .awards-display::-webkit-scrollbar-thumb {
+            background: var(--orange);
+            border-radius: 6px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+        }
+        
+        .awards-display::-webkit-scrollbar-thumb:hover {
             background: var(--gold);
         }
         
