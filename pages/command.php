@@ -173,7 +173,7 @@ try {
     // Get awards data for award recommendations dropdown
     $available_awards = [];
     try {
-        $stmt = $pdo->prepare("SELECT id, name, type, specialization, minimum_rank, description FROM awards ORDER BY order_precedence ASC, name ASC");
+        $stmt = $pdo->prepare("SELECT id, name, type, specialization, description FROM awards ORDER BY order_precedence ASC, name ASC");
         $stmt->execute();
         $available_awards = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     } catch (Exception $e) {
@@ -406,7 +406,7 @@ try {
 											}
 										?>
 											<option value="<?php echo htmlspecialchars($award['name'] ?? ''); ?>" title="<?php echo htmlspecialchars($award['description'] ?? ''); ?>">
-												<?php echo htmlspecialchars($award['name'] ?? ''); ?> (Min: <?php echo htmlspecialchars($award['minimum_rank'] ?? 'Unknown'); ?>)
+												<?php echo htmlspecialchars($award['name'] ?? ''); ?>
 											</option>
 										<?php endforeach; ?>
 										<?php if ($current_category !== '') echo '</optgroup>'; ?>

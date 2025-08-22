@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_award'])) {
 
 // Get all available awards
 try {
-    $awards_stmt = $pdo->query("SELECT DISTINCT id, name, type, description, specialization, minimum_rank, order_precedence FROM awards ORDER BY order_precedence, name");
+    $awards_stmt = $pdo->query("SELECT DISTINCT id, name, type, description, specialization, order_precedence FROM awards ORDER BY order_precedence, name");
     $awards = $awards_stmt->fetchAll();
 } catch (Exception $e) {
     $awards = [];

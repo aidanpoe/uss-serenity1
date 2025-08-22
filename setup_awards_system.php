@@ -13,8 +13,6 @@ try {
         name VARCHAR(255) NOT NULL,
         type ENUM('Medal', 'Ribbon', 'Badge', 'Grade') NOT NULL,
         specialization VARCHAR(50),
-        minimum_rank VARCHAR(50) NOT NULL,
-        awarding_authority VARCHAR(100) NOT NULL,
         description TEXT NOT NULL,
         requirements TEXT,
         image_url VARCHAR(500),
@@ -62,60 +60,60 @@ try {
     
     $awards_data = [
         // High-Level Command Medals
-        ['Christopher Pike Medal of Valor', 'Medal', 'Command', 'Fleet Admiral', 'Fleet Admiral+', 'The single greatest medal any Commanding Officer can achieve. Awarded to those who have given their life, blood, sweat and tears for our Federation.', 'Character must have been in a commanding role (XO/CPT)', null, 1],
-        ['The Star Cross Medal', 'Medal', null, 'Admiral', 'Admiral+', 'Consistent excellence as a Starfleet officer above and beyond what is expected', null, null, 2],
-        ['The Purple Heart Medal', 'Medal', null, 'Rear Admiral', 'Rear Admiral+', 'Bravery and sacrifice in the line of duty', null, null, 3],
-        ['Medal of Honour', 'Medal', null, 'Captain', 'Captain+', 'Incredible display of ability as a Starfleet officer on board the USS Serenity', null, null, 4],
-        ['Starfleet Expeditionary Medal', 'Medal', null, 'Rear Admiral', 'Rear Admiral+', 'For Completing a 5 year exploration mission', null, null, 5],
+        ['Christopher Pike Medal of Valor', 'Medal', 'Command', 'The single greatest medal any Commanding Officer can achieve. Awarded to those who have given their life, blood, sweat and tears for our Federation.', 'Character must have been in a commanding role (XO/CPT)', null, 1],
+        ['The Star Cross Medal', 'Medal', null, 'Consistent excellence as a Starfleet officer above and beyond what is expected', null, null, 2],
+        ['The Purple Heart Medal', 'Medal', null, 'Bravery and sacrifice in the line of duty', null, null, 3],
+        ['Medal of Honour', 'Medal', null, 'Incredible display of ability as a Starfleet officer on board the USS Serenity', null, null, 4],
+        ['Starfleet Expeditionary Medal', 'Medal', null, 'For Completing a 5 year exploration mission', null, null, 5],
         
         // Exploration & Diplomacy
-        ['James T Kirk Explorers Medal', 'Medal', null, 'Commodore', 'Commodore+', 'Impressive display while performing acts of exploration', null, null, 6],
-        ['Jonathan Archer Peace Medal', 'Medal', null, 'Rear Admiral', 'Rear Admiral+', 'Advanced and successful negotiation abilities', null, null, 7],
-        ['Silver Palm of Anaxar Medal', 'Medal', null, 'Commodore', 'Commodore+', 'Admirable humanitarian efforts', null, null, 8],
-        ['Four Palm Leaf Medal', 'Medal', null, 'Commodore', 'Commodore+', 'Excellence during First Contact', null, null, 9],
-        ['Diplomacy Achievement Medal', 'Medal', null, 'Captain', 'Captain+', 'Diplomatic Achievement', null, null, 10],
+        ['James T Kirk Explorers Medal', 'Medal', null, 'Impressive display while performing acts of exploration', null, null, 6],
+        ['Jonathan Archer Peace Medal', 'Medal', null, 'Advanced and successful negotiation abilities', null, null, 7],
+        ['Silver Palm of Anaxar Medal', 'Medal', null, 'Admirable humanitarian efforts', null, null, 8],
+        ['Four Palm Leaf Medal', 'Medal', null, 'Excellence during First Contact', null, null, 9],
+        ['Diplomacy Achievement Medal', 'Medal', null, 'Diplomatic Achievement', null, null, 10],
         
         // Engineering & Operations
-        ['Montgomery Scott Medal', 'Medal', 'ENG/OPS', 'Commodore', 'Commodore+', 'Excellence in Engineering or Operations', null, null, 11],
-        ['Engineering Achievement Medal', 'Medal', 'ENG/OPS', 'Captain', 'Captain+', 'Impressive display of Engineering or Operation ability', null, null, 12],
+        ['Montgomery Scott Medal', 'Medal', 'ENG/OPS', 'Excellence in Engineering or Operations', null, null, 11],
+        ['Engineering Achievement Medal', 'Medal', 'ENG/OPS', 'Impressive display of Engineering or Operation ability', null, null, 12],
         
         // Science
-        ['The Zefram Cochrane Discovery Medal', 'Medal', 'Science', 'Commodore', 'Commodore+', 'Brilliant Scientific advancement or discovery', null, null, 13],
-        ['Daystrom Institute of Scientific Achievement Medal', 'Medal', 'Science', 'Captain', 'Captain+', 'Excellence in the field of Science', null, null, 14],
+        ['The Zefram Cochrane Discovery Medal', 'Medal', 'Science', 'Brilliant Scientific advancement or discovery', null, null, 13],
+        ['Daystrom Institute of Scientific Achievement Medal', 'Medal', 'Science', 'Excellence in the field of Science', null, null, 14],
         
         // Medical
-        ['Starfleet Surgeons Medal', 'Medal', 'Medical', 'Surgeon General', 'Surgeon General', 'Excellence in the field of Medical', null, null, 15],
-        ['Silver Lifesaving Medal', 'Medal', 'Medical', 'Captain', 'Captain+', 'Impressive display of Medical ability', null, null, 16],
+        ['Starfleet Surgeons Medal', 'Medal', 'Medical', 'Excellence in the field of Medical', null, null, 15],
+        ['Silver Lifesaving Medal', 'Medal', 'Medical', 'Impressive display of Medical ability', null, null, 16],
         
         // Security & Tactical
-        ['Tactical Excellence Medal', 'Medal', 'SEC/TAC', 'Commodore', 'Commodore+', 'Excellence in Security or Tactical', null, null, 17],
-        ['Starfleet Investigative Excellence Medal', 'Medal', 'SEC/TAC', 'Commodore', 'Commodore+', 'Admirable investigative work', null, null, 18],
-        ['Expert Rifleman Badge', 'Badge', 'SEC/TAC', 'Captain', 'Captain+', 'Prowess in use of a Type-3 Phaser', null, null, 19],
-        ['Expert Pistol Badge', 'Badge', 'SEC/TAC', 'Captain', 'Captain+', 'Prowess in the use of a Type-2 Phaser', null, null, 20],
+        ['Tactical Excellence Medal', 'Medal', 'SEC/TAC', 'Excellence in Security or Tactical', null, null, 17],
+        ['Starfleet Investigative Excellence Medal', 'Medal', 'SEC/TAC', 'Admirable investigative work', null, null, 18],
+        ['Expert Rifleman Badge', 'Badge', 'SEC/TAC', 'Prowess in use of a Type-3 Phaser', null, null, 19],
+        ['Expert Pistol Badge', 'Badge', 'SEC/TAC', 'Prowess in the use of a Type-2 Phaser', null, null, 20],
         
         // Helm
-        ['Hikaru Sulu Order of Tactics Medal', 'Medal', 'Helm', 'Commodore', 'Commodore+', 'Excellence on the Helm station', null, null, 21],
-        ['Distinguished Flying Cross Medal', 'Medal', 'Helm', 'Captain', 'Captain+', 'Impressive display of Helm ability', null, null, 22],
+        ['Hikaru Sulu Order of Tactics Medal', 'Medal', 'Helm', 'Excellence on the Helm station', null, null, 21],
+        ['Distinguished Flying Cross Medal', 'Medal', 'Helm', 'Impressive display of Helm ability', null, null, 22],
         
         // General Service Medals
-        ['Five Star Medal', 'Medal', null, 'Commodore', 'Commodore+', 'Conducting self as an exemplary Starfleet Officer', null, null, 23],
-        ['Silver Star Medal', 'Medal', null, 'Commander', 'Commander+', 'Having gone above and beyond the requirements for a Bronze Star Medal', 'Requires Bronze Star Medal', null, 24],
-        ['Bronze Star Medal', 'Medal', null, 'Commander', 'Commander+', 'Having gone above and beyond the requirements for a Good Conduct Medal', 'Requires Good Conduct Medal', null, 25],
-        ['Good Conduct Medal', 'Medal', null, 'Lieutenant Commander', 'Lieutenant Commander+', 'Shown patience, calm and generally good conduct whilst on duty', null, null, 26],
+        ['Five Star Medal', 'Medal', null, 'Conducting self as an exemplary Starfleet Officer', null, null, 23],
+        ['Silver Star Medal', 'Medal', null, 'Having gone above and beyond the requirements for a Bronze Star Medal', 'Requires Bronze Star Medal', null, 24],
+        ['Bronze Star Medal', 'Medal', null, 'Having gone above and beyond the requirements for a Good Conduct Medal', 'Requires Good Conduct Medal', null, 25],
+        ['Good Conduct Medal', 'Medal', null, 'Shown patience, calm and generally good conduct whilst on duty', null, null, 26],
         
         // Service Ribbons
-        ['Officers Commendation Ribbon', 'Ribbon', null, 'Captain', 'Captain+', 'For those who have excelled as an Officer and have achieved maximum grade in their division', null, null, 27],
-        ['Outstanding Unit Ribbon', 'Ribbon', null, 'Commander', 'Commander+', 'For those who have excelled as an Enlisted and have achieved maximum grade in their division', null, null, 28],
+        ['Officers Commendation Ribbon', 'Ribbon', null, 'For those who have excelled as an Officer and have achieved maximum grade in their division', null, null, 27],
+        ['Outstanding Unit Ribbon', 'Ribbon', null, 'For those who have excelled as an Enlisted and have achieved maximum grade in their division', null, null, 28],
         
         // Department Efficiency Ribbons
-        ['Engineering Efficiency Ribbon', 'Ribbon', 'ENG/OPS', 'Lieutenant Commander', 'Lieutenant Commander+', 'Continues to show improvement and ability in Engineering or Operations', null, null, 29],
-        ['Science Efficiency Ribbon', 'Ribbon', 'Science', 'Lieutenant Commander', 'Lieutenant Commander+', 'Continues to show improvement and ability in Science', null, null, 30],
-        ['Medical Efficiency Ribbon', 'Ribbon', 'Medical', 'Lieutenant Commander', 'Lieutenant Commander+', 'Continues to show improvement and ability in Medical', null, null, 31],
-        ['Tactical Efficiency Ribbon', 'Ribbon', 'SEC/TAC', 'Lieutenant Commander', 'Lieutenant Commander+', 'Continues to show improvement and ability in Security or Tactical', null, null, 32],
-        ['Helm Efficiency Ribbon', 'Ribbon', 'Helm', 'Lieutenant Commander', 'Lieutenant Commander+', 'Continues to show improvement and ability in Helm', null, null, 33]
+        ['Engineering Efficiency Ribbon', 'Ribbon', 'ENG/OPS', 'Continues to show improvement and ability in Engineering or Operations', null, null, 29],
+        ['Science Efficiency Ribbon', 'Ribbon', 'Science', 'Continues to show improvement and ability in Science', null, null, 30],
+        ['Medical Efficiency Ribbon', 'Ribbon', 'Medical', 'Continues to show improvement and ability in Medical', null, null, 31],
+        ['Tactical Efficiency Ribbon', 'Ribbon', 'SEC/TAC', 'Continues to show improvement and ability in Security or Tactical', null, null, 32],
+        ['Helm Efficiency Ribbon', 'Ribbon', 'Helm', 'Continues to show improvement and ability in Helm', null, null, 33]
     ];
     
-    $stmt = $pdo->prepare("INSERT IGNORE INTO awards (name, type, specialization, minimum_rank, awarding_authority, description, requirements, image_url, order_precedence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT IGNORE INTO awards (name, type, specialization, description, requirements, image_url, order_precedence) VALUES (?, ?, ?, ?, ?, ?, ?)");
     
     $inserted = 0;
     foreach ($awards_data as $award) {

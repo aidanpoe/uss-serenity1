@@ -10,8 +10,7 @@ $awards_query = "SELECT
     description as award_description,
     id,
     type,
-    specialization,
-    minimum_rank
+    specialization
 FROM awards 
 ORDER BY name ASC";
 
@@ -310,11 +309,6 @@ $award_categories = array_filter($award_categories, function($category) {
                                                 <div class="award-description">
                                                     <?php echo htmlspecialchars($award['award_description']); ?>
                                                 </div>
-                                                <?php if (!empty($award['minimum_rank'])): ?>
-                                                <div style="color: var(--blue); font-size: 0.8rem; margin-top: 1rem; text-align: center; border-top: 1px solid var(--blue); padding-top: 0.5rem;">
-                                                    👤 Minimum Rank: <?php echo htmlspecialchars($award['minimum_rank']); ?>
-                                                </div>
-                                                <?php endif; ?>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
