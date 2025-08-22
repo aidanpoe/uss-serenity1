@@ -87,15 +87,13 @@ try {
             try {
                 $pdo->beginTransaction();
                 
-                // Temporarily disable foreign key checks for cleanup
-                $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
-                
                 // Get user info before deletion for logging
                 $stmt = $pdo->prepare("SELECT username, steam_id FROM users WHERE id = ?");
                 $stmt->execute([$user_id]);
                 $user_info = $stmt->fetch();
                 
-                // Delete or anonymize data based on retention requirements
+                // Clean up data based on retention requirements
+                // Foreign keys will handle most cleanup automatically with SET NULL or CASCADE
                 
                 // Option 1: Complete deletion (user choice)
                 if (isset($_POST['delete_characters']) && $_POST['delete_characters'] === 'yes') {
@@ -111,46 +109,38 @@ try {
                     ");
                     $stmt->execute([$user_id]);
                     
-                    // Delete other character-related data as needed
                 } else {
                     // Option 2: Anonymize characters (preserve roleplay continuity)
                     $stmt = $pdo->prepare("UPDATE roster SET user_id = NULL WHERE user_id = ?");
                     $stmt->execute([$user_id]);
                 }
                 
-                // Clean up training audit logs - keep for security but anonymize
-                $stmt = $pdo->prepare("
-                    UPDATE training_audit 
-                    SET performed_by = NULL, character_name = 'Deleted User', additional_notes = 'User account deleted' 
-                    WHERE performed_by = ?
-                ");
-                $stmt->execute([$user_id]);
+                // Clean up any optional tables that may not have proper foreign keys
+                // These will fail silently if tables don't exist
+                try {
+                    $stmt = $pdo->prepare("DELETE FROM user_sessions WHERE user_id = ?");
+                    $stmt->execute([$user_id]);
+                } catch (PDOException $e) {
+                    // Table may not exist, ignore
+                }
                 
-                // Also clean up any training_audit records where this user is referenced in trainee_id
-                $stmt = $pdo->prepare("
-                    UPDATE training_audit 
-                    SET trainee_id = NULL, character_name = 'Deleted User' 
-                    WHERE trainee_id = ?
-                ");
-                $stmt->execute([$user_id]);
+                try {
+                    $stmt = $pdo->prepare("DELETE FROM user_activity_logs WHERE user_id = ?");
+                    $stmt->execute([$user_id]);
+                } catch (PDOException $e) {
+                    // Table may not exist, ignore
+                }
                 
-                // Delete any other user-related audit records that can be safely removed
-                $stmt = $pdo->prepare("DELETE FROM user_activity_logs WHERE user_id = ?");
-                $stmt->execute([$user_id]);
+                try {
+                    $stmt = $pdo->prepare("DELETE FROM login_logs WHERE user_id = ?");
+                    $stmt->execute([$user_id]);
+                } catch (PDOException $e) {
+                    // Table may not exist, ignore
+                }
                 
-                $stmt = $pdo->prepare("DELETE FROM login_logs WHERE user_id = ?");
-                $stmt->execute([$user_id]);
-                
-                // Delete user sessions
-                $stmt = $pdo->prepare("DELETE FROM user_sessions WHERE user_id = ?");
-                $stmt->execute([$user_id]);
-                
-                // Delete user account
+                // Delete user account - foreign key constraints will handle cascade deletes
                 $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
                 $stmt->execute([$user_id]);
-                
-                // Re-enable foreign key checks
-                $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
                 
                 // Log the deletion for audit purposes
                 error_log("GDPR Account Deletion: User ID $user_id (" . $user_info['username'] . ", Steam: " . $user_info['steam_id'] . ") deleted their account on " . date('Y-m-d H:i:s'));
@@ -167,8 +157,6 @@ try {
                 
             } catch (Exception $e) {
                 $pdo->rollback();
-                // Re-enable foreign key checks in case of error
-                $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
                 $error = "Error deleting account: " . $e->getMessage();
             }
         }
