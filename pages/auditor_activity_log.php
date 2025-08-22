@@ -1,10 +1,6 @@
 <?php
 require_once '../includes/config.php';
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Check if user has command access or is Starfleet Auditor
 $roster_dept = $_SESSION['roster_department'] ?? '';
 if (!hasPermission('Command') && $roster_dept !== 'Starfleet Auditor') {
@@ -45,7 +41,7 @@ try {
             r.rank,
             r.department
         FROM character_audit_trail cat
-        JOIN roster r ON cat.character_id = r.id
+        LEFT JOIN roster r ON cat.character_id = r.id
         WHERE $where_clause
         ORDER BY cat.action_timestamp DESC
         LIMIT 500
@@ -57,7 +53,8 @@ try {
     $stmt = $pdo->prepare("
         SELECT DISTINCT r.id, r.first_name, r.last_name, r.rank
         FROM character_audit_trail cat
-        JOIN roster r ON cat.character_id = r.id
+        LEFT JOIN roster r ON cat.character_id = r.id
+        WHERE r.id IS NOT NULL
         ORDER BY r.first_name, r.last_name
     ");
     $stmt->execute();
@@ -207,6 +204,14 @@ try {
 						<p>Current user department: <?php echo htmlspecialchars($roster_dept); ?></p>
 						<p>Available auditors: <?php echo isset($auditors) ? count($auditors) : 'Not set'; ?></p>
 						<p>Available action types: <?php echo isset($action_types) ? count($action_types) : 'Not set'; ?></p>
+						<p>Current character ID: <?php echo $_SESSION['character_id'] ?? 'Not set'; ?></p>
+						<p>SQL WHERE clause: <?php echo htmlspecialchars($where_clause ?? 'Not set'); ?></p>
+						<p>SQL parameters: <?php echo htmlspecialchars(json_encode($params ?? [])); ?></p>
+						
+						<?php if (isset($audit_logs) && count($audit_logs) > 0): ?>
+						<h5>Sample audit log data:</h5>
+						<pre><?php echo htmlspecialchars(json_encode(array_slice($audit_logs, 0, 2), JSON_PRETTY_PRINT)); ?></pre>
+						<?php endif; ?>
 					</div>
 					
 					<!-- Filter Section -->
