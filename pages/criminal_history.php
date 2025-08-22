@@ -13,6 +13,45 @@ if (!$crew_id) {
     exit();
 }
 
+// Handle criminal record deletion (Command or Starfleet Auditor only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_criminal_record') {
+    $roster_dept = $_SESSION['roster_department'] ?? '';
+    if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor') {
+        try {
+            $pdo = getConnection();
+            
+            // Get record details for logging
+            $stmt = $pdo->prepare("SELECT cr.*, r.first_name, r.last_name FROM criminal_records cr JOIN roster r ON cr.roster_id = r.id WHERE cr.id = ?");
+            $stmt->execute([$_POST['record_id']]);
+            $record = $stmt->fetch();
+            
+            if ($record) {
+                // Delete the record
+                $stmt = $pdo->prepare("DELETE FROM criminal_records WHERE id = ?");
+                $stmt->execute([$_POST['record_id']]);
+                
+                // Log the action for Starfleet Auditors
+                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                    logAuditorAction($_SESSION['character_id'], 'delete_criminal_record', 'criminal_records', $record['id'], [
+                        'person_name' => $record['first_name'] . ' ' . $record['last_name'],
+                        'offense' => $record['offense'],
+                        'sentence' => $record['sentence'],
+                        'status' => $record['status']
+                    ]);
+                }
+                
+                $success = "Criminal record deleted successfully.";
+            } else {
+                $error = "Criminal record not found.";
+            }
+        } catch (Exception $e) {
+            $error = "Error deleting criminal record: " . $e->getMessage();
+        }
+    } else {
+        $error = "Only Command staff and Starfleet Auditors can delete criminal records.";
+    }
+}
+
 try {
     $pdo = getConnection();
     
@@ -199,6 +238,12 @@ try {
 					</div>
 					<?php endif; ?>
 					
+					<?php if (isset($success)): ?>
+					<div style="background: rgba(0, 255, 0, 0.2); border: 2px solid var(--green); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+						<p style="color: var(--green);"><?php echo htmlspecialchars($success); ?></p>
+					</div>
+					<?php endif; ?>
+					
 					<!-- Personnel Information -->
 					<div class="personnel-info">
 						<div style="display: flex; align-items: center; margin-bottom: 2rem;">
@@ -297,10 +342,19 @@ try {
 										Incident Date: <?php echo date('F j, Y', strtotime($record['incident_date'])); ?>
 									</p>
 								</div>
-								<div style="text-align: right;">
+								<div style="text-align: right; display: flex; flex-direction: column; gap: 0.5rem;">
 									<span class="status-badge status-<?php echo strtolower(str_replace([' ', '-'], '-', $record['status'])); ?>">
 										<?php echo $record['status']; ?>
 									</span>
+									<?php 
+									$roster_dept = $_SESSION['roster_department'] ?? '';
+									if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
+									<form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this criminal record?');">
+										<input type="hidden" name="action" value="delete_criminal_record">
+										<input type="hidden" name="record_id" value="<?php echo $record['id']; ?>">
+										<button type="submit" style="background: var(--red); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">Delete</button>
+									</form>
+									<?php endif; ?>
 								</div>
 							</div>
 							

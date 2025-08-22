@@ -137,12 +137,34 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_medical') 
 
 // Handle medical record deletion (Command or Starfleet Auditor only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_medical_record') {
-    if (hasPermission('Command') || hasPermission('Starfleet Auditor')) {
+    $roster_dept = $_SESSION['roster_department'] ?? '';
+    if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor') {
         try {
             $pdo = getConnection();
-            $stmt = $pdo->prepare("DELETE FROM medical_records WHERE id = ?");
+            
+            // Get record details for logging
+            $stmt = $pdo->prepare("SELECT mr.*, r.first_name, r.last_name FROM medical_records mr JOIN roster r ON mr.roster_id = r.id WHERE mr.id = ?");
             $stmt->execute([$_POST['record_id']]);
-            $success = "Medical record deleted successfully.";
+            $record = $stmt->fetch();
+            
+            if ($record) {
+                // Delete the record
+                $stmt = $pdo->prepare("DELETE FROM medical_records WHERE id = ?");
+                $stmt->execute([$_POST['record_id']]);
+                
+                // Log the action for Starfleet Auditors
+                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                    logAuditorAction($_SESSION['character_id'], 'delete_medical_record', 'medical_records', $record['id'], [
+                        'patient_name' => $record['first_name'] . ' ' . $record['last_name'],
+                        'condition' => $record['condition_description'],
+                        'status' => $record['status']
+                    ]);
+                }
+                
+                $success = "Medical record deleted successfully.";
+            } else {
+                $error = "Medical record not found.";
+            }
         } catch (Exception $e) {
             $error = "Error deleting medical record: " . $e->getMessage();
         }
@@ -153,17 +175,41 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_medical_re
 
 // Handle science report deletion (Command or Starfleet Auditor only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_science_report') {
-    if (hasPermission('Command') || hasPermission('Starfleet Auditor')) {
+    $roster_dept = $_SESSION['roster_department'] ?? '';
+    if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor') {
         try {
             $pdo = getConnection();
-            $stmt = $pdo->prepare("DELETE FROM science_reports WHERE id = ?");
+            
+            // Get report details for logging
+            $stmt = $pdo->prepare("SELECT * FROM science_reports WHERE id = ?");
             $stmt->execute([$_POST['report_id']]);
-            $success = "Science report deleted successfully.";
+            $report = $stmt->fetch();
+            
+            if ($report) {
+                // Delete the report
+                $stmt = $pdo->prepare("DELETE FROM science_reports WHERE id = ?");
+                $stmt->execute([$_POST['report_id']]);
+                
+                // Log the action for Starfleet Auditors
+                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                    logAuditorAction($_SESSION['character_id'], 'delete_science_report', 'science_reports', $report['id'], [
+                        'title' => $report['title'],
+                        'reported_by' => $report['reported_by'],
+                        'status' => $report['status']
+                    ]);
+                }
+                
+                $success = "Science report deleted successfully.";
+            } else {
+                $error = "Science report not found.";
+            }
         } catch (Exception $e) {
             $error = "Error deleting science report: " . $e->getMessage();
         }
     } else {
         $error = "Only Command staff and Starfleet Auditors can delete science reports.";
+    }
+}
     }
 }
 

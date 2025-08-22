@@ -382,4 +382,63 @@ function requirePermission($required_department) {
         exit();
     }
 }
+
+// Log auditor actions for accountability
+function logAuditorAction($auditor_roster_id, $action_type, $target_table, $target_id, $action_details = null) {
+    try {
+        $pdo = getConnection();
+        
+        // Check if audit trail table exists
+        $stmt = $pdo->query("SHOW TABLES LIKE 'character_audit_trail'");
+        if ($stmt->rowCount() == 0) {
+            return false; // Table doesn't exist yet
+        }
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO character_audit_trail 
+            (auditor_roster_id, action_type, target_table, target_id, action_details, performed_at) 
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+        
+        $stmt->execute([
+            $auditor_roster_id,
+            $action_type,
+            $target_table,
+            $target_id,
+            $action_details ? json_encode($action_details) : null
+        ]);
+        
+        return true;
+    } catch (Exception $e) {
+        error_log("Failed to log auditor action: " . $e->getMessage());
+        return false;
+    }
+}
+
+// Get auditor activity log (viewable by Command and Starfleet Auditors)
+function getAuditorActivityLog($limit = 50) {
+    try {
+        $pdo = getConnection();
+        
+        // Check if audit trail table exists
+        $stmt = $pdo->query("SHOW TABLES LIKE 'character_audit_trail'");
+        if ($stmt->rowCount() == 0) {
+            return []; // Table doesn't exist yet
+        }
+        
+        $stmt = $pdo->prepare("
+            SELECT cat.*, r.first_name, r.last_name, r.rank
+            FROM character_audit_trail cat
+            JOIN roster r ON cat.auditor_roster_id = r.id
+            ORDER BY cat.performed_at DESC
+            LIMIT ?
+        ");
+        $stmt->execute([$limit]);
+        
+        return $stmt->fetchAll();
+    } catch (Exception $e) {
+        error_log("Failed to get auditor activity log: " . $e->getMessage());
+        return [];
+    }
+}
 ?>

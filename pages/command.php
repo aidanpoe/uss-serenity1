@@ -131,6 +131,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
         }
     }
+    
+    // Handle award recommendation deletion (Command/Starfleet Auditor only)
+    if ($_POST['action'] === 'delete_award_recommendation') {
+        $roster_dept = $_SESSION['roster_department'] ?? '';
+        if (!hasPermission('Command') && $roster_dept !== 'Starfleet Auditor') {
+            $error = "Access denied. Command or Starfleet Auditor authorization required.";
+        } else {
+            try {
+                $pdo = getConnection();
+                
+                // Get recommendation details for logging
+                $stmt = $pdo->prepare("SELECT * FROM award_recommendations WHERE id = ?");
+                $stmt->execute([$_POST['recommendation_id'] ?? 0]);
+                $recommendation = $stmt->fetch();
+                
+                if ($recommendation) {
+                    // Delete the recommendation
+                    $stmt = $pdo->prepare("DELETE FROM award_recommendations WHERE id = ?");
+                    $stmt->execute([$_POST['recommendation_id'] ?? 0]);
+                    
+                    // Log the action for Starfleet Auditors
+                    if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                        logAuditorAction($_SESSION['character_id'], 'delete_award_recommendation', 'award_recommendations', $recommendation['id'], [
+                            'recommended_person' => $recommendation['recommended_person'],
+                            'recommended_award' => $recommendation['recommended_award'],
+                            'status' => $recommendation['status']
+                        ]);
+                    }
+                    
+                    $success = "Award recommendation deleted successfully.";
+                } else {
+                    $error = "Award recommendation not found.";
+                }
+            } catch (Exception $e) {
+                $error = "Error deleting award recommendation: " . $e->getMessage();
+            }
+        }
+    }
 }
 
 try {
@@ -338,6 +376,11 @@ try {
 									<button onclick="playSoundAndRedirect('audio2', 'awards_management.php')" style="background-color: var(--gold); color: black; border: none; padding: 0.75rem; border-radius: 5px;">🏅 Awards Management</button>
 									<button onclick="playSoundAndRedirect('audio2', 'admin_management.php')" style="background-color: var(--orange); color: black; border: none; padding: 0.75rem; border-radius: 5px;">⚠️ Admin Management</button>
 									<button onclick="playSoundAndRedirect('audio2', 'training_modules.php')" style="background-color: var(--green); color: black; border: none; padding: 0.75rem; border-radius: 5px;">🎓 Training Modules</button>
+									<?php 
+									$roster_dept = $_SESSION['roster_department'] ?? '';
+									if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
+									<button onclick="playSoundAndRedirect('audio2', 'auditor_activity_log.php')" style="background-color: var(--purple); color: white; border: none; padding: 0.75rem; border-radius: 5px;">🔍 Auditor Activity Log</button>
+									<?php endif; ?>
 								</div>
 							</div>
 							<div>
@@ -543,6 +586,20 @@ try {
 													Update Review
 												</button>
 											</form>
+											
+											<!-- Delete Button for Command/Starfleet Auditor -->
+											<?php 
+												$roster_dept = $_SESSION['roster_department'] ?? '';
+												if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): 
+											?>
+											<form method="POST" action="" style="margin-top: 1rem;" onsubmit="return confirm('Are you sure you want to delete this award recommendation? This action cannot be undone.');">
+												<input type="hidden" name="action" value="delete_award_recommendation">
+												<input type="hidden" name="recommendation_id" value="<?php echo htmlspecialchars($recommendation['id'] ?? ''); ?>">
+												<button type="submit" style="background-color: #ff3366; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; width: 100%;">
+													🗑️ Delete Recommendation
+												</button>
+											</form>
+											<?php endif; ?>
 										</div>
 									</div>
 								</div>

@@ -55,6 +55,46 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_security')
     }
 }
 
+// Handle security report deletion (Command or Starfleet Auditor only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_security_report') {
+    $roster_dept = $_SESSION['roster_department'] ?? '';
+    if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor') {
+        try {
+            $pdo = getConnection();
+            
+            // Get report details for logging
+            $stmt = $pdo->prepare("SELECT sr.*, r.first_name, r.last_name FROM security_reports sr LEFT JOIN roster r ON sr.involved_roster_id = r.id WHERE sr.id = ?");
+            $stmt->execute([$_POST['report_id']]);
+            $report = $stmt->fetch();
+            
+            if ($report) {
+                // Delete the report
+                $stmt = $pdo->prepare("DELETE FROM security_reports WHERE id = ?");
+                $stmt->execute([$_POST['report_id']]);
+                
+                // Log the action for Starfleet Auditors
+                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                    logAuditorAction($_SESSION['character_id'], 'delete_security_report', 'security_reports', $report['id'], [
+                        'incident_type' => $report['incident_type'],
+                        'description' => $report['description'],
+                        'involved_person' => ($report['first_name'] ?? '') . ' ' . ($report['last_name'] ?? ''),
+                        'status' => $report['status']
+                    ]);
+                }
+                
+                $success = "Security report deleted successfully.";
+            } else {
+                $error = "Security report not found.";
+            }
+        } catch (Exception $e) {
+            $error = "Error deleting security report: " . $e->getMessage();
+        }
+    } else {
+        $error = "Only Command staff and Starfleet Auditors can delete security reports.";
+    }
+}
+}
+
 // Handle phaser training update (backend only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_phaser_training') {
     // CSRF protection
@@ -336,6 +376,17 @@ try {
 											<textarea name="resolution_notes" placeholder="Resolution notes..." rows="3" style="width: 100%; padding: 0.25rem; background: black; color: white; border: 1px solid var(--gold); margin-bottom: 0.5rem;"><?php echo htmlspecialchars($report['resolution_notes'] ?? ''); ?></textarea>
 											<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%;">Update</button>
 										</form>
+										
+										<!-- Delete Button for Command/Starfleet Auditor -->
+										<?php $roster_dept = $_SESSION['roster_department'] ?? ''; if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
+										<form method="POST" style="margin-top: 0.5rem;" onsubmit="return confirm('Are you sure you want to delete this security report? This action cannot be undone.');">
+											<input type="hidden" name="action" value="delete_security_report">
+											<input type="hidden" name="report_id" value="<?php echo $report['id']; ?>">
+											<button type="submit" style="background-color: #ff3366; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%; font-size: 0.8rem;">
+												🗑️ Delete Report
+											</button>
+										</form>
+										<?php endif; ?>
 									</div>
 								</div>
 							</div>

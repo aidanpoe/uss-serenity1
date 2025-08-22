@@ -90,12 +90,35 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'resolve_fault') {
 
 // Handle fault report deletion (Command or Starfleet Auditor only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_fault_report') {
-    if (hasPermission('Command') || hasPermission('Starfleet Auditor')) {
+    $roster_dept = $_SESSION['roster_department'] ?? '';
+    if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor') {
         try {
             $pdo = getConnection();
-            $stmt = $pdo->prepare("DELETE FROM fault_reports WHERE id = ?");
+            
+            // Get report details for logging
+            $stmt = $pdo->prepare("SELECT fr.*, r.first_name, r.last_name FROM fault_reports fr LEFT JOIN roster r ON fr.reported_by_roster_id = r.id WHERE fr.id = ?");
             $stmt->execute([$_POST['report_id']]);
-            $success = "Fault report deleted successfully.";
+            $report = $stmt->fetch();
+            
+            if ($report) {
+                // Delete the report
+                $stmt = $pdo->prepare("DELETE FROM fault_reports WHERE id = ?");
+                $stmt->execute([$_POST['report_id']]);
+                
+                // Log the action for Starfleet Auditors
+                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                    logAuditorAction($_SESSION['character_id'], 'delete_fault_report', 'fault_reports', $report['id'], [
+                        'system_name' => $report['system_name'],
+                        'fault_description' => $report['fault_description'],
+                        'status' => $report['status'],
+                        'reported_by' => ($report['first_name'] ?? '') . ' ' . ($report['last_name'] ?? '')
+                    ]);
+                }
+                
+                $success = "Fault report deleted successfully.";
+            } else {
+                $error = "Fault report not found.";
+            }
         } catch (Exception $e) {
             $error = "Error deleting fault report: " . $e->getMessage();
         }

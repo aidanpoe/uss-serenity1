@@ -7,6 +7,45 @@ if (!hasPermission('ENG/OPS') && !hasPermission('Captain')) {
     exit();
 }
 
+// Handle resolved fault report deletion (Command or Starfleet Auditor only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_resolved_fault') {
+    $roster_dept = $_SESSION['roster_department'] ?? '';
+    if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor') {
+        try {
+            $pdo = getConnection();
+            
+            // Get report details for logging
+            $stmt = $pdo->prepare("SELECT fr.*, r.first_name, r.last_name FROM fault_reports fr LEFT JOIN roster r ON fr.reported_by_roster_id = r.id WHERE fr.id = ?");
+            $stmt->execute([$_POST['report_id']]);
+            $report = $stmt->fetch();
+            
+            if ($report) {
+                // Delete the report
+                $stmt = $pdo->prepare("DELETE FROM fault_reports WHERE id = ?");
+                $stmt->execute([$_POST['report_id']]);
+                
+                // Log the action for Starfleet Auditors
+                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                    logAuditorAction($_SESSION['character_id'], 'delete_resolved_fault', 'fault_reports', $report['id'], [
+                        'system_name' => $report['system_name'],
+                        'fault_description' => $report['fault_description'],
+                        'status' => $report['status'],
+                        'reported_by' => ($report['first_name'] ?? '') . ' ' . ($report['last_name'] ?? '')
+                    ]);
+                }
+                
+                $success = "Resolved fault report deleted successfully.";
+            } else {
+                $error = "Fault report not found.";
+            }
+        } catch (Exception $e) {
+            $error = "Error deleting fault report: " . $e->getMessage();
+        }
+    } else {
+        $error = "Only Command staff and Starfleet Auditors can delete fault reports.";
+    }
+}
+
 try {
     $pdo = getConnection();
     
@@ -130,6 +169,9 @@ try {
 											<th style="padding: 1rem; text-align: left; border: 1px solid var(--orange);">Reported By</th>
 											<th style="padding: 1rem; text-align: left; border: 1px solid var(--orange);">Reported</th>
 											<th style="padding: 1rem; text-align: left; border: 1px solid var(--orange);">Resolved</th>
+											<?php $roster_dept = $_SESSION['roster_department'] ?? ''; if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
+											<th style="padding: 1rem; text-align: left; border: 1px solid var(--orange);">Actions</th>
+											<?php endif; ?>
 										</tr>
 									</thead>
 									<tbody>
@@ -172,6 +214,17 @@ try {
 													<?php echo date('Y-m-d H:i', strtotime($fault['updated_at'])); ?>
 												</div>
 											</td>
+											<?php $roster_dept = $_SESSION['roster_department'] ?? ''; if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
+											<td style="padding: 1rem; border: 1px solid var(--orange);">
+												<form method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this resolved fault report? This action cannot be undone.');">
+													<input type="hidden" name="action" value="delete_resolved_fault">
+													<input type="hidden" name="report_id" value="<?php echo htmlspecialchars($fault['id']); ?>">
+													<button type="submit" style="background-color: #ff3366; color: white; border: none; padding: 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+														🗑️ Delete
+													</button>
+												</form>
+											</td>
+											<?php endif; ?>
 										</tr>
 										<?php endforeach; ?>
 									</tbody>

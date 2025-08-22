@@ -7,6 +7,45 @@ if (!hasPermission('SEC/TAC') && !hasPermission('Captain')) {
     exit();
 }
 
+// Handle resolved security report deletion (Command or Starfleet Auditor only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_resolved_security') {
+    $roster_dept = $_SESSION['roster_department'] ?? '';
+    if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor') {
+        try {
+            $pdo = getConnection();
+            
+            // Get report details for logging
+            $stmt = $pdo->prepare("SELECT sr.*, r.first_name, r.last_name FROM security_reports sr LEFT JOIN roster r ON sr.involved_roster_id = r.id WHERE sr.id = ?");
+            $stmt->execute([$_POST['report_id']]);
+            $report = $stmt->fetch();
+            
+            if ($report) {
+                // Delete the report
+                $stmt = $pdo->prepare("DELETE FROM security_reports WHERE id = ?");
+                $stmt->execute([$_POST['report_id']]);
+                
+                // Log the action for Starfleet Auditors
+                if ($roster_dept === 'Starfleet Auditor' && isset($_SESSION['character_id'])) {
+                    logAuditorAction($_SESSION['character_id'], 'delete_resolved_security', 'security_reports', $report['id'], [
+                        'incident_type' => $report['incident_type'],
+                        'description' => $report['description'],
+                        'involved_person' => ($report['first_name'] ?? '') . ' ' . ($report['last_name'] ?? ''),
+                        'status' => $report['status']
+                    ]);
+                }
+                
+                $success = "Resolved security report deleted successfully.";
+            } else {
+                $error = "Security report not found.";
+            }
+        } catch (Exception $e) {
+            $error = "Error deleting security report: " . $e->getMessage();
+        }
+    } else {
+        $error = "Only Command staff and Starfleet Auditors can delete security reports.";
+    }
+}
+
 try {
     $pdo = getConnection();
     
@@ -133,6 +172,9 @@ try {
 											<th style="padding: 1rem; text-align: left; border: 1px solid var(--gold);">Resolution</th>
 											<th style="padding: 1rem; text-align: left; border: 1px solid var(--gold);">Reported</th>
 											<th style="padding: 1rem; text-align: left; border: 1px solid var(--gold);">Resolved</th>
+											<?php $roster_dept = $_SESSION['roster_department'] ?? ''; if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
+											<th style="padding: 1rem; text-align: left; border: 1px solid var(--gold);">Actions</th>
+											<?php endif; ?>
 										</tr>
 									</thead>
 									<tbody>
@@ -165,6 +207,17 @@ try {
 													<?php echo date('Y-m-d H:i', strtotime($report['updated_at'])); ?>
 												</div>
 											</td>
+											<?php $roster_dept = $_SESSION['roster_department'] ?? ''; if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
+											<td style="padding: 1rem; border: 1px solid var(--gold);">
+												<form method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this resolved security report? This action cannot be undone.');">
+													<input type="hidden" name="action" value="delete_resolved_security">
+													<input type="hidden" name="report_id" value="<?php echo htmlspecialchars($report['id']); ?>">
+													<button type="submit" style="background-color: #ff3366; color: white; border: none; padding: 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+														🗑️ Delete
+													</button>
+												</form>
+											</td>
+											<?php endif; ?>
 										</tr>
 										<?php endforeach; ?>
 									</tbody>
