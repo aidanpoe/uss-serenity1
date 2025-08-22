@@ -135,16 +135,48 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_medical') 
     }
 }
 
+// Handle medical record deletion (Command or Starfleet Auditor only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_medical_record') {
+    if (hasPermission('Command') || hasPermission('Starfleet Auditor')) {
+        try {
+            $pdo = getConnection();
+            $stmt = $pdo->prepare("DELETE FROM medical_records WHERE id = ?");
+            $stmt->execute([$_POST['record_id']]);
+            $success = "Medical record deleted successfully.";
+        } catch (Exception $e) {
+            $error = "Error deleting medical record: " . $e->getMessage();
+        }
+    } else {
+        $error = "Only Command staff and Starfleet Auditors can delete medical records.";
+    }
+}
+
+// Handle science report deletion (Command or Starfleet Auditor only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_science_report') {
+    if (hasPermission('Command') || hasPermission('Starfleet Auditor')) {
+        try {
+            $pdo = getConnection();
+            $stmt = $pdo->prepare("DELETE FROM science_reports WHERE id = ?");
+            $stmt->execute([$_POST['report_id']]);
+            $success = "Science report deleted successfully.";
+        } catch (Exception $e) {
+            $error = "Error deleting science report: " . $e->getMessage();
+        }
+    } else {
+        $error = "Only Command staff and Starfleet Auditors can delete science reports.";
+    }
+}
+
 try {
     $pdo = getConnection();
     
     // Get roster for dropdown
-    $stmt = $pdo->prepare("SELECT id, first_name, last_name, rank FROM roster ORDER BY last_name, first_name");
+    $stmt = $pdo->prepare("SELECT id, first_name, last_name, rank FROM roster WHERE (is_invisible IS NULL OR is_invisible = 0) ORDER BY last_name, first_name");
     $stmt->execute();
     $roster = $stmt->fetchAll();
     
     // Get department heads
-    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('Head of MED/SCI', 'Chief Medical Officer', 'Chief Science Officer') ORDER BY position");
+    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('Head of MED/SCI', 'Chief Medical Officer', 'Chief Science Officer') AND (is_invisible IS NULL OR is_invisible = 0) ORDER BY position");
     $stmt->execute();
     $dept_heads = $stmt->fetchAll();
     
@@ -444,8 +476,17 @@ try {
 												<option value="Resolved" <?php echo $record['status'] === 'Resolved' ? 'selected' : ''; ?>>Resolved</option>
 											</select>
 											<textarea name="treatment" placeholder="Treatment notes..." rows="2" style="width: 100%; padding: 0.25rem; background: black; color: white; border: 1px solid var(--blue); margin-bottom: 0.5rem;"><?php echo htmlspecialchars($record['treatment'] ?? ''); ?></textarea>
-											<button type="submit" style="background-color: var(--blue); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%;">Update</button>
+											<button type="submit" style="background-color: var(--blue); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%; margin-bottom: 0.5rem;">Update</button>
 										</form>
+										
+										<?php if (hasPermission('Command') || hasPermission('Starfleet Auditor')): ?>
+										<form method="POST" action="" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this medical record? This action cannot be undone.');">
+											<input type="hidden" name="action" value="delete_medical_record">
+											<input type="hidden" name="record_id" value="<?php echo $record['id']; ?>">
+											<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+											<button type="submit" style="background-color: var(--red); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%; font-size: 0.8rem;">🗑️ Delete Record</button>
+										</form>
+										<?php endif; ?>
 									</div>
 								</div>
 							</div>
@@ -456,13 +497,28 @@ try {
 						<div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--ice); border-radius: 5px; padding: 1rem; margin: 1rem 0; background: rgba(0,0,0,0.3);">
 							<?php foreach ($science_reports as $report): ?>
 							<div style="border-bottom: 1px solid var(--gray); padding: 1rem 0;">
-								<h5 style="color: var(--ice);"><?php echo htmlspecialchars($report['title']); ?></h5>
-								<p><?php echo htmlspecialchars($report['description']); ?></p>
-								<small>Submitted by: <?php echo htmlspecialchars($report['reported_by']); ?> on <?php echo date('Y-m-d H:i', strtotime($report['created_at'])); ?></small>
-								<div style="margin-top: 0.5rem;">
-									<span style="background: var(--<?php echo strtolower(str_replace(' ', '-', $report['status'])); ?>); color: black; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
-										<?php echo htmlspecialchars($report['status']); ?>
-									</span>
+								<div style="display: flex; justify-content: space-between; align-items: flex-start;">
+									<div style="flex-grow: 1;">
+										<h5 style="color: var(--ice);"><?php echo htmlspecialchars($report['title']); ?></h5>
+										<p><?php echo htmlspecialchars($report['description']); ?></p>
+										<small>Submitted by: <?php echo htmlspecialchars($report['reported_by']); ?> on <?php echo date('Y-m-d H:i', strtotime($report['created_at'])); ?></small>
+										<div style="margin-top: 0.5rem;">
+											<span style="background: var(--<?php echo strtolower(str_replace(' ', '-', $report['status'])); ?>); color: black; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+												<?php echo htmlspecialchars($report['status']); ?>
+											</span>
+										</div>
+									</div>
+									
+									<?php if (hasPermission('Command') || hasPermission('Starfleet Auditor')): ?>
+									<div style="margin-left: 1rem;">
+										<form method="POST" action="" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this science report? This action cannot be undone.');">
+											<input type="hidden" name="action" value="delete_science_report">
+											<input type="hidden" name="report_id" value="<?php echo $report['id']; ?>">
+											<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+											<button type="submit" style="background-color: var(--red); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">🗑️ Delete</button>
+										</form>
+									</div>
+									<?php endif; ?>
 								</div>
 							</div>
 							<?php endforeach; ?>

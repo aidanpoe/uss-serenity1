@@ -73,7 +73,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_personnel'
 
 // Handle personnel deletion
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_personnel') {
-    if (hasPermission('Captain')) { // Only Captain can delete
+    if (hasPermission('Captain') || hasPermission('Starfleet Auditor')) { // Captain or Starfleet Auditor can delete
         try {
             $pdo = getConnection();
             
@@ -94,7 +94,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_personnel'
             $error = "Error deleting personnel file: " . $e->getMessage();
         }
     } else {
-        $error = "Only the Captain can delete personnel files.";
+        $error = "Only the Captain and Starfleet Auditors can delete personnel files.";
     }
 }
 

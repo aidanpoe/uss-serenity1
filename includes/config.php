@@ -254,6 +254,11 @@ function hasPermission($required_department) {
     $user_rank = $_SESSION['rank'] ?? '';
     $roster_dept = $_SESSION['roster_department'] ?? '';
     
+    // Starfleet Auditors have access to everything (OOC moderation)
+    if ($user_dept === 'Starfleet Auditor') {
+        return true;
+    }
+    
     // Captain and Command ranks have access to everything
     if ($user_rank === 'Captain' || $user_rank === 'Commander' || $user_dept === 'Command' || $roster_dept === 'Command') {
         return true;
@@ -263,11 +268,16 @@ function hasPermission($required_department) {
     return $user_dept === $required_department;
 }
 
-// Check if user can edit personnel files (Heads of departments, Command, Captain)
+// Check if user can edit personnel files (Heads of departments, Command, Captain, Starfleet Auditor)
 function canEditPersonnelFiles() {
     if (!isLoggedIn()) return false;
     
     $user_dept = getUserDepartment();
+    
+    // Starfleet Auditors have full access
+    if ($user_dept === 'Starfleet Auditor') {
+        return true;
+    }
     
     // Captain and Command have access
     if ($user_dept === 'Command' || $user_dept === 'Captain') {
@@ -295,6 +305,51 @@ function canEditPersonnelFiles() {
     }
     
     return false;
+}
+
+// Check if current user is invisible (Starfleet Auditor or marked invisible)
+function isInvisibleUser() {
+    if (!isLoggedIn()) return false;
+    
+    $user_dept = getUserDepartment();
+    
+    // Starfleet Auditors are always invisible
+    if ($user_dept === 'Starfleet Auditor') {
+        return true;
+    }
+    
+    // Check if user is manually marked as invisible
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->prepare("SELECT is_invisible FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $result = $stmt->fetch();
+        return $result && $result['is_invisible'] == 1;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+// Check if a specific user ID is invisible
+function isUserInvisible($user_id) {
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->prepare("SELECT department, is_invisible FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+        $result = $stmt->fetch();
+        
+        if (!$result) return false;
+        
+        // Starfleet Auditors are always invisible
+        if ($result['department'] === 'Starfleet Auditor') {
+            return true;
+        }
+        
+        // Check manual invisibility flag
+        return $result['is_invisible'] == 1;
+    } catch (Exception $e) {
+        return false;
+    }
 }
 
 // Redirect if not authorized

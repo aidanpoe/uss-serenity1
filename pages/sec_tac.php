@@ -84,12 +84,12 @@ try {
     $pdo = getConnection();
     
     // Get roster for dropdown
-    $stmt = $pdo->prepare("SELECT id, first_name, last_name, rank FROM roster ORDER BY last_name, first_name");
+    $stmt = $pdo->prepare("SELECT id, first_name, last_name, rank FROM roster WHERE (is_invisible IS NULL OR is_invisible = 0) ORDER BY last_name, first_name");
     $stmt->execute();
     $roster = $stmt->fetchAll();
     
     // Get department heads
-    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('Head of SEC/TAC', 'Security Chief', 'Tactical Officer', 'Intelligence Officer', 'S.R.T. Leader') ORDER BY position");
+    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('Head of SEC/TAC', 'Security Chief', 'Tactical Officer', 'Intelligence Officer', 'S.R.T. Leader') AND (is_invisible IS NULL OR is_invisible = 0) ORDER BY position");
     $stmt->execute();
     $dept_heads = $stmt->fetchAll();
     

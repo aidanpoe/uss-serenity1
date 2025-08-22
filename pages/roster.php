@@ -178,7 +178,7 @@ try {
         'S.R.T. Leader' => null
     ];
     
-    $stmt = $pdo->prepare("SELECT *, last_active FROM roster WHERE position IN ('" . implode("','", array_keys($command_positions)) . "') ORDER BY FIELD(position, '" . implode("','", array_keys($command_positions)) . "')");
+    $stmt = $pdo->prepare("SELECT *, last_active FROM roster WHERE position IN ('" . implode("','", array_keys($command_positions)) . "') AND (is_invisible IS NULL OR is_invisible = 0) ORDER BY FIELD(position, '" . implode("','", array_keys($command_positions)) . "')");
     $stmt->execute();
     $command_crew = $stmt->fetchAll();
     
@@ -186,7 +186,7 @@ try {
         $command_positions[$officer['position']] = $officer;
     }
     
-    // Get all crew members with current session info
+    // Get all crew members with current session info (excluding invisible users)
     $stmt = $pdo->prepare("
         SELECT r.*, r.last_active,
                u.last_login,
@@ -197,6 +197,8 @@ try {
                END as is_currently_online
         FROM roster r 
         LEFT JOIN users u ON r.user_id = u.id 
+        WHERE (r.is_invisible IS NULL OR r.is_invisible = 0)
+          AND (u.is_invisible IS NULL OR u.is_invisible = 0 OR u.department != 'Starfleet Auditor')
         ORDER BY r.department, r.rank, r.last_name, r.first_name
     ");
     $stmt->execute();

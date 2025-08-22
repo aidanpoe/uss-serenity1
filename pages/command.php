@@ -160,10 +160,17 @@ try {
         $command_officers = array_slice($all_command_related, 0, 6); // Limit to 6 for display
     }
     
-    // Get roster data for award recommendations dropdown
+    // Get roster data for award recommendations dropdown (excluding invisible users)
     $roster_members = [];
     try {
-        $stmt = $pdo->prepare("SELECT id, rank, first_name, last_name, department, position FROM roster ORDER BY rank DESC, last_name ASC, first_name ASC");
+        $stmt = $pdo->prepare("
+            SELECT r.id, r.rank, r.first_name, r.last_name, r.department, r.position 
+            FROM roster r 
+            LEFT JOIN users u ON r.user_id = u.id 
+            WHERE (r.is_invisible IS NULL OR r.is_invisible = 0) 
+              AND (u.is_invisible IS NULL OR u.is_invisible = 0 OR u.department != 'Starfleet Auditor')
+            ORDER BY r.rank DESC, r.last_name ASC, r.first_name ASC
+        ");
         $stmt->execute();
         $roster_members = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     } catch (Exception $e) {
@@ -344,6 +351,29 @@ try {
 							</div>
 						</div>
 					</div>
+					
+					<!-- Captain-Only Auditor Management -->
+					<?php if (hasPermission('Captain')): ?>
+					<div style="background: rgba(255, 140, 0, 0.1); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--orange);">
+						<h3 style="color: var(--orange); text-align: center;">🛡️ Captain's Special Operations</h3>
+						<p style="color: var(--orange); text-align: center; margin-bottom: 2rem;">
+							<em>Captain Access Only - OOC Administration</em>
+						</p>
+						
+						<div style="display: flex; justify-content: center; gap: 1rem;">
+							<button onclick="playSoundAndRedirect('audio2', 'auditor_management.php')" style="background-color: var(--orange); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-weight: bold;">
+								🛡️ Starfleet Auditor Management
+							</button>
+						</div>
+						
+						<div style="margin-top: 1.5rem; text-align: center;">
+							<small style="color: var(--orange);">
+								Manage OOC moderation accounts with full system access.<br>
+								Auditors remain invisible from all rosters and crew listings.
+							</small>
+						</div>
+					</div>
+					<?php endif; ?>
 					
 					<!-- Department Training Section -->
 					<?php renderDepartmentTrainingSection('Command', 'Command'); ?>

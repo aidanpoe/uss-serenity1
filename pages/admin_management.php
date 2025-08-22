@@ -1,8 +1,8 @@
 <?php
 require_once '../includes/config.php';
 
-// Check if user has command access or is Captain
-if (!hasPermission('Command') && !hasPermission('Captain')) {
+// Check if user has command access, is Captain, or is Starfleet Auditor
+if (!hasPermission('Command') && !hasPermission('Captain') && !hasPermission('Starfleet Auditor')) {
     header('Location: login.php');
     exit();
 }
@@ -15,7 +15,7 @@ try {
     
     // Handle account deletion
     if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_account') {
-        if (hasPermission('Captain') || hasPermission('Command')) {
+        if (hasPermission('Captain') || hasPermission('Command') || hasPermission('Starfleet Auditor')) {
             try {
                 $pdo->beginTransaction();
                 

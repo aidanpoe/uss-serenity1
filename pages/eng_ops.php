@@ -88,16 +88,32 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'resolve_fault') {
     }
 }
 
+// Handle fault report deletion (Command or Starfleet Auditor only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_fault_report') {
+    if (hasPermission('Command') || hasPermission('Starfleet Auditor')) {
+        try {
+            $pdo = getConnection();
+            $stmt = $pdo->prepare("DELETE FROM fault_reports WHERE id = ?");
+            $stmt->execute([$_POST['report_id']]);
+            $success = "Fault report deleted successfully.";
+        } catch (Exception $e) {
+            $error = "Error deleting fault report: " . $e->getMessage();
+        }
+    } else {
+        $error = "Only Command staff and Starfleet Auditors can delete fault reports.";
+    }
+}
+
 try {
     $pdo = getConnection();
     
     // Get roster for dropdown
-    $stmt = $pdo->prepare("SELECT id, first_name, last_name, rank FROM roster ORDER BY last_name, first_name");
+    $stmt = $pdo->prepare("SELECT id, first_name, last_name, rank FROM roster WHERE (is_invisible IS NULL OR is_invisible = 0) ORDER BY last_name, first_name");
     $stmt->execute();
     $roster = $stmt->fetchAll();
     
     // Get department heads
-    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('Head of ENG/OPS', 'Chief Engineer', 'Operations Officer', 'Helm Officer') ORDER BY position");
+    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('Head of ENG/OPS', 'Chief Engineer', 'Operations Officer', 'Helm Officer') AND (is_invisible IS NULL OR is_invisible = 0) ORDER BY position");
     $stmt->execute();
     $dept_heads = $stmt->fetchAll();
     
@@ -399,8 +415,17 @@ try {
 												<option value="Resolved" <?php echo $fault['status'] === 'Resolved' ? 'selected' : ''; ?>>Resolved</option>
 											</select>
 											<textarea name="resolution_description" placeholder="Resolution details..." rows="3" style="width: 100%; padding: 0.25rem; background: black; color: white; border: 1px solid var(--orange); margin-bottom: 0.5rem;"><?php echo htmlspecialchars($fault['resolution_description'] ?? ''); ?></textarea>
-											<button type="submit" style="background-color: var(--orange); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%;">Update</button>
+											<button type="submit" style="background-color: var(--orange); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%; margin-bottom: 0.5rem;">Update</button>
 										</form>
+										
+										<?php if (hasPermission('Command') || hasPermission('Starfleet Auditor')): ?>
+										<form method="POST" action="" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this fault report? This action cannot be undone.');">
+											<input type="hidden" name="action" value="delete_fault_report">
+											<input type="hidden" name="report_id" value="<?php echo $fault['id']; ?>">
+											<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+											<button type="submit" style="background-color: var(--red); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%; font-size: 0.8rem;">🗑️ Delete Report</button>
+										</form>
+										<?php endif; ?>
 									</div>
 								</div>
 							</div>

@@ -80,7 +80,7 @@ try {
 
 // Get all crew members
 try {
-    $crew_stmt = $pdo->query("SELECT id, rank, first_name, last_name, department, position FROM roster ORDER BY rank, last_name, first_name");
+    $crew_stmt = $pdo->query("SELECT id, rank, first_name, last_name, department, position FROM roster WHERE (is_invisible IS NULL OR is_invisible = 0) ORDER BY rank, last_name, first_name");
     $crew_members = $crew_stmt->fetchAll();
 } catch (Exception $e) {
     $crew_members = [];
@@ -91,7 +91,7 @@ try {
 
 // Get command personnel for "Assigned By" dropdown
 try {
-    $command_stmt = $pdo->query("SELECT id, rank, first_name, last_name, position FROM roster WHERE department = 'Command' OR position LIKE '%Captain%' OR position LIKE '%Commander%' OR position LIKE '%Admiral%' ORDER BY rank, last_name, first_name");
+    $command_stmt = $pdo->query("SELECT id, rank, first_name, last_name, position FROM roster WHERE (department = 'Command' OR position LIKE '%Captain%' OR position LIKE '%Commander%' OR position LIKE '%Admiral%') AND (is_invisible IS NULL OR is_invisible = 0) ORDER BY rank, last_name, first_name");
     $command_personnel = $command_stmt->fetchAll();
 } catch (Exception $e) {
     $command_personnel = [];
