@@ -230,76 +230,223 @@ try {
         }
         
         .awards-display {
-            max-height: 600px;
-            overflow-y: auto;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
             padding: 1.5rem;
             min-height: 500px;
         }
         
-        .award-type-section {
-            margin-bottom: 2rem;
+        .award-browser {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
         
-        .award-type-header {
-            background: var(--orange);
-            color: black;
-            padding: 0.8rem 1rem;
+        .award-type-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--bluey);
+            padding-bottom: 1rem;
+        }
+        
+        .award-tab {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--bluey);
+            border-radius: 10px 10px 0 0;
+            color: var(--bluey);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 0.5rem;
-            border-radius: 5px;
-            text-align: center;
             letter-spacing: 1px;
         }
         
-        .award-type-container {
-            max-height: 300px;
-            min-height: 150px;
-            overflow-y: auto;
+        .award-tab.active {
+            background: var(--orange);
+            color: black;
+            border-color: var(--orange);
+            transform: translateY(-2px);
+        }
+        
+        .award-tab:hover:not(.active) {
+            background: rgba(255, 136, 0, 0.2);
+            border-color: var(--orange);
+        }
+        
+        .award-content {
+            flex: 1;
             background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 1rem;
             border: 1px solid var(--bluey);
+            min-height: 400px;
         }
         
-        .award-type-container::-webkit-scrollbar {
-            width: 10px;
+        .award-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
         }
         
-        .award-type-container::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 5px;
+        .award-card {
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.8) 0%, rgba(153, 153, 204, 0.1) 100%);
+            border: 2px solid var(--bluey);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
         
-        .award-type-container::-webkit-scrollbar-thumb {
+        .award-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--orange) 0%, var(--gold) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .award-card:hover {
+            border-color: var(--orange);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(255, 136, 0, 0.3);
+        }
+        
+        .award-card:hover::before {
+            opacity: 1;
+        }
+        
+        .award-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+        }
+        
+        .award-card-title {
+            color: var(--orange);
+            font-weight: bold;
+            font-size: 1rem;
+            line-height: 1.2;
+        }
+        
+        .award-card-icon {
+            font-size: 1.5rem;
+            opacity: 0.8;
+        }
+        
+        .award-card-type {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+        
+        .award-card-description {
+            color: var(--bluey);
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 0.8rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .award-card-specialization {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid var(--green);
+            border-radius: 8px;
+            padding: 0.3rem 0.6rem;
+            color: var(--green);
+            font-size: 0.75rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .award-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid var(--orange);
+        }
+        
+        .award-count {
+            color: var(--orange);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .award-filter {
+            color: var(--bluey);
+            font-size: 0.9rem;
+        }
+        
+        .no-awards {
+            text-align: center;
+            padding: 3rem;
+            color: var(--bluey);
+            font-style: italic;
+        }
+        
+        .award-search {
+            margin-bottom: 1rem;
+        }
+        
+        .award-search input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--bluey);
+            border-radius: 8px;
+            color: var(--bluey);
+            font-family: inherit;
+        }
+        
+        .award-search input:focus {
+            border-color: var(--orange);
+            outline: none;
+        }
+        
+        .award-search input::placeholder {
+            color: rgba(153, 153, 204, 0.6);
+        }
+        
+        /* Scrollbar styling for award grid */
+        .award-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .award-grid::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        .award-grid::-webkit-scrollbar-thumb {
             background: var(--orange);
-            border-radius: 5px;
-            border: 1px solid rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
         }
         
-        .award-type-container::-webkit-scrollbar-thumb:hover {
-            background: var(--gold);
-        }
-        
-        /* Main awards display scrollbar */
-        .awards-display::-webkit-scrollbar {
-            width: 12px;
-        }
-        
-        .awards-display::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 6px;
-        }
-        
-        .awards-display::-webkit-scrollbar-thumb {
-            background: var(--orange);
-            border-radius: 6px;
-            border: 2px solid rgba(0, 0, 0, 0.3);
-        }
-        
-        .awards-display::-webkit-scrollbar-thumb:hover {
+        .award-grid::-webkit-scrollbar-thumb:hover {
             background: var(--gold);
         }
         
@@ -579,49 +726,98 @@ try {
                         <div class="award-panel">
                             <div class="panel-header">📋 Available Awards</div>
                             <div class="awards-display">
-                                <?php 
-                                // Group awards by type
-                                $awards_by_type = [];
-                                foreach ($awards as $award) {
-                                    $awards_by_type[$award['type']][] = $award;
-                                }
-                                
-                                // Display each type in its own section
-                                foreach ($awards_by_type as $type => $type_awards): 
-                                ?>
-                                    <div class="award-type-section">
-                                        <div class="award-type-header">
-                                            <?php 
-                                            $icon = '';
-                                            switch($type) {
-                                                case 'Medal': $icon = '🏅'; break;
-                                                case 'Ribbon': $icon = '🎗️'; break;
-                                                case 'Badge': $icon = '🏆'; break;
-                                                default: $icon = '⭐'; break;
-                                            }
-                                            echo $icon . ' ' . htmlspecialchars($type . 's'); 
-                                            ?>
-                                        </div>
-                                        <div class="award-type-container">
-                                            <?php foreach ($type_awards as $award): ?>
-                                                <div class="award-entry">
-                                                    <div class="award-title"><?php echo htmlspecialchars($award['name']); ?></div>
-                                                    <div class="award-type <?php echo strtolower($award['type']); ?>">
-                                                        <?php echo htmlspecialchars($award['type']); ?>
-                                                    </div>
-                                                    <div class="award-details">
-                                                        <?php echo htmlspecialchars($award['description']); ?>
-                                                    </div>
-                                                    <?php if ($award['specialization']): ?>
-                                                        <div class="award-meta">
-                                                            📡 <?php echo htmlspecialchars($award['specialization']); ?>
-                                                        </div>
-                                                    <?php endif; ?>
+                                <div class="award-browser">
+                                    <?php 
+                                    // Group awards by type
+                                    $awards_by_type = [];
+                                    foreach ($awards as $award) {
+                                        $awards_by_type[$award['type']][] = $award;
+                                    }
+                                    ?>
+                                    
+                                    <!-- Award Type Tabs -->
+                                    <div class="award-type-tabs">
+                                        <?php foreach ($awards_by_type as $type => $type_awards): ?>
+                                            <div class="award-tab" data-type="<?php echo strtolower($type); ?>" onclick="showAwardType('<?php echo strtolower($type); ?>')">
+                                                <div style="font-size: 1.2rem; margin-bottom: 0.3rem;">
+                                                    <?php 
+                                                    switch($type) {
+                                                        case 'Medal': echo '🏅'; break;
+                                                        case 'Ribbon': echo '🎗️'; break;
+                                                        case 'Badge': echo '🏆'; break;
+                                                        default: echo '⭐'; break;
+                                                    }
+                                                    ?>
                                                 </div>
-                                            <?php endforeach; ?>
+                                                <?php echo htmlspecialchars($type . 's'); ?>
+                                                <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.2rem;">
+                                                    (<?php echo count($type_awards); ?>)
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    
+                                    <!-- Award Content Area -->
+                                    <div class="award-content">
+                                        <!-- Search Box -->
+                                        <div class="award-search">
+                                            <input type="text" id="award-search" placeholder="🔍 Search awards..." onkeyup="filterAwards()">
+                                        </div>
+                                        
+                                        <!-- Award Stats -->
+                                        <div class="award-stats">
+                                            <div class="award-count" id="award-count">
+                                                Total: <?php echo count($awards); ?> awards
+                                            </div>
+                                            <div class="award-filter" id="award-filter">
+                                                Showing all types
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Award Grid for each type -->
+                                        <?php foreach ($awards_by_type as $type => $type_awards): ?>
+                                            <div class="award-grid award-type-content" id="<?php echo strtolower($type); ?>-content" style="display: none;">
+                                                <?php foreach ($type_awards as $award): ?>
+                                                    <div class="award-card" data-name="<?php echo htmlspecialchars(strtolower($award['name'])); ?>" data-specialization="<?php echo htmlspecialchars(strtolower($award['specialization'] ?? '')); ?>">
+                                                        <div class="award-card-header">
+                                                            <div class="award-card-title"><?php echo htmlspecialchars($award['name']); ?></div>
+                                                            <div class="award-card-icon">
+                                                                <?php 
+                                                                switch($award['type']) {
+                                                                    case 'Medal': echo '🏅'; break;
+                                                                    case 'Ribbon': echo '🎗️'; break;
+                                                                    case 'Badge': echo '🏆'; break;
+                                                                    default: echo '⭐'; break;
+                                                                }
+                                                                ?>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="award-card-type <?php echo strtolower($award['type']); ?>">
+                                                            <?php echo htmlspecialchars($award['type']); ?>
+                                                        </div>
+                                                        
+                                                        <div class="award-card-description">
+                                                            <?php echo htmlspecialchars($award['description']); ?>
+                                                        </div>
+                                                        
+                                                        <?php if ($award['specialization']): ?>
+                                                            <div class="award-card-specialization">
+                                                                📡 <?php echo htmlspecialchars($award['specialization']); ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                        
+                                        <!-- No results message -->
+                                        <div class="no-awards" id="no-awards" style="display: none;">
+                                            <h4>No awards found</h4>
+                                            <p>Try adjusting your search terms or browse different categories.</p>
                                         </div>
                                     </div>
-                                <?php endforeach; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -694,7 +890,98 @@ try {
     </section>
     <script src="../assets/lcars.js"></script>
     <script>
-        // Award selection helper
+        // Award Browser JavaScript
+        let currentType = '';
+        
+        // Initialize the award browser
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show first tab by default
+            const firstTab = document.querySelector('.award-tab');
+            if (firstTab) {
+                const firstType = firstTab.getAttribute('data-type');
+                showAwardType(firstType);
+            }
+        });
+        
+        // Show awards of specific type
+        function showAwardType(type) {
+            currentType = type;
+            
+            // Update tabs
+            document.querySelectorAll('.award-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.award-type-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(`${type}-content`).style.display = 'grid';
+            
+            // Update stats
+            updateAwardStats();
+            
+            // Clear search
+            document.getElementById('award-search').value = '';
+        }
+        
+        // Filter awards based on search
+        function filterAwards() {
+            const searchTerm = document.getElementById('award-search').value.toLowerCase();
+            const currentContent = document.getElementById(`${currentType}-content`);
+            
+            if (!currentContent) return;
+            
+            const cards = currentContent.querySelectorAll('.award-card');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                const specialization = card.getAttribute('data-specialization');
+                const description = card.querySelector('.award-card-description').textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || 
+                    specialization.includes(searchTerm) || 
+                    description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Show/hide no results message
+            const noAwards = document.getElementById('no-awards');
+            if (visibleCount === 0 && searchTerm !== '') {
+                noAwards.style.display = 'block';
+                currentContent.style.display = 'none';
+            } else {
+                noAwards.style.display = 'none';
+                currentContent.style.display = 'grid';
+            }
+            
+            updateAwardStats(visibleCount, searchTerm);
+        }
+        
+        // Update award statistics display
+        function updateAwardStats(visibleCount = null, searchTerm = '') {
+            const currentContent = document.getElementById(`${currentType}-content`);
+            if (!currentContent) return;
+            
+            const totalCards = currentContent.querySelectorAll('.award-card').length;
+            const displayCount = visibleCount !== null ? visibleCount : totalCards;
+            
+            document.getElementById('award-count').textContent = `${displayCount} of ${totalCards} ${currentType}s`;
+            
+            if (searchTerm) {
+                document.getElementById('award-filter').textContent = `Filtered by: "${searchTerm}"`;
+            } else {
+                document.getElementById('award-filter').textContent = `Showing all ${currentType}s`;
+            }
+        }
+        
+        // Award selection helper for form
         <?php if (!empty($awards) && !empty($crew_members)): ?>
         if (document.getElementById('award_id')) {
             document.getElementById('award_id').addEventListener('change', function() {
