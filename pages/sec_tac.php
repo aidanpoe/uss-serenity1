@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/config.php';
 require_once '../includes/department_training.php';
+require_once '../includes/promotion_system.php';
 
 // Update last active timestamp for current character
 updateLastActive();
@@ -399,6 +400,9 @@ try {
 					<!-- Department Training Section -->
 					<?php renderDepartmentTrainingSection('Security', 'Security & Tactical'); ?>
 					<?php endif; ?>
+					
+					<!-- Promotion/Demotion Form -->
+					<?php renderPromotionForm('SEC/TAC'); ?>
 					
 					<div style="background: rgba(255, 170, 0, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">
 						<h4>Security Information</h4>

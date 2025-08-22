@@ -330,6 +330,78 @@ function canEditPersonnelFiles() {
     return false;
 }
 
+// Check if user is a specific department head
+function isDepartmentHead($department) {
+    if (!isLoggedIn()) return false;
+    
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->prepare("SELECT position FROM roster WHERE id = ?");
+        $stmt->execute([$_SESSION['character_id']]);
+        $result = $stmt->fetch();
+        
+        if ($result && $result['position']) {
+            $head_position = "Head of " . $department;
+            return $result['position'] === $head_position;
+        }
+    } catch (Exception $e) {
+        return false;
+    }
+    
+    return false;
+}
+
+// Check if user can promote/demote members of a specific department
+function canPromoteDemote($department = null) {
+    if (!isLoggedIn()) return false;
+    
+    $roster_dept = $_SESSION['roster_department'] ?? '';
+    
+    // Command and Starfleet Auditors can promote/demote anyone
+    if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor') {
+        return true;
+    }
+    
+    // Department heads can only promote/demote within their department
+    if ($department && isDepartmentHead($department)) {
+        return true;
+    }
+    
+    return false;
+}
+
+// Get promotable ranks (up to Lieutenant for department heads)
+function getPromotableRanks($isDepartmentHead = false) {
+    $ranks = [
+        'Crewman 3rd Class',
+        'Crewman 2nd Class', 
+        'Crewman 1st Class',
+        'Petty Officer 3rd class',
+        'Petty Officer 1st class',
+        'Chief Petter Officer',
+        'Senior Chief Petty Officer',
+        'Master Chief Petty Officer',
+        'Command Master Chief Petty Officer',
+        'Warrant officer',
+        'Ensign',
+        'Lieutenant Junior Grade',
+        'Lieutenant'
+    ];
+    
+    // Department heads can promote up to Lieutenant
+    // Command can promote higher (add more ranks as needed)
+    if (!$isDepartmentHead && hasPermission('Command')) {
+        $command_ranks = [
+            'Lieutenant Commander',
+            'Commander',
+            'Captain'
+        ];
+        $ranks = array_merge($ranks, $command_ranks);
+    }
+    
+    return $ranks;
+}
+
 // Check if current user is invisible (Starfleet Auditor or marked invisible)
 function isInvisibleUser() {
     if (!isLoggedIn()) return false;

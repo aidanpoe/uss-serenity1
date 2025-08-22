@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/config.php';
 require_once '../includes/department_training.php';
+require_once '../includes/promotion_system.php';
 
 // Update last active timestamp for current character
 updateLastActive();
@@ -580,6 +581,9 @@ try {
 					<!-- Department Training Section -->
 					<?php renderDepartmentTrainingSection('Medical', 'Medical & Science'); ?>
 					<?php endif; ?>
+					
+					<!-- Promotion/Demotion Form -->
+					<?php renderPromotionForm('MED/SCI'); ?>
 					
 					<div style="background: rgba(85, 102, 255, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">
 						<h4>Department Information</h4>
