@@ -384,7 +384,7 @@ function requirePermission($required_department) {
 }
 
 // Log auditor actions for accountability
-function logAuditorAction($auditor_roster_id, $action_type, $target_table, $target_id, $action_details = null) {
+function logAuditorAction($character_id, $action_type, $table_name, $record_id, $additional_data = null) {
     try {
         $pdo = getConnection();
         
@@ -396,16 +396,16 @@ function logAuditorAction($auditor_roster_id, $action_type, $target_table, $targ
         
         $stmt = $pdo->prepare("
             INSERT INTO character_audit_trail 
-            (auditor_roster_id, action_type, target_table, target_id, action_details, performed_at) 
-            VALUES (?, ?, ?, ?, ?, NOW())
+            (character_id, action_type, table_name, record_id, additional_data) 
+            VALUES (?, ?, ?, ?, ?)
         ");
         
         $stmt->execute([
-            $auditor_roster_id,
+            $character_id,
             $action_type,
-            $target_table,
-            $target_id,
-            $action_details ? json_encode($action_details) : null
+            $table_name,
+            $record_id,
+            $additional_data ? json_encode($additional_data) : null
         ]);
         
         return true;
