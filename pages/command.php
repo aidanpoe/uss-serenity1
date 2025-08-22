@@ -282,6 +282,7 @@ if (!function_exists('canEditPersonnelFiles')) {
 	<script src="../assets/lcars.js"></script>
 </head>
 <body class="bg">
+<section>
 	<div class="wrap">
 		<div class="left-frame-top">
 			<div class="panel-1">01<span class="hop">-111A</span></div>
@@ -624,7 +625,15 @@ if (!function_exists('canEditPersonnelFiles')) {
 					</div>
 				</div>
 			</main>
+			<footer>
+				USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+				LCARS Inspired Website Template by <a href="https://www.thelcars.com">www.TheLCARS.com</a>.
+			</footer> 
 		</div>
 	</div>
+</section>	
+<script type="text/javascript" src="../assets/lcars.js"></script>
+<div class="headtrim"> </div>
+<div class="baseboard"> </div>
 </body>
 </html>
