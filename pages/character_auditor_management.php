@@ -9,6 +9,21 @@ if (!isLoggedIn() || !hasPermission('Command')) {
 
 $pdo = getConnection();
 
+// Check if migration has been run
+$migration_needed = false;
+try {
+    $stmt = $pdo->query("SHOW COLUMNS FROM roster LIKE 'is_invisible'");
+    if ($stmt->rowCount() == 0) {
+        $migration_needed = true;
+    }
+    
+    $stmt = $pdo->query("SELECT 1 FROM roster WHERE department = 'Starfleet Auditor' LIMIT 1");
+} catch (Exception $e) {
+    if (strpos($e->getMessage(), "Starfleet Auditor") !== false) {
+        $migration_needed = true;
+    }
+}
+
 // Handle character department updates
 if ($_POST['action'] ?? '' === 'update_character_department') {
     $character_id = $_POST['character_id'] ?? 0;
@@ -22,15 +37,37 @@ if ($_POST['action'] ?? '' === 'update_character_department') {
         $character = $stmt->fetch();
         
         if ($character) {
-            // Update character department
-            $stmt = $pdo->prepare("UPDATE roster SET department = ?, is_invisible = ? WHERE id = ?");
-            $is_invisible = ($new_department === 'Starfleet Auditor') ? 1 : 0;
-            $stmt->execute([$new_department, $is_invisible, $character_id]);
+            // Check if is_invisible column exists
+            $has_invisible_column = false;
+            try {
+                $stmt = $pdo->query("SHOW COLUMNS FROM roster LIKE 'is_invisible'");
+                $has_invisible_column = ($stmt->rowCount() > 0);
+            } catch (Exception $e) {
+                $has_invisible_column = false;
+            }
             
-            // Log the assignment/revocation
-            $stmt = $pdo->prepare("INSERT INTO character_auditor_assignments (roster_id, assigned_by_user_id, notes, is_active) VALUES (?, ?, ?, ?)");
-            $is_active = ($new_department === 'Starfleet Auditor') ? 1 : 0;
-            $stmt->execute([$character_id, $_SESSION['user_id'], $notes, $is_active]);
+            // Update character department
+            if ($has_invisible_column) {
+                $stmt = $pdo->prepare("UPDATE roster SET department = ?, is_invisible = ? WHERE id = ?");
+                $is_invisible = ($new_department === 'Starfleet Auditor') ? 1 : 0;
+                $stmt->execute([$new_department, $is_invisible, $character_id]);
+            } else {
+                // Column doesn't exist yet, just update department
+                $stmt = $pdo->prepare("UPDATE roster SET department = ? WHERE id = ?");
+                $stmt->execute([$new_department, $character_id]);
+            }
+            
+            // Log the assignment/revocation (if table exists)
+            try {
+                $stmt = $pdo->query("SHOW TABLES LIKE 'character_auditor_assignments'");
+                if ($stmt->rowCount() > 0) {
+                    $stmt = $pdo->prepare("INSERT INTO character_auditor_assignments (roster_id, assigned_by_user_id, notes, is_active) VALUES (?, ?, ?, ?)");
+                    $is_active = ($new_department === 'Starfleet Auditor') ? 1 : 0;
+                    $stmt->execute([$character_id, $_SESSION['user_id'], $notes, $is_active]);
+                }
+            } catch (Exception $e) {
+                // Table doesn't exist, skip logging for now
+            }
             
             // If user is currently playing this character, update their session
             if (($_SESSION['character_id'] ?? 0) == $character_id) {
@@ -60,17 +97,26 @@ $auditor_characters = array_filter($all_characters, function($char) {
     return $char['department'] === 'Starfleet Auditor';
 });
 
-// Get recent auditor assignments
-$stmt = $pdo->query("
-    SELECT caa.*, r.first_name, r.last_name, r.department,
-           u.first_name as assigned_by_first, u.last_name as assigned_by_last
-    FROM character_auditor_assignments caa
-    JOIN roster r ON caa.roster_id = r.id
-    JOIN users u ON caa.assigned_by_user_id = u.id
-    ORDER BY caa.assigned_at DESC
-    LIMIT 20
-");
-$recent_assignments = $stmt->fetchAll();
+// Get recent auditor assignments (check if table exists first)
+$recent_assignments = [];
+try {
+    $stmt = $pdo->query("SHOW TABLES LIKE 'character_auditor_assignments'");
+    if ($stmt->rowCount() > 0) {
+        $stmt = $pdo->query("
+            SELECT caa.*, r.first_name, r.last_name, r.department,
+                   u.first_name as assigned_by_first, u.last_name as assigned_by_last
+            FROM character_auditor_assignments caa
+            JOIN roster r ON caa.roster_id = r.id
+            JOIN users u ON caa.assigned_by_user_id = u.id
+            ORDER BY caa.assigned_at DESC
+            LIMIT 20
+        ");
+        $recent_assignments = $stmt->fetchAll();
+    }
+} catch (Exception $e) {
+    // Table doesn't exist yet, assignments will be empty
+    $recent_assignments = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -94,6 +140,14 @@ $recent_assignments = $stmt->fetchAll();
             <div class="lcars-content">
                 <h1>🛡️ Character Auditor Management</h1>
                 <p>Captain-Only Interface: Manage Starfleet Auditor Character Assignments</p>
+                
+                <?php if ($migration_needed): ?>
+                    <div style="background-color: #ff3366; color: white; padding: 1.5rem; margin: 1rem 0; border-radius: 5px; border: 2px solid #ff6666;">
+                        <h3 style="margin: 0 0 1rem 0;">⚠️ Database Migration Required</h3>
+                        <p style="margin: 0 0 1rem 0;">The character-based auditor system requires database updates to function properly.</p>
+                        <p style="margin: 0;"><strong>Please run:</strong> <code>character_based_auditor_migration.php</code> first to enable full functionality.</p>
+                    </div>
+                <?php endif; ?>
                 
                 <?php if (isset($success_message)): ?>
                     <div style="background-color: var(--orange); color: black; padding: 1rem; margin: 1rem 0; border-radius: 5px;">
