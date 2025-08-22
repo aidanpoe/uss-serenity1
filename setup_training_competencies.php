@@ -27,27 +27,28 @@ try {
     )");
     echo "<p style='color: green;'>✅ training_modules table created</p>";
     
-    // Create crew_competencies table to track who has what training
+    // Create crew_competencies table to track individual training assignments and progress
     echo "<h3>Creating crew_competencies table...</h3>";
     $pdo->exec("CREATE TABLE IF NOT EXISTS crew_competencies (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        roster_id INT NOT NULL,
+        user_id INT NOT NULL,
         module_id INT NOT NULL,
-        awarded_by INT NOT NULL,
-        completion_date DATE NOT NULL,
-        expiry_date DATE NULL,
-        certification_level ENUM('Basic', 'Intermediate', 'Advanced', 'Expert') DEFAULT 'Basic',
+        assigned_by INT NOT NULL,
+        assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        completion_date DATE NULL,
+        completion_notes TEXT,
+        status ENUM('assigned', 'in_progress', 'completed', 'expired') DEFAULT 'assigned',
         notes TEXT,
         is_current TINYINT(1) DEFAULT 1,
-        awarded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (roster_id) REFERENCES roster(id) ON DELETE CASCADE,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (module_id) REFERENCES training_modules(id) ON DELETE CASCADE,
-        FOREIGN KEY (awarded_by) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_competency (roster_id, module_id),
-        INDEX idx_roster (roster_id),
+        FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_assignment (user_id, module_id, is_current),
+        INDEX idx_user (user_id),
         INDEX idx_module (module_id),
-        INDEX idx_current (is_current),
-        INDEX idx_expiry (expiry_date)
+        INDEX idx_status (status),
+        INDEX idx_current (is_current)
     )");
     echo "<p style='color: green;'>✅ crew_competencies table created</p>";
     

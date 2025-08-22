@@ -132,13 +132,14 @@ try {
     // Get all crew members with their current character and department
     $crewStmt = $pdo->query("
         SELECT u.id, u.username, 
-               COALESCE(c.character_name, 'No Character') as character_name,
-               COALESCE(c.current_rank, 'Unassigned') as current_rank,
-               COALESCE(c.current_department, 'Unassigned') as current_department
+               COALESCE(r.first_name, 'No') as first_name,
+               COALESCE(r.last_name, 'Character') as last_name,
+               COALESCE(r.rank, 'Unassigned') as current_rank,
+               COALESCE(r.department, 'Unassigned') as current_department
         FROM users u
-        LEFT JOIN characters c ON u.id = c.user_id AND c.is_active = 1
-        WHERE u.is_active = 1
-        ORDER BY c.current_department, c.current_rank, c.character_name
+        LEFT JOIN roster r ON u.id = r.user_id AND r.is_active = 1
+        WHERE u.active = 1
+        ORDER BY r.department, r.rank, r.last_name, r.first_name
     ");
     $crew = $crewStmt->fetchAll();
     
@@ -152,7 +153,7 @@ try {
     }
     
     if ($selected_department && $selected_department !== 'All') {
-        $whereConditions[] = "c.current_department = ?";
+        $whereConditions[] = "r.department = ?";
         $params[] = $selected_department;
     }
     
@@ -171,17 +172,18 @@ try {
                tm.module_name, tm.module_code, tm.department as module_department,
                tm.certification_level,
                u.username,
-               COALESCE(c.character_name, 'No Character') as character_name,
-               COALESCE(c.current_rank, 'Unassigned') as current_rank,
-               COALESCE(c.current_department, 'Unassigned') as current_department,
+               COALESCE(r.first_name, 'No') as first_name,
+               COALESCE(r.last_name, 'Character') as last_name,
+               COALESCE(r.rank, 'Unassigned') as current_rank,
+               COALESCE(r.department, 'Unassigned') as current_department,
                assigner.username as assigned_by_name
         FROM crew_competencies cc
         JOIN training_modules tm ON cc.module_id = tm.id
         JOIN users u ON cc.user_id = u.id
-        LEFT JOIN characters c ON u.id = c.user_id AND c.is_active = 1
+        LEFT JOIN roster r ON u.id = r.user_id AND r.is_active = 1
         LEFT JOIN users assigner ON cc.assigned_by = assigner.id
         {$whereClause}
-        ORDER BY cc.assigned_date DESC, tm.department, c.current_department
+        ORDER BY cc.assigned_date DESC, tm.department, r.department
     ");
     $assignmentsStmt->execute($params);
     $assignments = $assignmentsStmt->fetchAll();
@@ -448,7 +450,7 @@ try {
                             <option value="">Select Crew Member</option>
                             <?php foreach ($crew as $member): ?>
                             <option value="<?php echo $member['id']; ?>">
-                                <?php echo htmlspecialchars($member['character_name']); ?> 
+                                <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?> 
                                 (<?php echo htmlspecialchars($member['current_rank']); ?> - <?php echo htmlspecialchars($member['current_department']); ?>)
                             </option>
                             <?php endforeach; ?>
@@ -493,7 +495,7 @@ try {
                         <div class="crew-checkbox">
                             <input type="checkbox" name="selected_users[]" value="<?php echo $member['id']; ?>" id="crew_<?php echo $member['id']; ?>">
                             <label for="crew_<?php echo $member['id']; ?>">
-                                <?php echo htmlspecialchars($member['character_name']); ?><br>
+                                <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?><br>
                                 <small><?php echo htmlspecialchars($member['current_rank']); ?> - <?php echo htmlspecialchars($member['current_department']); ?></small>
                             </label>
                         </div>
@@ -573,7 +575,7 @@ try {
                     <?php foreach ($assignments as $assignment): ?>
                     <tr>
                         <td>
-                            <strong><?php echo htmlspecialchars($assignment['character_name']); ?></strong><br>
+                            <strong><?php echo htmlspecialchars($assignment['first_name'] . ' ' . $assignment['last_name']); ?></strong><br>
                             <small><?php echo htmlspecialchars($assignment['current_rank']); ?> - <?php echo htmlspecialchars($assignment['current_department']); ?></small>
                         </td>
                         <td>
