@@ -1,20 +1,10 @@
 <?php
 require_once '../includes/config.php';
 
-// Check if user is logged in and is admin/command
-if (!isLoggedIn()) {
-    header('Location: ../index.php');
-    exit;
-}
-
-// Check if user has admin permissions (Command rank or admin flag)
-$user_dept = getUserDepartment();
-$user_rank = $_SESSION['rank'] ?? '';
-$is_admin = ($user_dept === 'Command' || $user_rank === 'Captain' || $user_rank === 'Commander' || $_SESSION['admin'] ?? false);
-
-if (!$is_admin) {
-    header('Location: ../index.php?error=access_denied');
-    exit;
+// Check if user has Command access or is Captain - using same logic as admin_management.php
+if (!hasPermission('Command') && !hasPermission('Captain')) {
+    header('Location: ../login.php');
+    exit();
 }
 
 try {
