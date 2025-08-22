@@ -37,6 +37,55 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'security_report')
     }
 }
 
+// Handle adding new persons (SEC/TAC only)
+if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_person') {
+    // CSRF protection
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please try again.";
+    } elseif (hasPermission('SEC/TAC')) {
+        try {
+            // Check if person already exists (by name only, species can be shared)
+            $pdo = getConnection();
+            $check_stmt = $pdo->prepare("SELECT id FROM roster WHERE first_name = ? AND last_name = ?");
+            $check_stmt->execute([sanitizeInput($_POST['first_name']), sanitizeInput($_POST['last_name'])]);
+            
+            if ($check_stmt->fetch()) {
+                $error = "A crew member with this name already exists in the roster.";
+            } else {
+                // SEC/TAC limited to ranks below Commander for person addition
+                $allowed_person_ranks = [
+                    'Crewman 3rd Class', 'Crewman 2nd Class', 'Crewman 1st Class', 
+                    'Petty Officer 3rd class', 'Petty Officer 1st class', 'Chief Petter Officer',
+                    'Senior Chief Petty Officer', 'Master Chief Petty Officer', 
+                    'Command Master Chief Petty Officer', 'Warrant officer', 'Ensign',
+                    'Lieutenant Junior Grade', 'Lieutenant', 'Lieutenant Commander'
+                ];
+                
+                if (!in_array($_POST['rank'], $allowed_person_ranks)) {
+                    $error = "Security personnel can only add persons with ranks below Commander.";
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO roster (rank, first_name, last_name, species, department, position, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([
+                        sanitizeInput($_POST['rank']),
+                        sanitizeInput($_POST['first_name']),
+                        sanitizeInput($_POST['last_name']),
+                        sanitizeInput($_POST['species']),
+                        sanitizeInput($_POST['department']),
+                        '', // No special positions for person addition
+                        '' // No image upload in this simplified form
+                    ]);
+                    $success = "New person added to roster successfully.";
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error adding person: " . $e->getMessage());
+            $error = "Error adding person. Please try again.";
+        }
+    } else {
+        $error = "Access denied. Security/Tactical authorization required.";
+    }
+}
+
 // Handle security report update (backend only)
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_security') {
     // CSRF protection
@@ -306,6 +355,63 @@ try {
 							<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; width: 100%;">Submit Security Report</button>
 						</form>
 					</div>
+					
+					<!-- Add New Person Form (SEC/TAC Only) -->
+					<?php if (hasPermission('SEC/TAC')): ?>
+					<div style="background: rgba(255, 170, 0, 0.1); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--gold);">
+						<h3 style="color: var(--gold); text-align: center; margin-bottom: 1.5rem;">👮 Add New Person to Roster</h3>
+						<form method="POST" action="">
+							<input type="hidden" name="action" value="add_person">
+							<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+							<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+								<div>
+									<label style="color: var(--gold);">Rank:</label>
+									<select name="rank" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+										<option value="Crewman 3rd Class">Crewman 3rd Class</option>
+										<option value="Crewman 2nd Class">Crewman 2nd Class</option>
+										<option value="Crewman 1st Class">Crewman 1st Class</option>
+										<option value="Petty Officer 3rd class">Petty Officer 3rd class</option>
+										<option value="Petty Officer 1st class">Petty Officer 1st class</option>
+										<option value="Chief Petter Officer">Chief Petter Officer</option>
+										<option value="Senior Chief Petty Officer">Senior Chief Petty Officer</option>
+										<option value="Master Chief Petty Officer">Master Chief Petty Officer</option>
+										<option value="Command Master Chief Petty Officer">Command Master Chief Petty Officer</option>
+										<option value="Warrant officer">Warrant officer</option>
+										<option value="Ensign">Ensign</option>
+										<option value="Lieutenant Junior Grade">Lieutenant Junior Grade</option>
+										<option value="Lieutenant">Lieutenant</option>
+										<option value="Lieutenant Commander">Lieutenant Commander</option>
+									</select>
+								</div>
+								<div>
+									<label style="color: var(--gold);">First Name:</label>
+									<input type="text" name="first_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+								</div>
+								<div>
+									<label style="color: var(--gold);">Last Name:</label>
+									<input type="text" name="last_name" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+								</div>
+								<div>
+									<label style="color: var(--gold);">Species:</label>
+									<input type="text" name="species" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+								</div>
+								<div>
+									<label style="color: var(--gold);">Department:</label>
+									<select name="department" required style="width: 100%; padding: 0.5rem; background: black; color: white; border: 1px solid var(--gold);">
+										<option value="Command">Command</option>
+										<option value="MED/SCI">MED/SCI</option>
+										<option value="ENG/OPS">ENG/OPS</option>
+										<option value="SEC/TAC">SEC/TAC</option>
+									</select>
+								</div>
+							</div>
+							<button type="submit" style="background-color: var(--gold); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; margin-top: 1rem; width: 100%;">Add New Person to Roster</button>
+						</form>
+						<p style="color: var(--gold); font-size: 0.9rem; text-align: center; margin-top: 1rem;">
+							<em>Security personnel can add new persons to the ship's roster for incident and crime tracking purposes.</em>
+						</p>
+					</div>
+					<?php endif; ?>
 					
 					<?php if (hasPermission('SEC/TAC')): ?>
 					<!-- Security Staff Backend -->
