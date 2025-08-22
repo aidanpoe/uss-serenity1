@@ -100,10 +100,10 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_award_reco
             
             $stmt = $pdo->prepare("UPDATE award_recommendations SET status = ?, review_notes = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?");
             $stmt->execute([
-                $_POST['status'],
-                $_POST['review_notes'],
+                $_POST['status'] ?? '',
+                $_POST['review_notes'] ?? '',
                 $reviewed_by,
-                $_POST['recommendation_id']
+                $_POST['recommendation_id'] ?? 0
             ]);
             $success = "Award recommendation updated successfully.";
         } catch (Exception $e) {
@@ -119,9 +119,9 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_suggestion
             $pdo = getConnection();
             $stmt = $pdo->prepare("UPDATE command_suggestions SET status = ?, response = ? WHERE id = ?");
             $stmt->execute([
-                $_POST['status'],
-                $_POST['response'],
-                $_POST['suggestion_id']
+                $_POST['status'] ?? '',
+                $_POST['response'] ?? '',
+                $_POST['suggestion_id'] ?? 0
             ]);
             $success = "Suggestion updated successfully.";
         } catch (Exception $e) {
@@ -133,16 +133,44 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_suggestion
 try {
     $pdo = getConnection();
     
+    // Initialize variables
+    $command_officers = [];
+    $suggestions = [];
+    $award_recommendations = [];
+    $summary = ['open_medical' => 0, 'open_faults' => 0, 'open_security' => 0, 'total_crew' => 0];
+    
     // Get command structure
-    $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('Commanding Officer', 'First Officer', 'Second Officer', 'Third Officer') ORDER BY FIELD(position, 'Commanding Officer', 'First Officer', 'Second Officer', 'Third Officer')");
-    $stmt->execute();
-    $command_officers = $stmt->fetchAll();
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM roster WHERE position IN ('Commanding Officer', 'First Officer', 'Second Officer', 'Third Officer') ORDER BY FIELD(position, 'Commanding Officer', 'First Officer', 'Second Officer', 'Third Officer')");
+        $stmt->execute();
+        $command_officers = $stmt->fetchAll();
+    } catch (Exception $e) {
+        // If roster table doesn't exist or has issues, initialize empty array
+        $command_officers = [];
+        error_log("Command officers query error: " . $e->getMessage());
+    }
     
     // Get suggestions for backend
     if (hasPermission('Command')) {
-        $stmt = $pdo->prepare("SELECT * FROM command_suggestions ORDER BY status ASC, created_at DESC");
-        $stmt->execute();
-        $suggestions = $stmt->fetchAll();
+        try {
+            // Create command_suggestions table if it doesn't exist
+            $pdo->exec("CREATE TABLE IF NOT EXISTS command_suggestions (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                suggestion_title VARCHAR(255) NOT NULL,
+                suggestion_description TEXT NOT NULL,
+                submitted_by VARCHAR(255) NOT NULL,
+                submission_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status ENUM('pending', 'reviewed', 'implemented') DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )");
+            
+            $stmt = $pdo->prepare("SELECT * FROM command_suggestions ORDER BY status ASC, submission_date DESC");
+            $stmt->execute();
+            $suggestions = $stmt->fetchAll();
+        } catch (Exception $e) {
+            $suggestions = [];
+            error_log("Suggestions query error: " . $e->getMessage());
+        }
         
         // Get award recommendations for backend
         try {
@@ -172,15 +200,21 @@ try {
         }
         
         // Get department summary data
-        $stmt = $pdo->prepare("
-            SELECT 
-                (SELECT COUNT(*) FROM medical_records WHERE status != 'Resolved') as open_medical,
-                (SELECT COUNT(*) FROM fault_reports WHERE status != 'Resolved') as open_faults,
-                (SELECT COUNT(*) FROM security_reports WHERE status != 'Resolved') as open_security,
-                (SELECT COUNT(*) FROM roster) as total_crew
-        ");
-        $stmt->execute();
-        $summary = $stmt->fetch();
+        try {
+            $stmt = $pdo->prepare("
+                SELECT 
+                    (SELECT COUNT(*) FROM medical_records WHERE status != 'Resolved') as open_medical,
+                    (SELECT COUNT(*) FROM fault_reports WHERE status != 'Resolved') as open_faults,
+                    (SELECT COUNT(*) FROM security_reports WHERE status != 'Resolved') as open_security,
+                    (SELECT COUNT(*) FROM roster) as total_crew
+            ");
+            $stmt->execute();
+            $summary = $stmt->fetch();
+        } catch (Exception $e) {
+            // If tables don't exist, use safe defaults
+            $summary = ['open_medical' => 0, 'open_faults' => 0, 'open_security' => 0, 'total_crew' => 0];
+            error_log("Summary query error: " . $e->getMessage());
+        }
     } else {
         // Initialize empty arrays for non-command users
         $suggestions = [];
