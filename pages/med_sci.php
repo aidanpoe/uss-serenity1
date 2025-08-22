@@ -212,8 +212,6 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_science_re
         $error = "Only Command staff and Starfleet Auditors can delete science reports.";
     }
 }
-    }
-}
 
 try {
     $pdo = getConnection();
@@ -527,7 +525,9 @@ try {
 											<button type="submit" style="background-color: var(--blue); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; width: 100%; margin-bottom: 0.5rem;">Update</button>
 										</form>
 										
-										<?php if (hasPermission('Command') || hasPermission('Starfleet Auditor')): ?>
+										<?php 
+										$roster_dept = $_SESSION['roster_department'] ?? '';
+										if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
 										<form method="POST" action="" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this medical record? This action cannot be undone.');">
 											<input type="hidden" name="action" value="delete_medical_record">
 											<input type="hidden" name="record_id" value="<?php echo $record['id']; ?>">
@@ -557,7 +557,9 @@ try {
 										</div>
 									</div>
 									
-									<?php if (hasPermission('Command') || hasPermission('Starfleet Auditor')): ?>
+									<?php 
+									$roster_dept = $_SESSION['roster_department'] ?? '';
+									if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>
 									<div style="margin-left: 1rem;">
 										<form method="POST" action="" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this science report? This action cannot be undone.');">
 											<input type="hidden" name="action" value="delete_science_report">
