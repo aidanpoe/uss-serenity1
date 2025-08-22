@@ -21,6 +21,10 @@ try {
         $hasRosterId = false;
         $hasAssignedBy = false;
         $hasIsCurrent = false;
+        $hasAssignedDate = false;
+        $hasStatus = false;
+        $hasCompletionDate = false;
+        $hasNotes = false;
         
         foreach ($columns as $column) {
             if ($column['Field'] === 'user_id') {
@@ -34,6 +38,18 @@ try {
             }
             if ($column['Field'] === 'is_current') {
                 $hasIsCurrent = true;
+            }
+            if ($column['Field'] === 'assigned_date') {
+                $hasAssignedDate = true;
+            }
+            if ($column['Field'] === 'status') {
+                $hasStatus = true;
+            }
+            if ($column['Field'] === 'completion_date') {
+                $hasCompletionDate = true;
+            }
+            if ($column['Field'] === 'notes') {
+                $hasNotes = true;
             }
         }
         
@@ -111,6 +127,46 @@ try {
                 echo "<p>✅ Added is_current column</p>";
             }
             
+            // Ensure assigned_date column exists
+            if (!$hasAssignedDate) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN assigned_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP");
+                echo "<p>✅ Added assigned_date column</p>";
+            }
+            
+            // Ensure status column exists
+            if (!$hasStatus) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN status ENUM('assigned', 'in_progress', 'completed', 'expired') NOT NULL DEFAULT 'assigned'");
+                echo "<p>✅ Added status column</p>";
+            }
+            
+            // Ensure completion_date column exists
+            if (!$hasCompletionDate) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN completion_date DATETIME NULL");
+                echo "<p>✅ Added completion_date column</p>";
+            }
+            
+            // Ensure notes column exists
+            if (!$hasNotes) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN notes TEXT NULL");
+                echo "<p>✅ Added notes column</p>";
+            }
+            
+            // Ensure updated_at column exists
+            try {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN updated_at DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP");
+                echo "<p>✅ Added updated_at column</p>";
+            } catch (Exception $e) {
+                echo "<p>ℹ️ updated_at column already exists</p>";
+            }
+            
+            // Ensure completion_notes column exists
+            try {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN completion_notes TEXT NULL");
+                echo "<p>✅ Added completion_notes column</p>";
+            } catch (Exception $e) {
+                echo "<p>ℹ️ completion_notes column already exists</p>";
+            }
+            
             // Update unique constraint
             $pdo->exec("ALTER TABLE crew_competencies DROP INDEX IF EXISTS unique_assignment");
             $pdo->exec("ALTER TABLE crew_competencies ADD UNIQUE KEY unique_assignment (roster_id, module_id, is_current)");
@@ -131,6 +187,46 @@ try {
             if (!$hasIsCurrent) {
                 $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN is_current TINYINT(1) NOT NULL DEFAULT 1");
                 echo "<p>✅ Added is_current column</p>";
+            }
+            
+            // Ensure assigned_date column exists
+            if (!$hasAssignedDate) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN assigned_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP");
+                echo "<p>✅ Added assigned_date column</p>";
+            }
+            
+            // Ensure status column exists
+            if (!$hasStatus) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN status ENUM('assigned', 'in_progress', 'completed', 'expired') NOT NULL DEFAULT 'assigned'");
+                echo "<p>✅ Added status column</p>";
+            }
+            
+            // Ensure completion_date column exists
+            if (!$hasCompletionDate) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN completion_date DATETIME NULL");
+                echo "<p>✅ Added completion_date column</p>";
+            }
+            
+            // Ensure notes column exists
+            if (!$hasNotes) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN notes TEXT NULL");
+                echo "<p>✅ Added notes column</p>";
+            }
+            
+            // Ensure updated_at column exists
+            try {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN updated_at DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP");
+                echo "<p>✅ Added updated_at column</p>";
+            } catch (Exception $e) {
+                echo "<p>ℹ️ updated_at column already exists</p>";
+            }
+            
+            // Ensure completion_notes column exists
+            try {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN completion_notes TEXT NULL");
+                echo "<p>✅ Added completion_notes column</p>";
+            } catch (Exception $e) {
+                echo "<p>ℹ️ completion_notes column already exists</p>";
             }
             
             echo "<p style='color: green;'>✅ All required columns are present</p>";
