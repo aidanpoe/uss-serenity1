@@ -20,6 +20,7 @@ try {
         $hasUserId = false;
         $hasRosterId = false;
         $hasAssignedBy = false;
+        $hasIsCurrent = false;
         
         foreach ($columns as $column) {
             if ($column['Field'] === 'user_id') {
@@ -30,6 +31,9 @@ try {
             }
             if ($column['Field'] === 'assigned_by') {
                 $hasAssignedBy = true;
+            }
+            if ($column['Field'] === 'is_current') {
+                $hasIsCurrent = true;
             }
         }
         
@@ -101,6 +105,12 @@ try {
                 echo "<p>✅ Added assigned_by column</p>";
             }
             
+            // Ensure is_current column exists
+            if (!$hasIsCurrent) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN is_current TINYINT(1) NOT NULL DEFAULT 1");
+                echo "<p>✅ Added is_current column</p>";
+            }
+            
             // Update unique constraint
             $pdo->exec("ALTER TABLE crew_competencies DROP INDEX IF EXISTS unique_assignment");
             $pdo->exec("ALTER TABLE crew_competencies ADD UNIQUE KEY unique_assignment (roster_id, module_id, is_current)");
@@ -109,7 +119,21 @@ try {
             echo "<h2>✅ Migration Complete!</h2>";
             
         } else if ($hasRosterId) {
-            echo "<p style='color: green;'>✅ Table already uses roster_id - no migration needed</p>";
+            echo "<p style='color: green;'>✅ Table already uses roster_id - checking for missing columns</p>";
+            
+            // Ensure assigned_by column exists
+            if (!$hasAssignedBy) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN assigned_by INT NOT NULL DEFAULT 1");
+                echo "<p>✅ Added assigned_by column</p>";
+            }
+            
+            // Ensure is_current column exists
+            if (!$hasIsCurrent) {
+                $pdo->exec("ALTER TABLE crew_competencies ADD COLUMN is_current TINYINT(1) NOT NULL DEFAULT 1");
+                echo "<p>✅ Added is_current column</p>";
+            }
+            
+            echo "<p style='color: green;'>✅ All required columns are present</p>";
         } else {
             echo "<p style='color: red;'>❌ Table has neither user_id nor roster_id - needs manual review</p>";
         }

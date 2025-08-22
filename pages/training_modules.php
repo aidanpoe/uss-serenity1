@@ -63,13 +63,44 @@ try {
         }
     }
     
+    // Handle deleting module
+    if ($_POST && isset($_POST['action']) && $_POST['action'] === 'delete_module') {
+        if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+            $error = "Invalid security token. Please try again.";
+        } else {
+            // Check if module has active assignments
+            $checkStmt = $pdo->prepare("SELECT COUNT(*) as count FROM crew_competencies WHERE module_id = ?");
+            $checkStmt->execute([$_POST['module_id']]);
+            $assignmentCount = $checkStmt->fetch()['count'];
+            
+            if ($assignmentCount > 0) {
+                $error = "Cannot delete module: {$assignmentCount} active assignments exist. Please complete or remove assignments first.";
+            } else {
+                // Get module name for success message
+                $nameStmt = $pdo->prepare("SELECT module_name FROM training_modules WHERE id = ?");
+                $nameStmt->execute([$_POST['module_id']]);
+                $moduleName = $nameStmt->fetch()['module_name'];
+                
+                // Delete all historical assignments first
+                $deleteAssignments = $pdo->prepare("DELETE FROM crew_competencies WHERE module_id = ?");
+                $deleteAssignments->execute([$_POST['module_id']]);
+                
+                // Delete the module
+                $deleteModule = $pdo->prepare("DELETE FROM training_modules WHERE id = ?");
+                $deleteModule->execute([$_POST['module_id']]);
+                
+                $success = "Training module '{$moduleName}' and all associated records deleted successfully!";
+            }
+        }
+    }
+    
     // Get all training modules
     $stmt = $pdo->query("
         SELECT tm.*, u.username as created_by_name,
                COUNT(cc.id) as assigned_count
         FROM training_modules tm
         LEFT JOIN users u ON tm.created_by = u.id
-        LEFT JOIN crew_competencies cc ON tm.id = cc.module_id AND cc.is_current = 1
+        LEFT JOIN crew_competencies cc ON tm.id = cc.module_id
         GROUP BY tm.id
         ORDER BY tm.department, tm.certification_level, tm.module_name
     ");
@@ -468,6 +499,8 @@ try {
 								<div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
 									<button onclick="toggleEditForm(<?php echo $module['id']; ?>)" class="button-small">Edit</button>
 									<a href="training_assignment.php?module_id=<?php echo $module['id']; ?>" class="button-small">Assign to Crew</a>
+									<button onclick="confirmDeleteModule(<?php echo $module['id']; ?>, '<?php echo htmlspecialchars($module['module_name'], ENT_QUOTES); ?>', <?php echo $module['assigned_count']; ?>)" 
+									        class="button-small" style="background: var(--red); color: white;">Delete</button>
 								</div>
 								
 								<!-- Edit Form (Hidden by default) -->
@@ -520,6 +553,13 @@ try {
 						</div>
 					</div>
 					
+					<!-- Hidden Delete Form -->
+					<form id="delete-form" method="POST" style="display: none;">
+						<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+						<input type="hidden" name="action" value="delete_module">
+						<input type="hidden" name="module_id" id="delete-module-id">
+					</form>
+					
 				</main>
 				<footer>
 					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
@@ -536,6 +576,18 @@ try {
 				form.style.display = 'block';
 			} else {
 				form.style.display = 'none';
+			}
+		}
+		
+		function confirmDeleteModule(moduleId, moduleName, assignedCount) {
+			if (assignedCount > 0) {
+				alert('Cannot delete "' + moduleName + '": It has ' + assignedCount + ' active assignments. Please complete or remove assignments first.');
+				return;
+			}
+			
+			if (confirm('Are you sure you want to delete the training module "' + moduleName + '"?\n\nThis action cannot be undone and will also delete all historical assignment records for this module.')) {
+				document.getElementById('delete-module-id').value = moduleId;
+				document.getElementById('delete-form').submit();
 			}
 		}
 	</script>

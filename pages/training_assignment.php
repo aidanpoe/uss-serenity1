@@ -21,7 +21,7 @@ try {
             // Check if assignment already exists
             $checkStmt = $pdo->prepare("
                 SELECT id FROM crew_competencies 
-                WHERE roster_id = ? AND module_id = ? AND is_current = 1
+                WHERE roster_id = ? AND module_id = ?
             ");
             $checkStmt->execute([$_POST['roster_id'], $_POST['module_id']]);
             
@@ -58,7 +58,7 @@ try {
                 // Check if assignment already exists
                 $checkStmt = $pdo->prepare("
                     SELECT id FROM crew_competencies 
-                    WHERE roster_id = ? AND module_id = ? AND is_current = 1
+                    WHERE roster_id = ? AND module_id = ?
                 ");
                 $checkStmt->execute([$roster_id, $_POST['module_id']]);
                 
