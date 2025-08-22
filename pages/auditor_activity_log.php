@@ -1,6 +1,10 @@
 <?php
 require_once '../includes/config.php';
 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Check if user has command access or is Starfleet Auditor
 $roster_dept = $_SESSION['roster_department'] ?? '';
 if (!hasPermission('Command') && $roster_dept !== 'Starfleet Auditor') {
@@ -70,6 +74,9 @@ try {
     
 } catch (Exception $e) {
     $error = "Database error: " . $e->getMessage();
+    error_log("Auditor Activity Log Error: " . $e->getMessage());
+    // For debugging, also display the error
+    $debug_error = $e->getMessage();
 }
 ?>
 <!DOCTYPE html>
@@ -183,6 +190,24 @@ try {
 						<p style="color: var(--red);"><?php echo htmlspecialchars($error); ?></p>
 					</div>
 					<?php endif; ?>
+					
+					<?php if (isset($debug_error)): ?>
+					<div style="background: rgba(255, 165, 0, 0.3); border: 2px solid var(--orange); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+						<p style="color: var(--orange);"><strong>Debug Error:</strong> <?php echo htmlspecialchars($debug_error); ?></p>
+					</div>
+					<?php endif; ?>
+					
+					<!-- Debug Info -->
+					<div style="background: rgba(0, 255, 255, 0.1); border: 2px solid var(--blue); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+						<h4 style="color: var(--blue);">Debug Information:</h4>
+						<p>Total audit logs found: <?php echo isset($audit_logs) ? count($audit_logs) : 'Not set'; ?></p>
+						<p>Filter days: <?php echo htmlspecialchars($filter_days); ?></p>
+						<p>Filter auditor: <?php echo htmlspecialchars($filter_auditor); ?></p>
+						<p>Filter action: <?php echo htmlspecialchars($filter_action); ?></p>
+						<p>Current user department: <?php echo htmlspecialchars($roster_dept); ?></p>
+						<p>Available auditors: <?php echo isset($auditors) ? count($auditors) : 'Not set'; ?></p>
+						<p>Available action types: <?php echo isset($action_types) ? count($action_types) : 'Not set'; ?></p>
+					</div>
 					
 					<!-- Filter Section -->
 					<div class="audit-container">
