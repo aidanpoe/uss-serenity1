@@ -129,9 +129,31 @@ try {
         $suggestions = $stmt->fetchAll();
         
         // Get award recommendations for backend
-        $stmt = $pdo->prepare("SELECT * FROM award_recommendations ORDER BY status ASC, submitted_at DESC");
-        $stmt->execute();
-        $award_recommendations = $stmt->fetchAll();
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM award_recommendations ORDER BY status ASC, submitted_at DESC");
+            $stmt->execute();
+            $award_recommendations = $stmt->fetchAll();
+        } catch (Exception $e) {
+            // If table doesn't exist, create it and initialize empty array
+            if (strpos($e->getMessage(), "doesn't exist") !== false) {
+                $pdo->exec("CREATE TABLE IF NOT EXISTS award_recommendations (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    recommended_person VARCHAR(255) NOT NULL,
+                    recommended_award VARCHAR(255) NOT NULL,
+                    justification TEXT NOT NULL,
+                    submitted_by VARCHAR(255) NOT NULL,
+                    status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+                    reviewed_by VARCHAR(255),
+                    review_notes TEXT,
+                    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    reviewed_at TIMESTAMP NULL
+                )");
+                $award_recommendations = [];
+            } else {
+                $award_recommendations = [];
+                error_log("Award recommendations query error: " . $e->getMessage());
+            }
+        }
         
         // Get department summary data
         $stmt = $pdo->prepare("
@@ -143,10 +165,16 @@ try {
         ");
         $stmt->execute();
         $summary = $stmt->fetch();
+    } else {
+        // Initialize empty arrays for non-command users
+        $suggestions = [];
+        $award_recommendations = [];
     }
     
 } catch (Exception $e) {
     $error = "Database error: " . $e->getMessage();
+    $suggestions = [];
+    $award_recommendations = [];
 }
 ?>
 <!DOCTYPE html>
