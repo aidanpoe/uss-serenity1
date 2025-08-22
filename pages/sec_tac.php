@@ -462,7 +462,7 @@ try {
 										<span style="background: var(--<?php echo strtolower(str_replace(' ', '-', $report['incident_type'])); ?>); color: black; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
 											<?php echo htmlspecialchars($report['incident_type']); ?>
 										</span><br><br>
-										<small>Reported: <?php echo date('Y-m-d H:i', strtotime($report['created_at'])); ?></small><br>
+										<small>Reported: <?php echo formatICDateTime($report['created_at']); ?></small><br>
 										<small>By: <?php echo htmlspecialchars($report['reported_by']); ?></small><br>
 										<?php if ($report['first_name']): ?>
 										<small>Involves: <?php echo htmlspecialchars($report['rank'] . ' ' . $report['first_name'] . ' ' . $report['last_name']); ?></small>

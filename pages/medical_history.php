@@ -172,7 +172,7 @@ try {
 								<div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start;">
 									<div>
 										<div style="color: var(--blue); font-weight: bold; margin-bottom: 0.5rem;">
-											Medical Record - <?php echo date('Y-m-d H:i', strtotime($record['created_at'])); ?>
+											Medical Record - <?php echo formatICDateTime($record['created_at']); ?>
 										</div>
 										
 										<div style="margin-bottom: 1rem;">
@@ -196,7 +196,7 @@ try {
 										
 										<?php if ($record['updated_at'] !== $record['created_at']): ?>
 										<div style="color: var(--orange); font-size: 0.9rem;">
-											Last updated: <?php echo date('Y-m-d H:i', strtotime($record['updated_at'])); ?>
+											Last updated: <?php echo formatICDateTime($record['updated_at']); ?>
 											<?php if (!empty($record['updated_by'])): ?>
 												by <?php echo htmlspecialchars($record['updated_by']); ?>
 											<?php endif; ?>

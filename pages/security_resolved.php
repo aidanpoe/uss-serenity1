@@ -200,12 +200,12 @@ try {
 											</td>
 											<td style="padding: 1rem; border: 1px solid var(--gold);">
 												<div style="color: var(--orange); font-size: 0.8rem;">
-													<?php echo date('Y-m-d H:i', strtotime($report['created_at'])); ?>
+													<?php echo formatICDateTime($report['created_at']); ?>
 												</div>
 											</td>
 											<td style="padding: 1rem; border: 1px solid var(--gold);">
 												<div style="color: var(--green); font-size: 0.8rem;">
-													<?php echo date('Y-m-d H:i', strtotime($report['updated_at'])); ?>
+													<?php echo formatICDateTime($report['updated_at']); ?>
 												</div>
 											</td>
 											<?php $roster_dept = $_SESSION['roster_department'] ?? ''; if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>

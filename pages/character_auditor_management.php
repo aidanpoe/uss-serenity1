@@ -259,7 +259,7 @@ try {
                             <div class="record-details">
                                 <p><strong>Action:</strong> <?= $assignment['is_active'] ? 'Promoted to Starfleet Auditor' : 'Auditor status revoked' ?></p>
                                 <p><strong>By:</strong> <?= htmlspecialchars($assignment['assigned_by_first']) ?> <?= htmlspecialchars($assignment['assigned_by_last']) ?></p>
-                                <p><strong>Date:</strong> <?= date('Y-m-d H:i:s', strtotime($assignment['assigned_at'])) ?></p>
+                                <p><strong>Date:</strong> <?= formatICDateTime($assignment['assigned_at']) ?></p>
                                 <?php if ($assignment['notes']): ?>
                                     <p><strong>Notes:</strong> <?= htmlspecialchars($assignment['notes']) ?></p>
                                 <?php endif; ?>

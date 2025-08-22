@@ -207,12 +207,12 @@ try {
 											</td>
 											<td style="padding: 1rem; border: 1px solid var(--orange);">
 												<div style="color: var(--orange); font-size: 0.8rem;">
-													<?php echo date('Y-m-d H:i', strtotime($fault['created_at'])); ?>
+													<?php echo formatICDateTime($fault['created_at']); ?>
 												</div>
 											</td>
 											<td style="padding: 1rem; border: 1px solid var(--orange);">
 												<div style="color: var(--green); font-size: 0.8rem;">
-													<?php echo date('Y-m-d H:i', strtotime($fault['updated_at'])); ?>
+													<?php echo formatICDateTime($fault['updated_at']); ?>
 												</div>
 											</td>
 											<?php $roster_dept = $_SESSION['roster_department'] ?? ''; if (hasPermission('Command') || $roster_dept === 'Starfleet Auditor'): ?>

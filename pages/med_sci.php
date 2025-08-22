@@ -503,7 +503,7 @@ try {
 								<div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 1rem;">
 									<div>
 										<strong><?php echo htmlspecialchars($record['rank'] . ' ' . $record['first_name'] . ' ' . $record['last_name']); ?></strong><br>
-										<small>Reported: <?php echo date('Y-m-d H:i', strtotime($record['created_at'])); ?></small><br>
+										<small>Reported: <?php echo formatICDateTime($record['created_at']); ?></small><br>
 										<small>By: <?php echo htmlspecialchars($record['reported_by']); ?></small>
 									</div>
 									<div>
@@ -552,7 +552,7 @@ try {
 									<div style="flex-grow: 1;">
 										<h5 style="color: var(--ice);"><?php echo htmlspecialchars($report['title']); ?></h5>
 										<p><?php echo htmlspecialchars($report['description']); ?></p>
-										<small>Submitted by: <?php echo htmlspecialchars($report['reported_by']); ?> on <?php echo date('Y-m-d H:i', strtotime($report['created_at'])); ?></small>
+										<small>Submitted by: <?php echo htmlspecialchars($report['reported_by']); ?> on <?php echo formatICDateTime($report['created_at']); ?></small>
 										<div style="margin-top: 0.5rem;">
 											<span style="background: var(--<?php echo strtolower(str_replace(' ', '-', $report['status'])); ?>); color: black; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
 												<?php echo htmlspecialchars($report['status']); ?>

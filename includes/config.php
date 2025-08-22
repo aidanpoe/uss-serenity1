@@ -527,4 +527,39 @@ function getCurrentUserFullName() {
     $last_name = $_SESSION['last_name'] ?? 'User';
     return trim($first_name . ' ' . $last_name);
 }
+
+/**
+ * Format a date/time for in-character display (adds 360 years)
+ * This function should be used for all IC timestamps except last_active
+ */
+function formatICDate($datetime, $format = 'Y-m-d H:i') {
+    if (empty($datetime)) {
+        return '';
+    }
+    
+    // Convert to timestamp
+    $timestamp = is_numeric($datetime) ? $datetime : strtotime($datetime);
+    if ($timestamp === false) {
+        return $datetime; // Return original if parsing fails
+    }
+    
+    // Add 360 years (360 * 365.25 * 24 * 60 * 60 seconds)
+    $ic_timestamp = $timestamp + (360 * 365.25 * 24 * 60 * 60);
+    
+    return date($format, $ic_timestamp);
+}
+
+/**
+ * Format a date for in-character display (date only, adds 360 years)
+ */
+function formatICDateOnly($datetime) {
+    return formatICDate($datetime, 'Y-m-d');
+}
+
+/**
+ * Format a datetime for in-character display (full datetime, adds 360 years)
+ */
+function formatICDateTime($datetime) {
+    return formatICDate($datetime, 'Y-m-d H:i');
+}
 ?>

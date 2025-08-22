@@ -416,7 +416,7 @@ try {
 											- Tube <?php echo htmlspecialchars($fault['jefferies_tube_number']); ?>
 										<?php endif; ?>
 										<br>
-										<small>Reported: <?php echo date('Y-m-d H:i', strtotime($fault['created_at'])); ?></small><br>
+										<small>Reported: <?php echo formatICDateTime($fault['created_at']); ?></small><br>
 										<?php if ($fault['first_name']): ?>
 										<small>By: <?php echo htmlspecialchars($fault['rank'] . ' ' . $fault['first_name'] . ' ' . $fault['last_name']); ?></small>
 										<?php endif; ?>

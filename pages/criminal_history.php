@@ -403,7 +403,7 @@ try {
 								<div style="font-size: 0.9rem; color: var(--bluey);">
 									<strong>Investigating Officer:</strong> <?php echo htmlspecialchars($record['investigating_officer'] ?? 'Not Assigned'); ?><br>
 									<strong>Reported By:</strong> <?php echo htmlspecialchars($record['reported_by'] ?? 'Unknown'); ?><br>
-									<strong>Record Created:</strong> <?php echo date('M j, Y g:i A', strtotime($record['created_at'])); ?>
+									<strong>Record Created:</strong> <?php echo formatICDate($record['created_at'], 'M j, Y g:i A'); ?>
 								</div>
 								
 								<?php if ($record['status'] === 'Under Investigation' || $record['status'] === 'Pending Review'): ?>
