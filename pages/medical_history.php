@@ -197,6 +197,9 @@ try {
 										<?php if ($record['updated_at'] !== $record['created_at']): ?>
 										<div style="color: var(--orange); font-size: 0.9rem;">
 											Last updated: <?php echo date('Y-m-d H:i', strtotime($record['updated_at'])); ?>
+											<?php if (!empty($record['updated_by'])): ?>
+												by <?php echo htmlspecialchars($record['updated_by']); ?>
+											<?php endif; ?>
 										</div>
 										<?php endif; ?>
 									</div>

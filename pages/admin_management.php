@@ -64,17 +64,18 @@ try {
                 ]);
                 
                 // Add final medical record
-                $stmt = $pdo->prepare("INSERT INTO medical_records (roster_id, condition_description, treatment, reported_by, status) VALUES (?, ?, ?, ?, 'Deceased')");
+                $stmt = $pdo->prepare("INSERT INTO medical_records (roster_id, condition_description, treatment, reported_by, status, updated_by) VALUES (?, ?, ?, ?, 'Deceased', ?)");
                 $stmt->execute([
                     $_POST['roster_id'],
                     "Crew member declared deceased. Cause: " . $_POST['cause_of_death'],
                     "Final medical record - crew member deceased",
-                    $_SESSION['user_first_name'] . ' ' . $_SESSION['user_last_name']
+                    $_SESSION['user_first_name'] . ' ' . $_SESSION['user_last_name'],
+                    getCurrentUserFullName()
                 ]);
                 
                 // Close any open medical records
-                $stmt = $pdo->prepare("UPDATE medical_records SET status = 'Resolved' WHERE roster_id = ? AND status IN ('Open', 'In Progress')");
-                $stmt->execute([$_POST['roster_id']]);
+                $stmt = $pdo->prepare("UPDATE medical_records SET status = 'Resolved', updated_by = ? WHERE roster_id = ? AND status IN ('Open', 'In Progress')");
+                $stmt->execute([getCurrentUserFullName(), $_POST['roster_id']]);
                 
                 $pdo->commit();
                 $success = "Crew member has been marked as deceased and medical records updated.";

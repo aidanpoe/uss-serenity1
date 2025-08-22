@@ -73,11 +73,12 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'medical_report') 
             $reported_by = sanitizeInput(($_SESSION['rank'] ?? '') . ' ' . ($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? ''));
             
             $pdo = getConnection();
-            $stmt = $pdo->prepare("INSERT INTO medical_records (roster_id, condition_description, reported_by) VALUES (?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO medical_records (roster_id, condition_description, reported_by, updated_by) VALUES (?, ?, ?, ?)");
             $stmt->execute([
                 filter_var($_POST['roster_id'], FILTER_VALIDATE_INT),
                 sanitizeInput($_POST['condition_description']),
-                $reported_by
+                $reported_by,
+                getCurrentUserFullName()
             ]);
             $success = "Medical report submitted successfully.";
         } catch (Exception $e) {
@@ -122,10 +123,11 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_medical') 
     } elseif (hasPermission('MED/SCI')) {
         try {
             $pdo = getConnection();
-            $stmt = $pdo->prepare("UPDATE medical_records SET status = ?, treatment = ? WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE medical_records SET status = ?, treatment = ?, updated_by = ? WHERE id = ?");
             $stmt->execute([
                 sanitizeInput($_POST['status']),
                 sanitizeInput($_POST['treatment']),
+                getCurrentUserFullName(),
                 filter_var($_POST['record_id'], FILTER_VALIDATE_INT)
             ]);
             $success = "Medical record updated successfully.";

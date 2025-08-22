@@ -518,4 +518,13 @@ function getAuditorActivityLog($limit = 50) {
         return [];
     }
 }
+
+/**
+ * Get the current user's full name for tracking updates
+ */
+function getCurrentUserFullName() {
+    $first_name = $_SESSION['first_name'] ?? 'Unknown';
+    $last_name = $_SESSION['last_name'] ?? 'User';
+    return trim($first_name . ' ' . $last_name);
+}
 ?>

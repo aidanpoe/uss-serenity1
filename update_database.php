@@ -169,6 +169,7 @@ try {
             reported_by VARCHAR(255) NOT NULL,
             status VARCHAR(50) DEFAULT 'Open',
             treatment TEXT,
+            updated_by VARCHAR(255) DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX idx_roster_id (roster_id),
