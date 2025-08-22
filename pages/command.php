@@ -352,24 +352,24 @@ try {
 						</div>
 					</div>
 					
-					<!-- Captain-Only Auditor Management -->
+					<!-- Captain-Only Character Auditor Management -->
 					<?php if (hasPermission('Captain')): ?>
 					<div style="background: rgba(255, 140, 0, 0.1); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--orange);">
 						<h3 style="color: var(--orange); text-align: center;">🛡️ Captain's Special Operations</h3>
 						<p style="color: var(--orange); text-align: center; margin-bottom: 2rem;">
-							<em>Captain Access Only - OOC Administration</em>
+							<em>Captain Access Only - Character-Based OOC Administration</em>
 						</p>
 						
 						<div style="display: flex; justify-content: center; gap: 1rem;">
-							<button onclick="playSoundAndRedirect('audio2', 'auditor_management.php')" style="background-color: var(--orange); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-weight: bold;">
-								🛡️ Starfleet Auditor Management
+							<button onclick="playSoundAndRedirect('audio2', 'character_auditor_management.php')" style="background-color: var(--orange); color: black; border: none; padding: 1rem 2rem; border-radius: 5px; font-weight: bold;">
+								🛡️ Character Auditor Management
 							</button>
 						</div>
 						
 						<div style="margin-top: 1.5rem; text-align: center;">
 							<small style="color: var(--orange);">
-								Manage OOC moderation accounts with full system access.<br>
-								Auditors remain invisible from all rosters and crew listings.
+								Assign Starfleet Auditor status to specific characters.<br>
+								Character-based system for OOC moderation without roleplay disruption.
 							</small>
 						</div>
 					</div>

@@ -153,6 +153,9 @@ function switchCharacter($character_id) {
             case 'Command':
                 $user_department = 'Command';
                 break;
+            case 'Starfleet Auditor':
+                $user_department = 'Starfleet Auditor';
+                break;
             default:
                 $user_department = 'SEC/TAC'; // Default fallback
                 break;
@@ -162,6 +165,13 @@ function switchCharacter($character_id) {
         $stmt = $pdo->prepare("UPDATE users SET active_character_id = ?, department = ? WHERE id = ?");
         $stmt->execute([$character_id, $user_department, $_SESSION['user_id']]);
         
+        // If character is Starfleet Auditor, ensure they are invisible
+        if ($character['department'] === 'Starfleet Auditor') {
+            $stmt = $pdo->prepare("UPDATE roster SET is_invisible = 1 WHERE id = ?");
+            $stmt->execute([$character_id]);
+            $character['is_invisible'] = 1; // Update local data
+        }
+        
         // Update session variables with new character data
         $_SESSION['first_name'] = $character['first_name'];
         $_SESSION['last_name'] = $character['last_name'];
@@ -170,6 +180,7 @@ function switchCharacter($character_id) {
         $_SESSION['department'] = $user_department; // Use the mapped permission group
         $_SESSION['roster_department'] = $character['department']; // Store original department too
         $_SESSION['character_id'] = $character_id; // Store character ID for tracking
+        $_SESSION['is_invisible'] = $character['is_invisible'] ?? 0; // Store invisibility status
         
         // Update last_active timestamp for the new character
         $stmt = $pdo->prepare("UPDATE roster SET last_active = NOW() WHERE id = ?");
@@ -254,18 +265,24 @@ function hasPermission($required_department) {
     $user_rank = $_SESSION['rank'] ?? '';
     $roster_dept = $_SESSION['roster_department'] ?? '';
     
-    // Starfleet Auditors have access to everything (OOC moderation)
+    // Priority 1: Check if current character is a Starfleet Auditor (character-based)
+    if ($roster_dept === 'Starfleet Auditor') {
+        return true;
+    }
+    
+    // Priority 2: Starfleet Auditors at user level have access to everything (legacy support)
     if ($user_dept === 'Starfleet Auditor') {
         return true;
     }
     
-    // Captain and Command ranks have access to everything
+    // Priority 3: Captain and Command ranks have access to everything
     if ($user_rank === 'Captain' || $user_rank === 'Commander' || $user_dept === 'Command' || $roster_dept === 'Command') {
         return true;
     }
     
-    // Check specific department access
-    return $user_dept === $required_department;
+    // Priority 4: Check specific department access (use character department first, fallback to user department)
+    $active_department = $roster_dept ?: $user_dept;
+    return $active_department === $required_department;
 }
 
 // Check if user can edit personnel files (Heads of departments, Command, Captain, Starfleet Auditor)
@@ -273,13 +290,19 @@ function canEditPersonnelFiles() {
     if (!isLoggedIn()) return false;
     
     $user_dept = getUserDepartment();
+    $roster_dept = $_SESSION['roster_department'] ?? '';
     
-    // Starfleet Auditors have full access
+    // Priority 1: Check if current character is a Starfleet Auditor (character-based)
+    if ($roster_dept === 'Starfleet Auditor') {
+        return true;
+    }
+    
+    // Priority 2: Starfleet Auditors at user level have full access (legacy support)
     if ($user_dept === 'Starfleet Auditor') {
         return true;
     }
     
-    // Captain and Command have access
+    // Priority 3: Captain and Command have access
     if ($user_dept === 'Command' || $user_dept === 'Captain') {
         return true;
     }

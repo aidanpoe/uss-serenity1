@@ -30,6 +30,11 @@ $department_permissions = [
     'Command' => 'Command'
 ];
 
+// Add Starfleet Auditor option for Captains only
+if (hasPermission('Captain') || getUserDepartment() === 'Captain') {
+    $department_permissions['Starfleet Auditor'] = 'Starfleet Auditor';
+}
+
 // Map individual departments to roster display departments
 $roster_department_mapping = [
     'Medical' => 'MED/SCI',
@@ -38,7 +43,8 @@ $roster_department_mapping = [
     'Operations' => 'ENG/OPS',
     'Security' => 'SEC/TAC',
     'Tactical' => 'SEC/TAC',
-    'Command' => 'Command'
+    'Command' => 'Command',
+    'Starfleet Auditor' => 'Starfleet Auditor'
 ];
 
 // Available ranks (excluding command ranks)
@@ -111,9 +117,10 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
         }
         
         // Create new character
+        $is_invisible = ($roster_department === 'Starfleet Auditor') ? 1 : 0;
         $stmt = $pdo->prepare("
-            INSERT INTO roster (user_id, character_name, first_name, last_name, species, department, position, rank, image_path, is_active, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())
+            INSERT INTO roster (user_id, character_name, first_name, last_name, species, department, position, rank, image_path, is_active, is_invisible, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, NOW())
         ");
         $stmt->execute([
             $_SESSION['user_id'],
@@ -124,10 +131,17 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
             $roster_department,  // Use mapped department
             $_POST['position'],
             $_POST['rank'],
-            $image_path
+            $image_path,
+            $is_invisible
         ]);
         
         $character_id = $pdo->lastInsertId();
+        
+        // If this is a Starfleet Auditor character, log the assignment
+        if ($roster_department === 'Starfleet Auditor') {
+            $stmt = $pdo->prepare("INSERT INTO character_auditor_assignments (roster_id, assigned_by_user_id, notes, is_active) VALUES (?, ?, ?, 1)");
+            $stmt->execute([$character_id, $_SESSION['user_id'], 'Character created as Starfleet Auditor']);
+        }
         
         // Update user's department permission based on new character's department
         $permission_group = $department_permissions[$_POST['department']];
@@ -357,9 +371,22 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
 									<select id="department" name="department" required>
 										<option value="">Select Department</option>
 										<?php foreach ($department_permissions as $dept => $perm): ?>
-										<option value="<?php echo htmlspecialchars($dept); ?>"><?php echo htmlspecialchars($dept); ?> (<?php echo htmlspecialchars($perm); ?> Access)</option>
+											<?php if ($dept === 'Starfleet Auditor'): ?>
+												<option value="<?php echo htmlspecialchars($dept); ?>" style="color: #ff9900; font-weight: bold;">
+													🛡️ <?php echo htmlspecialchars($dept); ?> (Captain-Only OOC Role)
+												</option>
+											<?php else: ?>
+												<option value="<?php echo htmlspecialchars($dept); ?>">
+													<?php echo htmlspecialchars($dept); ?> (<?php echo htmlspecialchars($perm); ?> Access)
+												</option>
+											<?php endif; ?>
 										<?php endforeach; ?>
 									</select>
+									<?php if (hasPermission('Captain') || getUserDepartment() === 'Captain'): ?>
+										<small style="color: #ff9900; display: block; margin-top: 0.5rem;">
+											⚠️ Starfleet Auditor: Creates an invisible OOC moderation character with full system access
+										</small>
+									<?php endif; ?>
 								</div>
 								
 								<div class="form-group">
