@@ -31,7 +31,7 @@ try {
     echo "<h3>Creating crew_competencies table...</h3>";
     $pdo->exec("CREATE TABLE IF NOT EXISTS crew_competencies (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
+        roster_id INT NOT NULL,
         module_id INT NOT NULL,
         assigned_by INT NOT NULL,
         assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -41,11 +41,11 @@ try {
         notes TEXT,
         is_current TINYINT(1) DEFAULT 1,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (roster_id) REFERENCES roster(id) ON DELETE CASCADE,
         FOREIGN KEY (module_id) REFERENCES training_modules(id) ON DELETE CASCADE,
         FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_assignment (user_id, module_id, is_current),
-        INDEX idx_user (user_id),
+        UNIQUE KEY unique_assignment (roster_id, module_id, is_current),
+        INDEX idx_roster (roster_id),
         INDEX idx_module (module_id),
         INDEX idx_status (status),
         INDEX idx_current (is_current)

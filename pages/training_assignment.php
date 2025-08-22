@@ -21,21 +21,21 @@ try {
             // Check if assignment already exists
             $checkStmt = $pdo->prepare("
                 SELECT id FROM crew_competencies 
-                WHERE user_id = ? AND module_id = ? AND is_current = 1
+                WHERE roster_id = ? AND module_id = ? AND is_current = 1
             ");
-            $checkStmt->execute([$_POST['user_id'], $_POST['module_id']]);
+            $checkStmt->execute([$_POST['roster_id'], $_POST['module_id']]);
             
             if ($checkStmt->fetch()) {
                 $error = "This training is already assigned to the selected crew member.";
             } else {
                 $stmt = $pdo->prepare("
                     INSERT INTO crew_competencies 
-                    (user_id, module_id, assigned_by, assigned_date, status, notes) 
+                    (roster_id, module_id, assigned_by, assigned_date, status, notes) 
                     VALUES (?, ?, ?, NOW(), 'assigned', ?)
                 ");
                 
                 $stmt->execute([
-                    $_POST['user_id'],
+                    $_POST['roster_id'],
                     $_POST['module_id'],
                     $_SESSION['user_id'],
                     $_POST['notes'] ?? ''
@@ -54,23 +54,23 @@ try {
             $assigned_count = 0;
             $skipped_count = 0;
             
-            foreach ($_POST['selected_users'] as $user_id) {
+            foreach ($_POST['selected_crew'] as $roster_id) {
                 // Check if assignment already exists
                 $checkStmt = $pdo->prepare("
                     SELECT id FROM crew_competencies 
-                    WHERE user_id = ? AND module_id = ? AND is_current = 1
+                    WHERE roster_id = ? AND module_id = ? AND is_current = 1
                 ");
-                $checkStmt->execute([$user_id, $_POST['module_id']]);
+                $checkStmt->execute([$roster_id, $_POST['module_id']]);
                 
                 if (!$checkStmt->fetch()) {
                     $stmt = $pdo->prepare("
                         INSERT INTO crew_competencies 
-                        (user_id, module_id, assigned_by, assigned_date, status, notes) 
+                        (roster_id, module_id, assigned_by, assigned_date, status, notes) 
                         VALUES (?, ?, ?, NOW(), 'assigned', ?)
                     ");
                     
                     $stmt->execute([
-                        $user_id,
+                        $roster_id,
                         $_POST['module_id'],
                         $_SESSION['user_id'],
                         $_POST['bulk_notes'] ?? ''
@@ -131,14 +131,11 @@ try {
     
     // Get all crew members with their current character and department
     $crewStmt = $pdo->query("
-        SELECT u.id, u.username, 
-               COALESCE(r.first_name, 'No') as first_name,
-               COALESCE(r.last_name, 'Character') as last_name,
-               COALESCE(r.rank, 'Unassigned') as current_rank,
-               COALESCE(r.department, 'Unassigned') as current_department
-        FROM users u
-        LEFT JOIN roster r ON u.id = r.user_id AND r.is_active = 1
-        WHERE u.active = 1
+        SELECT r.id as roster_id, r.first_name, r.last_name, r.rank, r.department,
+               u.id as user_id, u.username
+        FROM roster r
+        LEFT JOIN users u ON r.user_id = u.id
+        WHERE r.is_active = 1 AND (u.active = 1 OR u.active IS NULL)
         ORDER BY r.department, r.rank, r.last_name, r.first_name
     ");
     $crew = $crewStmt->fetchAll();
@@ -171,16 +168,13 @@ try {
         SELECT cc.*, 
                tm.module_name, tm.module_code, tm.department as module_department,
                tm.certification_level,
+               r.first_name, r.last_name, r.rank as current_rank, r.department as current_department,
                u.username,
-               COALESCE(r.first_name, 'No') as first_name,
-               COALESCE(r.last_name, 'Character') as last_name,
-               COALESCE(r.rank, 'Unassigned') as current_rank,
-               COALESCE(r.department, 'Unassigned') as current_department,
                assigner.username as assigned_by_name
         FROM crew_competencies cc
         JOIN training_modules tm ON cc.module_id = tm.id
-        JOIN users u ON cc.user_id = u.id
-        LEFT JOIN roster r ON u.id = r.user_id AND r.is_active = 1
+        JOIN roster r ON cc.roster_id = r.id
+        LEFT JOIN users u ON r.user_id = u.id
         LEFT JOIN users assigner ON cc.assigned_by = assigner.id
         {$whereClause}
         ORDER BY cc.assigned_date DESC, tm.department, r.department
@@ -445,13 +439,13 @@ try {
                     </div>
                     
                     <div class="form-group">
-                        <label for="user_id">Crew Member:</label>
-                        <select name="user_id" id="user_id" required>
+                        <label for="roster_id">Crew Member:</label>
+                        <select name="roster_id" id="roster_id" required>
                             <option value="">Select Crew Member</option>
                             <?php foreach ($crew as $member): ?>
-                            <option value="<?php echo $member['id']; ?>">
+                            <option value="<?php echo $member['roster_id']; ?>">
                                 <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?> 
-                                (<?php echo htmlspecialchars($member['current_rank']); ?> - <?php echo htmlspecialchars($member['current_department']); ?>)
+                                (<?php echo htmlspecialchars($member['rank']); ?> - <?php echo htmlspecialchars($member['department']); ?>)
                             </option>
                             <?php endforeach; ?>
                         </select>
@@ -493,10 +487,10 @@ try {
                     <div class="crew-grid">
                         <?php foreach ($crew as $member): ?>
                         <div class="crew-checkbox">
-                            <input type="checkbox" name="selected_users[]" value="<?php echo $member['id']; ?>" id="crew_<?php echo $member['id']; ?>">
-                            <label for="crew_<?php echo $member['id']; ?>">
+                            <input type="checkbox" name="selected_crew[]" value="<?php echo $member['roster_id']; ?>" id="crew_<?php echo $member['roster_id']; ?>">
+                            <label for="crew_<?php echo $member['roster_id']; ?>">
                                 <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?><br>
-                                <small><?php echo htmlspecialchars($member['current_rank']); ?> - <?php echo htmlspecialchars($member['current_department']); ?></small>
+                                <small><?php echo htmlspecialchars($member['rank']); ?> - <?php echo htmlspecialchars($member['department']); ?></small>
                             </label>
                         </div>
                         <?php endforeach; ?>
