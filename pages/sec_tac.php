@@ -525,13 +525,12 @@ try {
 								<strong style="color: var(--gold);">Weapons:</strong> Ready
 							</div>
 							<div>
-								<strong style="color: var(--gold);">Security Teams:</strong> 4 Active<br>
-								<strong style="color: var(--gold);">Patrols:</strong> Deck 1-15<br>
-								<strong style="color: var(--gold);">Armory:</strong> Secured
+								<strong style="color: var(--gold);">Patrols:</strong> Deck 1-11<br>
+								<strong style="color: var(--gold);">Armory:</strong> Secured (Always lock)
 							</div>
 							<div>
-								<strong style="color: var(--gold);">Brig:</strong> Deck 7<br>
-								<strong style="color: var(--gold);">Security Office:</strong> Deck 7<br>
+								<strong style="color: var(--gold);">Brig:</strong> Deck 4<br>
+								<strong style="color: var(--gold);">Security Office:</strong> Deck 4<br>
 								<strong style="color: var(--gold);">Tactical:</strong> Bridge
 							</div>
 						</div>

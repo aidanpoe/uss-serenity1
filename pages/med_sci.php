@@ -590,9 +590,9 @@ try {
 					<div style="background: rgba(85, 102, 255, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">
 						<h4>Department Information</h4>
 						<ul style="color: var(--blue);">
-							<li>Sickbay: Deck 12, Sections 1-4</li>
-							<li>Science Labs: Decks 8-9</li>
-							<li>Medical Emergency: Contact Bridge</li>
+							<li>Sickbay: Deck 6</li>
+							<li>Science Labs: Decks 2 and Deck 5</li>
+							<li>Medical Emergency: Contact Bridge & Medical staff on duty</li>
 							<li>Research Requests: Submit via Science Inquiry form</li>
 						</ul>
 					</div>
