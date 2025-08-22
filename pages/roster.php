@@ -1121,6 +1121,14 @@ $ranks = [
 								</a>
 							</div>
 							<?php endif; ?>
+							
+							<!-- Competencies Button - Available to Everyone -->
+							<div style="margin-top: 0.5rem;">
+								<button onclick="showCompetencies(<?php echo $crew_member['id']; ?>, '<?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name'], ENT_QUOTES); ?>')" 
+								        style="background-color: var(--gold); color: black; border: none; padding: 0.3rem 0.8rem; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">
+									Competencies
+								</button>
+							</div>
 						</div>
 						<?php endforeach; ?>
 					</div>
@@ -1186,6 +1194,317 @@ $ranks = [
 			document.head.appendChild(style);
 		});
 	</script>
+	
+	<!-- Competencies Modal -->
+	<div id="competencies-modal" class="competencies-modal" style="display: none;">
+		<div class="competencies-modal-content">
+			<div class="competencies-header">
+				<div class="competencies-title">TRAINING COMPETENCIES</div>
+				<div class="competencies-subtitle" id="crew-name-display"></div>
+			</div>
+			<div class="competencies-body" id="competencies-content">
+				<div class="loading-message">Loading training records...</div>
+			</div>
+			<div class="competencies-footer">
+				<button onclick="closeCompetencies()" class="lcars-close-button">CLOSE DATABASE ACCESS</button>
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		function showCompetencies(rosterId, crewName) {
+			document.getElementById('crew-name-display').textContent = crewName;
+			document.getElementById('competencies-modal').style.display = 'flex';
+			document.getElementById('competencies-content').innerHTML = '<div class="loading-message">Loading training records...</div>';
+			
+			// Play LCARS sound
+			if (typeof playAudio !== 'undefined') {
+				playAudio('audio3');
+			}
+			
+			// Fetch competencies data
+			fetch('../api/get_competencies.php?roster_id=' + rosterId)
+				.then(response => response.json())
+				.then(data => {
+					displayCompetencies(data);
+				})
+				.catch(error => {
+					document.getElementById('competencies-content').innerHTML = 
+						'<div class="error-message">❌ Error loading training records: ' + error.message + '</div>';
+				});
+		}
+		
+		function displayCompetencies(competencies) {
+			const content = document.getElementById('competencies-content');
+			
+			if (!competencies || competencies.length === 0) {
+				content.innerHTML = '<div class="no-training-message">📚 No training records found</div>';
+				return;
+			}
+			
+			let html = '<div class="competencies-grid">';
+			
+			// Group by department
+			const departments = {};
+			competencies.forEach(comp => {
+				if (!departments[comp.module_department]) {
+					departments[comp.module_department] = [];
+				}
+				departments[comp.module_department].push(comp);
+			});
+			
+			// Display by department
+			for (const [dept, modules] of Object.entries(departments)) {
+				html += `<div class="department-section">
+					<h3 class="department-header">${dept}</h3>
+					<div class="modules-list">`;
+				
+				modules.forEach(comp => {
+					const statusClass = comp.status.replace('_', '-');
+					const statusText = comp.status.replace('_', ' ').toUpperCase();
+					let statusIcon = '';
+					
+					switch(comp.status) {
+						case 'assigned': statusIcon = '📋'; break;
+						case 'in_progress': statusIcon = '⏳'; break;
+						case 'completed': statusIcon = '✅'; break;
+						case 'expired': statusIcon = '❌'; break;
+						default: statusIcon = '📚'; break;
+					}
+					
+					html += `<div class="competency-item status-${statusClass}">
+						<div class="competency-header">
+							<span class="competency-name">${comp.module_name}</span>
+							<span class="competency-status">${statusIcon} ${statusText}</span>
+						</div>
+						<div class="competency-details">
+							<div class="competency-code">${comp.module_code}</div>
+							<div class="competency-level">Level: ${comp.certification_level}</div>
+							<div class="competency-date">Assigned: ${new Date(comp.assigned_date).toLocaleDateString()}</div>
+							${comp.completion_date ? `<div class="completion-date">Completed: ${new Date(comp.completion_date).toLocaleDateString()}</div>` : ''}
+							${comp.notes ? `<div class="competency-notes">${comp.notes}</div>` : ''}
+						</div>
+					</div>`;
+				});
+				
+				html += '</div></div>';
+			}
+			
+			html += '</div>';
+			content.innerHTML = html;
+		}
+		
+		function closeCompetencies() {
+			document.getElementById('competencies-modal').style.display = 'none';
+			
+			// Play LCARS sound
+			if (typeof playAudio !== 'undefined') {
+				playAudio('audio2');
+			}
+		}
+		
+		// Close modal when clicking outside
+		document.getElementById('competencies-modal').addEventListener('click', function(e) {
+			if (e.target === this) {
+				closeCompetencies();
+			}
+		});
+		
+		// Close modal with Escape key
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') {
+				closeCompetencies();
+			}
+		});
+	</script>
+	
+	<style>
+		.competencies-modal {
+			display: none;
+			position: fixed;
+			z-index: 10000;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.8);
+			justify-content: center;
+			align-items: center;
+		}
+		
+		.competencies-modal-content {
+			background: linear-gradient(45deg, #000 0%, #1a1a2e 50%, #000 100%);
+			border: 3px solid var(--blue);
+			border-radius: 15px;
+			width: 90%;
+			max-width: 800px;
+			max-height: 80vh;
+			overflow: hidden;
+			position: relative;
+		}
+		
+		.competencies-header {
+			background: var(--blue);
+			color: black;
+			padding: 1rem;
+			text-align: center;
+		}
+		
+		.competencies-title {
+			font-size: 1.4rem;
+			font-weight: bold;
+			font-family: 'Antonio', sans-serif;
+		}
+		
+		.competencies-subtitle {
+			font-size: 1rem;
+			margin-top: 0.5rem;
+			opacity: 0.8;
+		}
+		
+		.competencies-body {
+			padding: 1.5rem;
+			max-height: 60vh;
+			overflow-y: auto;
+			color: var(--green);
+		}
+		
+		.competencies-footer {
+			background: rgba(85, 102, 255, 0.2);
+			padding: 1rem;
+			text-align: center;
+			border-top: 2px solid var(--blue);
+		}
+		
+		.lcars-close-button {
+			background: var(--red);
+			color: black;
+			border: none;
+			padding: 0.8rem 2rem;
+			border-radius: 25px;
+			font-size: 1rem;
+			font-weight: bold;
+			font-family: 'Antonio', sans-serif;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+		
+		.lcars-close-button:hover {
+			background: #ff6b6b;
+			transform: scale(1.05);
+		}
+		
+		.loading-message, .no-training-message, .error-message {
+			text-align: center;
+			padding: 2rem;
+			font-size: 1.1rem;
+			color: var(--gold);
+		}
+		
+		.error-message {
+			color: var(--red);
+		}
+		
+		.department-section {
+			margin-bottom: 2rem;
+		}
+		
+		.department-header {
+			color: var(--blue);
+			font-size: 1.2rem;
+			font-weight: bold;
+			margin-bottom: 1rem;
+			padding-bottom: 0.5rem;
+			border-bottom: 2px solid var(--blue);
+		}
+		
+		.modules-list {
+			display: grid;
+			gap: 1rem;
+		}
+		
+		.competency-item {
+			background: rgba(0, 0, 0, 0.6);
+			border: 1px solid var(--blue);
+			border-radius: 8px;
+			padding: 1rem;
+			transition: all 0.3s ease;
+		}
+		
+		.competency-item:hover {
+			border-color: var(--gold);
+			background: rgba(0, 0, 0, 0.8);
+		}
+		
+		.competency-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 0.5rem;
+		}
+		
+		.competency-name {
+			font-weight: bold;
+			color: var(--green);
+			font-size: 1.1rem;
+		}
+		
+		.competency-status {
+			font-size: 0.9rem;
+			padding: 0.2rem 0.5rem;
+			border-radius: 5px;
+		}
+		
+		.status-assigned .competency-status {
+			background: var(--blue);
+			color: black;
+		}
+		
+		.status-in-progress .competency-status {
+			background: var(--gold);
+			color: black;
+		}
+		
+		.status-completed .competency-status {
+			background: var(--green);
+			color: black;
+		}
+		
+		.status-expired .competency-status {
+			background: var(--red);
+			color: white;
+		}
+		
+		.competency-details {
+			font-size: 0.9rem;
+			color: var(--blue);
+		}
+		
+		.competency-code {
+			font-family: monospace;
+			color: var(--gold);
+			margin-bottom: 0.3rem;
+		}
+		
+		.competency-level {
+			margin-bottom: 0.3rem;
+		}
+		
+		.competency-date, .completion-date {
+			margin-bottom: 0.3rem;
+			font-size: 0.8rem;
+			opacity: 0.8;
+		}
+		
+		.competency-notes {
+			font-style: italic;
+			color: var(--green);
+			margin-top: 0.5rem;
+			padding: 0.5rem;
+			background: rgba(0, 255, 0, 0.1);
+			border-radius: 3px;
+		}
+	</style>
 	
 	<script type="text/javascript" src="../assets/lcars.js"></script>
 	<div class="headtrim"> </div>
