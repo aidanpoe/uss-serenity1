@@ -20,10 +20,23 @@ try {
         image_url VARCHAR(500),
         order_precedence INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_award (name, type, specialization)
     )";
     $pdo->exec($sql);
     echo "✓ Awards table created successfully.<br>";
+    
+    // Add unique constraint if table already exists
+    try {
+        $pdo->exec("ALTER TABLE awards ADD CONSTRAINT unique_award UNIQUE (name, type, specialization)");
+        echo "✓ Added unique constraint to prevent duplicate awards.<br>";
+    } catch (PDOException $e) {
+        if (strpos($e->getMessage(), 'Duplicate key name') !== false) {
+            echo "Note: Unique constraint already exists.<br>";
+        } else {
+            echo "Note: Could not add unique constraint: " . $e->getMessage() . "<br>";
+        }
+    }
 
     // Create crew_awards table (linking awards to crew members)
     echo "<h2>Creating crew_awards table...</h2>";
@@ -102,7 +115,7 @@ try {
         ['Helm Efficiency Ribbon', 'Ribbon', 'Helm', 'Lieutenant Commander', 'Lieutenant Commander+', 'Continues to show improvement and ability in Helm', null, null, 33]
     ];
     
-    $stmt = $pdo->prepare("INSERT INTO awards (name, type, specialization, minimum_rank, awarding_authority, description, requirements, image_url, order_precedence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT IGNORE INTO awards (name, type, specialization, minimum_rank, awarding_authority, description, requirements, image_url, order_precedence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
     $inserted = 0;
     foreach ($awards_data as $award) {
@@ -110,9 +123,7 @@ try {
             $stmt->execute($award);
             $inserted++;
         } catch (PDOException $e) {
-            if (strpos($e->getMessage(), 'Duplicate entry') === false) {
-                echo "Error inserting award '{$award[0]}': " . $e->getMessage() . "<br>";
-            }
+            echo "Error inserting award '{$award[0]}': " . $e->getMessage() . "<br>";
         }
     }
     
