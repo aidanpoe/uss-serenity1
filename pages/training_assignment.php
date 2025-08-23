@@ -28,16 +28,20 @@ try {
             if ($checkStmt->fetch()) {
                 $error = "This training is already assigned to the selected crew member.";
             } else {
+                // Get current IC date
+                $ic_date = date('Y-m-d H:i:s', strtotime('+360 years'));
+                
                 $stmt = $pdo->prepare("
                     INSERT INTO crew_competencies 
                     (roster_id, module_id, assigned_by, assigned_date, status, notes) 
-                    VALUES (?, ?, ?, NOW(), 'assigned', ?)
+                    VALUES (?, ?, ?, ?, 'assigned', ?)
                 ");
                 
                 $stmt->execute([
                     $_POST['roster_id'],
                     $_POST['module_id'],
                     $_SESSION['user_id'],
+                    $ic_date,
                     $_POST['notes'] ?? ''
                 ]);
                 
@@ -63,16 +67,20 @@ try {
                 $checkStmt->execute([$roster_id, $_POST['module_id']]);
                 
                 if (!$checkStmt->fetch()) {
+                    // Get current IC date
+                    $ic_date = date('Y-m-d H:i:s', strtotime('+360 years'));
+                    
                     $stmt = $pdo->prepare("
                         INSERT INTO crew_competencies 
                         (roster_id, module_id, assigned_by, assigned_date, status, notes) 
-                        VALUES (?, ?, ?, NOW(), 'assigned', ?)
+                        VALUES (?, ?, ?, ?, 'assigned', ?)
                     ");
                     
                     $stmt->execute([
                         $roster_id,
                         $_POST['module_id'],
                         $_SESSION['user_id'],
+                        $ic_date,
                         $_POST['bulk_notes'] ?? ''
                     ]);
                     $assigned_count++;
@@ -90,18 +98,21 @@ try {
         if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
             $error = "Invalid security token. Please try again.";
         } else {
-            $updateData = [
-                $_POST['status'],
-                $_POST['competency_id']
-            ];
-            
             $query = "UPDATE crew_competencies SET status = ?, updated_at = NOW()";
             
             if ($_POST['status'] === 'completed') {
-                $query .= ", completion_date = NOW(), completion_notes = ?";
+                // Get current IC date for completion
+                $ic_completion_date = date('Y-m-d H:i:s', strtotime('+360 years'));
+                $query .= ", completion_date = ?, completion_notes = ?";
                 $updateData = [
                     $_POST['status'],
+                    $ic_completion_date,
                     $_POST['completion_notes'] ?? '',
+                    $_POST['competency_id']
+                ];
+            } else {
+                $updateData = [
+                    $_POST['status'],
                     $_POST['competency_id']
                 ];
             }
