@@ -19,9 +19,9 @@ if (file_exists(__DIR__ . '/../.env')) {
 
 // Database configuration - Use environment variables in production
 define('DB_HOST', isset($_ENV['DB_HOST']) ? $_ENV['DB_HOST'] : 'localhost');
-define('DB_USERNAME', isset($_ENV['DB_USERNAME']) ? $_ENV['DB_USERNAME'] : 'serenity');
+define('DB_USERNAME', isset($_ENV['DB_USERNAME']) ? $_ENV['DB_USERNAME'] : 'usss_serenity');
 define('DB_PASSWORD', isset($_ENV['DB_PASSWORD']) ? $_ENV['DB_PASSWORD'] : 'Os~886go4'); // Change this password!
-define('DB_NAME', isset($_ENV['DB_NAME']) ? $_ENV['DB_NAME'] : 'serenity');
+define('DB_NAME', isset($_ENV['DB_NAME']) ? $_ENV['DB_NAME'] : 'usss_serenity');
 define('DB_PORT', isset($_ENV['DB_PORT']) ? $_ENV['DB_PORT'] : 3306);
 
 // Steam API configuration - Use environment variables in production  
