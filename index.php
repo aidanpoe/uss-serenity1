@@ -176,7 +176,7 @@ function loginbutton($buttonstyle = "square") {
 					
 					<div style="margin: 2rem 0;">
 						<h4>Ship Status: All Systems Nominal</h4>
-						<p class="go-big">Current Mission: Deep Space Exploration</p>
+						<p class="go-big">This website now functions as a portfolio, serving solely as a showcase and product advertisement. For further information, please visit <a href="http://0161.org" style="color: var(--blue); text-decoration: underline;">0161.org</a></p>
 						
 						<?php if (isLoggedIn()): ?>
 							<div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
