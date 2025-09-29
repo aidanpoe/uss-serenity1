@@ -259,7 +259,7 @@ function loginbutton($buttonstyle = "square") {
 								</div>
 								<div style="background: rgba(153, 102, 204, 0.2); padding: 1rem; border-radius: 10px; border: 2px solid var(--african-violet);">
 									<h5 style="color: var(--african-violet); margin: 0 0 0.5rem 0;">Training Documents</h5>
-									<button onclick="playSoundAndRedirect('audio2', 'pages/training.php')" class="lcars-quick-btn" style="background-color: var(--african-violet); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
+									<button onclick="window.open('http://0161.org/', '_blank')" class="lcars-quick-btn" style="background-color: var(--african-violet); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
 										ACCESS
 									</button>
 								</div>
