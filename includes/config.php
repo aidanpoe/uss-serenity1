@@ -55,6 +55,12 @@ function getConnection() {
                 PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
             ]
         );
+        
+        // In showcase mode, wrap with safe PDO to prevent dangerous operations
+        if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+            return new ShowcaseSafePDO($pdo);
+        }
+        
         return $pdo;
     } catch(PDOException $e) {
         // Log error securely, don't expose details to user

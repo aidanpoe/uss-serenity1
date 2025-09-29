@@ -264,6 +264,8 @@ try {
 					<h1>Account & Personnel Management</h1>
 					<h2>Administrative Controls - Command Access Only</h2>
 					
+					<?php showShowcaseNotice(); ?>
+					
 					<?php if ($success): ?>
 					<div style="background: rgba(85, 102, 255, 0.3); border: 2px solid var(--blue); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--blue);"><?php echo htmlspecialchars($success); ?></p>
@@ -541,6 +543,7 @@ try {
 			event.target.classList.add('active');
 		}
 	</script>
+	<?php displayShowcaseMessage(); ?>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
 </body>

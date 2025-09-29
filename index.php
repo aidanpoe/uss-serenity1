@@ -371,7 +371,7 @@ function loginbutton($buttonstyle = "square") {
 				// After 2 seconds, redirect to Discord and fade out
 				setTimeout(() => {
 					// Open Discord link in new tab
-					window.open('https://discord.gg/r5r38Md3Xb', '_blank');
+					window.open('https://discord.gg/WuvgeRah67', '_blank');
 					
 					// Fade out modal
 					modal.style.transition = 'opacity 0.5s ease';
@@ -403,10 +403,23 @@ function loginbutton($buttonstyle = "square") {
 		}
 		
 		function confirmShipBoarding() {
-			// Connect to GMOD server
-			window.location.href = 'steam://connect/46.4.12.78:27015';
-			// Close modal
-			cancelShipBoarding();
+			// Show configuration message instead of connecting to server
+			const modal = document.getElementById('shipBoardingModal');
+			const modalContent = modal.querySelector('div');
+			
+			// Change content to configuration message
+			modalContent.innerHTML = `
+				<div style="border-bottom: 2px solid var(--orange); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+					<h3 style="color: var(--orange); margin: 0; font-size: 1.3rem;">LCARS - TRANSPORT SYSTEM</h3>
+				</div>
+				<div style="margin: 1.5rem 0; color: var(--bluey); font-size: 1rem; line-height: 1.5;">
+					<p style="margin: 0;">This function can be configured to load custom game servers etc.</p>
+					<p style="margin: 0.5rem 0 0 0; font-weight: bold;">Perfect for connecting to multiplayer games or applications!</p>
+				</div>
+				<div style="margin-top: 2rem;">
+					<button onclick="cancelShipBoarding()" style="background: var(--blue); color: black; border: none; padding: 0.8rem 2rem; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem;">ACKNOWLEDGE</button>
+				</div>
+			`;
 		}
 		
 		function cancelShipBoarding() {

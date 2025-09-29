@@ -232,6 +232,8 @@ $ranks = [
 					<h1>Personnel File Editor</h1>
 					<h2>USS-Serenity Crew Management System</h2>
 					
+					<?php showShowcaseNotice(); ?>
+					
 					<?php if (isset($success)): ?>
 					<div style="background: rgba(85, 102, 255, 0.3); border: 2px solid var(--blue); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--blue);"><?php echo htmlspecialchars($success); ?></p>
@@ -362,6 +364,7 @@ $ranks = [
 		</div>
 	</section>	
 	<script type="text/javascript" src="../assets/lcars.js"></script>
+	<?php displayShowcaseMessage(); ?>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
 </body>

@@ -48,14 +48,158 @@ function showShowcaseNotice() {
     }
 }
 
-// Add POST prevention for showcase mode
-if (defined('SHOWCASE_MODE') && SHOWCASE_MODE && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Instead of processing POST, show a showcase message and redirect back
-    if (!isset($_GET['showcase_message'])) {
-        $current_url = $_SERVER['REQUEST_URI'];
-        $separator = strpos($current_url, '?') !== false ? '&' : '?';
-        header("Location: {$current_url}{$separator}showcase_message=1");
-        exit();
+// Safe PDO wrapper for showcase mode
+class ShowcaseSafePDO {
+    private $realPdo;
+    
+    public function __construct($pdo) {
+        $this->realPdo = $pdo;
+    }
+    
+    public function prepare($statement) {
+        // Check if this is a dangerous statement
+        $statement_lower = strtolower(trim($statement));
+        if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+            if (strpos($statement_lower, 'delete') !== false ||
+                strpos($statement_lower, 'update') !== false ||
+                strpos($statement_lower, 'insert') !== false ||
+                strpos($statement_lower, 'drop') !== false ||
+                strpos($statement_lower, 'truncate') !== false ||
+                strpos($statement_lower, 'alter') !== false) {
+                // Return a safe mock statement
+                return new ShowcaseSafeStatement();
+            }
+        }
+        // For read operations, use the real PDO
+        return $this->realPdo->prepare($statement);
+    }
+    
+    public function query($statement) {
+        $statement_lower = strtolower(trim($statement));
+        if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+            if (strpos($statement_lower, 'select') === 0) {
+                return $this->realPdo->query($statement);
+            }
+            // Block all non-SELECT operations
+            return new ShowcaseSafeStatement();
+        }
+        return $this->realPdo->query($statement);
+    }
+    
+    public function exec($statement) {
+        if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+            return true; // Fake success but do nothing
+        }
+        return $this->realPdo->exec($statement);
+    }
+    
+    public function lastInsertId() {
+        return $this->realPdo->lastInsertId();
+    }
+    
+    public function beginTransaction() {
+        return true; // Always succeed but don't actually start transaction in showcase
+    }
+    
+    public function commit() {
+        return true; // Always succeed but don't actually commit in showcase
+    }
+    
+    public function rollBack() {
+        return true; // Always succeed but don't actually rollback in showcase
+    }
+}
+
+// Safe PDO Statement wrapper
+class ShowcaseSafeStatement {
+    public function execute($params = []) {
+        return true; // Always succeed but don't actually execute
+    }
+    
+    public function fetch($fetch_style = PDO::FETCH_ASSOC) {
+        // Return sample data for showcase
+        return [
+            'id' => 1,
+            'rank' => 'Captain',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'species' => 'Human',
+            'department' => 'Command',
+            'position' => 'Commanding Officer'
+        ];
+    }
+    
+    public function fetchAll($fetch_style = PDO::FETCH_ASSOC) {
+        // Return sample roster data
+        return [
+            [
+                'id' => 1,
+                'rank' => 'Captain',
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+                'species' => 'Human',
+                'department' => 'Command',
+                'position' => 'Commanding Officer'
+            ],
+            [
+                'id' => 2,
+                'rank' => 'Commander',
+                'first_name' => 'Jane',
+                'last_name' => 'Smith',
+                'species' => 'Human',
+                'department' => 'Medical',
+                'position' => 'Chief Medical Officer'
+            ]
+        ];
+    }
+    
+    public function rowCount() {
+        return 1;
+    }
+    
+    public function bindParam($parameter, &$variable, $data_type = PDO::PARAM_STR) {
+        return true;
+    }
+    
+    public function bindValue($parameter, $value, $data_type = PDO::PARAM_STR) {
+        return true;
+    }
+}
+
+// Enhanced security for showcase mode - prevent ALL data modification attempts
+if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+    // Prevent POST requests
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (!isset($_GET['showcase_message'])) {
+            $current_url = $_SERVER['REQUEST_URI'];
+            $separator = strpos($current_url, '?') !== false ? '&' : '?';
+            header("Location: {$current_url}{$separator}showcase_message=1");
+            exit();
+        }
+    }
+    
+    // Prevent dangerous GET parameters
+    $dangerous_params = ['delete', 'remove', 'clear', 'reset', 'destroy', 'drop', 'truncate'];
+    foreach ($dangerous_params as $param) {
+        if (isset($_GET[$param]) || isset($_REQUEST[$param])) {
+            if (!isset($_GET['showcase_message'])) {
+                $current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+                header("Location: {$current_url}?showcase_message=1");
+                exit();
+            }
+        }
+    }
+    
+    // Prevent action-based operations that might be dangerous
+    if ((isset($_GET['action']) || isset($_REQUEST['action'])) && !isset($_GET['showcase_message'])) {
+        $action = $_GET['action'] ?? $_REQUEST['action'] ?? '';
+        if (strpos(strtolower($action), 'delete') !== false || 
+            strpos(strtolower($action), 'remove') !== false ||
+            strpos(strtolower($action), 'clear') !== false) {
+            $current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            header("Location: {$current_url}?showcase_message=1");
+            exit();
+        }
     }
 }
 
