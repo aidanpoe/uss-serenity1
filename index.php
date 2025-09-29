@@ -233,10 +233,10 @@ function loginbutton($buttonstyle = "square") {
 							<p>Access to administrative functions requires Steam authentication.</p>
 							<div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: center;">
 								<div style="text-align: center;">
-									<?php loginbutton("rectangle"); ?>
+									<button onclick="showFeatureDisabledMessage()" class='lcars-steam-button' style="background-color: #666; color: #ccc; border: 2px solid #666; cursor: not-allowed;">Feature Disabled - Showcase Only</button>
 								</div>
 							</div>
-							<p style="margin-top: 1rem; font-size: 0.9rem; color: var(--bluey); text-align: center;">All crew members must use Steam to access department systems.</p>
+							<p style="margin-top: 1rem; font-size: 0.9rem; color: var(--bluey); text-align: center;">This is a portfolio demonstration site.</p>
 						</div>
 						<?php endif; ?>
 						
@@ -341,6 +341,22 @@ function loginbutton($buttonstyle = "square") {
 		</div>
 	</div>
 	
+	<!-- LCARS Feature Disabled Modal -->
+	<div id="featureDisabledModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+		<div style="background: linear-gradient(135deg, #000000, #1a1a2e); border: 3px solid var(--red); border-radius: 15px; padding: 2rem; max-width: 500px; text-align: center; box-shadow: 0 0 30px rgba(204, 68, 68, 0.5);">
+			<div style="border-bottom: 2px solid var(--red); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+				<h3 style="color: var(--red); margin: 0; font-size: 1.3rem;">LCARS - FEATURE DISABLED</h3>
+			</div>
+			<div style="margin: 1.5rem 0; color: var(--bluey); font-size: 1rem; line-height: 1.5;">
+				<p style="margin: 0;">This is a portfolio demonstration site.</p>
+				<p style="margin: 0.5rem 0 0 0; font-weight: bold;">Authentication features have been disabled for showcase purposes.</p>
+			</div>
+			<div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+				<button onclick="closeFeatureDisabledModal()" style="background: var(--blue); color: black; border: none; padding: 0.8rem 2rem; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem;">ACKNOWLEDGE</button>
+			</div>
+		</div>
+	</div>
+	
 	<script>
 		function showDiscordModal() {
 			const modal = document.getElementById('discordModal');
@@ -427,6 +443,25 @@ function loginbutton($buttonstyle = "square") {
 					`;
 				}, 500);
 			}, 2000);
+		}
+		
+		function showFeatureDisabledMessage() {
+			const modal = document.getElementById('featureDisabledModal');
+			modal.style.display = 'flex';
+			modal.style.opacity = '0';
+			setTimeout(() => {
+				modal.style.transition = 'opacity 0.3s ease';
+				modal.style.opacity = '1';
+			}, 10);
+		}
+		
+		function closeFeatureDisabledModal() {
+			const modal = document.getElementById('featureDisabledModal');
+			modal.style.transition = 'opacity 0.3s ease';
+			modal.style.opacity = '0';
+			setTimeout(() => {
+				modal.style.display = 'none';
+			}, 300);
 		}
 	</script>
 	
