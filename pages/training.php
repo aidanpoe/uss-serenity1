@@ -658,6 +658,8 @@ try {
 					<h1>Training Management System</h1>
 					<h2>USS-Serenity Educational Resources & File Repository</h2>
 					
+					<?php showShowcaseNotice(); ?>
+					
 					<?php if (isset($success) && !empty($success)): ?>
 					<div style="background: rgba(76, 175, 80, 0.2); border: 2px solid var(--green); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--green); font-weight: bold;">✅ <?php echo htmlspecialchars($success); ?></p>
@@ -1128,6 +1130,7 @@ try {
 			});
 		});
 	</script>
+	<?php displayShowcaseMessage(); ?>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
 </body>

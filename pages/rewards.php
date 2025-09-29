@@ -263,6 +263,8 @@ $award_categories = array_filter($award_categories, function($category) {
                     <h1>🏅 Starfleet Rewards & Commendations</h1>
                     <h2>USS-Serenity NCC-74714 &#149; Awards Database</h2>
                     
+                    <?php showShowcaseNotice(); ?>
+                    
                     <div class="total-awards">
                         📊 Total Available Awards: <?php echo count($awards); ?>
                     </div>
@@ -384,6 +386,7 @@ $award_categories = array_filter($award_categories, function($category) {
     <audio id="audio4" src="../assets/beep4.mp3" preload="auto"></audio>
     
     <script type="text/javascript" src="../assets/lcars.js"></script>
+    <?php displayShowcaseMessage(); ?>
     <div class="headtrim"> </div>
     <div class="baseboard"> </div>
 </body>

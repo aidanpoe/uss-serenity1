@@ -166,6 +166,8 @@ function loginbutton($buttonstyle = "square") {
 				<main>
 					<h1>Welcome to USS-Serenity</h1>
 					<h2>NCC-74714 &#149; Main Computer Interface</h2>
+					
+					<?php showShowcaseNotice(); ?>
 					<h3 class="font-gold">Stardate <?php 
 						// Calculate current stardate (Star Trek formula with 360 years added)
 						$currentYear = (int)date('Y') + 360;
@@ -466,6 +468,7 @@ function loginbutton($buttonstyle = "square") {
 	</script>
 	
 	<script type="text/javascript" src="assets/lcars.js"></script>
+	<?php displayShowcaseMessage(); ?>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
 </body>

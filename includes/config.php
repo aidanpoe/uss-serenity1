@@ -2,6 +2,9 @@
 // Include secure configuration
 require_once __DIR__ . '/secure_config.php';
 
+// Include showcase configuration (must be loaded before other functions)
+require_once __DIR__ . '/showcase_config.php';
+
 // Start session with secure settings
 if (session_status() == PHP_SESSION_NONE) {
     // Secure session configuration - adjust for development/production

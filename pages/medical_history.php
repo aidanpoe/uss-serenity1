@@ -123,6 +123,8 @@ try {
 					<h1>Medical History - <?php echo htmlspecialchars($crew_member['rank'] . ' ' . $crew_member['first_name'] . ' ' . $crew_member['last_name']); ?></h1>
 					<h2>Medical Department &#149; Patient Records</h2>
 					
+					<?php showShowcaseNotice(); ?>
+					
 					<?php if (isset($error)): ?>
 						<div style="background: rgba(204, 68, 68, 0.3); padding: 1rem; border-radius: 10px; margin: 1rem 0; border: 2px solid var(--red);">
 							<h4 style="color: var(--red);">Error</h4>
@@ -229,6 +231,7 @@ try {
 		</div>
 	</section>	
 	<script type="text/javascript" src="../assets/lcars.js"></script>
+	<?php displayShowcaseMessage(); ?>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
 </body>

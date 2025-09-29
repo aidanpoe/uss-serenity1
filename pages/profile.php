@@ -303,6 +303,8 @@ try {
 					<div class="bar-10"></div>
 				</div>
 				<main>
+					<?php showShowcaseNotice(); ?>
+					
 					<?php if ($success): ?>
 					<div class="alert success">
 						✅ <?php echo htmlspecialchars($success); ?>
@@ -533,5 +535,6 @@ try {
 		</div>
 	</section>
 	<script src="../assets/lcars.js"></script>
+	<?php displayShowcaseMessage(); ?>
 </body>
 </html>

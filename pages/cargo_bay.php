@@ -908,6 +908,8 @@ try {
                     <h1>Cargo Bay Management System</h1>
                     <h3>Department: <?php echo htmlspecialchars($user_department); ?></h3>
                     
+                    <?php showShowcaseNotice(); ?>
+                    
                     <!-- Permission Debug (remove this later) -->
                     <?php if ($user_department): ?>
                         <div style="background: rgba(0,100,200,0.2); border: 1px solid var(--blue); padding: 0.5rem; border-radius: 5px; margin: 1rem 0; font-size: 0.9rem;">
@@ -1483,6 +1485,7 @@ try {
             }
         }
     </script>
+    <?php displayShowcaseMessage(); ?>
                 </main>
             </div>
         </div>

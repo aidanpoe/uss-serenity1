@@ -233,6 +233,8 @@ try {
 					<h1>Criminal Record File</h1>
 					<h2>⚠️ RESTRICTED ACCESS - Security Personnel Only</h2>
 					
+					<?php showShowcaseNotice(); ?>
+					
 					<?php if (isset($error)): ?>
 					<div style="background: rgba(204, 68, 68, 0.3); border: 2px solid var(--red); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--red);"><?php echo htmlspecialchars($error); ?></p>
@@ -443,6 +445,7 @@ try {
 		</div>
 	</section>	
 	<script type="text/javascript" src="../assets/lcars.js"></script>
+	<?php displayShowcaseMessage(); ?>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
 </body>

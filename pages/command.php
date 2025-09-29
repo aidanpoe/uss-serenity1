@@ -327,6 +327,8 @@ try {
 					<h1>Command & Control</h1>
 					<h2>USS-Serenity Strategic Operations</h2>
 					
+					<?php showShowcaseNotice(); ?>
+					
 					<?php if (isset($success) && $success): ?>
 					<div style="background: rgba(204, 68, 68, 0.3); border: 2px solid var(--red); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--red);"><?php echo htmlspecialchars($success); ?></p>
@@ -653,6 +655,7 @@ try {
 		</div>
 	</section>	
 	<script type="text/javascript" src="../assets/lcars.js"></script>
+	<?php displayShowcaseMessage(); ?>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
 </body>

@@ -226,6 +226,8 @@ try {
 					<h1>Engineering & Operations</h1>
 					<h2>USS-Serenity Ship Systems & Maintenance</h2>
 					
+					<?php showShowcaseNotice(); ?>
+					
 					<?php if (isset($success)): ?>
 					<div style="background: rgba(255, 136, 0, 0.3); border: 2px solid var(--orange); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
 						<p style="color: var(--orange);"><?php echo htmlspecialchars($success); ?></p>
@@ -645,6 +647,7 @@ try {
 			}
 		}
 	</script>
+	<?php displayShowcaseMessage(); ?>
 	<div class="headtrim"> </div>
 	<div class="baseboard"> </div>
 </body>
