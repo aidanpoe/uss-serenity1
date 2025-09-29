@@ -8,10 +8,14 @@ require_once '../includes/config.php';
 // Update last active timestamp for current character
 updateLastActive();
 
-// Check if user is logged in
+// Check if user is logged in (or in showcase mode)
 if (!isLoggedIn()) {
-    header("Location: ../steamauth/steamauth.php?login");
-    exit();
+    if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+        // Show showcase notice instead of redirecting
+    } else {
+        header("Location: ../steamauth/steamauth.php?login");
+        exit();
+    }
 }
 
 $success = '';
@@ -19,7 +23,9 @@ $error = '';
 
 // Handle character switching
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'switch_character') {
-    if (isset($_POST['character_id'])) {
+    if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+        $error = "Character switching is disabled in showcase mode.";
+    } else if (isset($_POST['character_id'])) {
         if (switchCharacter($_POST['character_id'])) {
             $success = "Switched to character successfully!";
         } else {
@@ -31,27 +37,80 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'switch_character'
 try {
     $pdo = getConnection();
     
-    // Debug: Check if user_id exists in session
-    if (!isset($_SESSION['user_id'])) {
-        throw new Exception("User ID not found in session. Session data: " . print_r($_SESSION, true));
+    // Handle showcase mode
+    if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+        // Provide mock data for showcase
+        $current_user = [
+            'user_id' => 1,
+            'username' => 'showcase_user',
+            'rank' => 'Commander',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'character_id' => 1,
+            'species' => 'Human',
+            'roster_department' => 'Command',
+            'position' => 'Executive Officer',
+            'image_path' => null,
+            'character_name' => 'Commander Jane Doe',
+            'is_active' => 1
+        ];
+        
+        $user_characters = [
+            [
+                'id' => 1,
+                'rank' => 'Commander',
+                'first_name' => 'Jane',
+                'last_name' => 'Doe',
+                'species' => 'Human',
+                'department' => 'Command',
+                'position' => 'Executive Officer',
+                'is_current_character' => true,
+                'character_name' => 'Commander Jane Doe'
+            ],
+            [
+                'id' => 2,
+                'rank' => 'Lieutenant',
+                'first_name' => 'John',
+                'last_name' => 'Smith',
+                'species' => 'Human', 
+                'department' => 'Engineering',
+                'position' => 'Assistant Chief Engineer',
+                'is_current_character' => false,
+                'character_name' => 'Lieutenant John Smith'
+            ]
+        ];
+        
+        $has_character = true;
+    } else {
+        // Debug: Check if user_id exists in session
+        if (!isset($_SESSION['user_id'])) {
+            throw new Exception("User ID not found in session. Session data: " . print_r($_SESSION, true));
+        }
+        
+        // Get current user data with roster information
+        $current_user = getCurrentCharacter();
+        
+        if (!$current_user) {
+            throw new Exception("User account not found. Please try logging out and back in.");
+        }
+        
+        // Check if user has any characters
+        $has_character = !empty($current_user['character_id']);
+        
+        // Get all characters for this user
+        $user_characters = getUserCharacters();
     }
     
-    // Get current user data with roster information
-    $current_user = getCurrentCharacter();
-    
-    if (!$current_user) {
-        throw new Exception("User account not found. Please try logging out and back in.");
+    // Ensure $user_characters is always an array
+    if (!is_array($user_characters)) {
+        $user_characters = [];
     }
-    
-    // Check if user has any characters
-    $has_character = !empty($current_user['character_id']);
-    
-    // Get all characters for this user
-    $user_characters = getUserCharacters();
     
     // Handle image upload
     if ($_POST && isset($_POST['action']) && $_POST['action'] === 'update_image') {
-        if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+        if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+            $error = "Image uploads are disabled in showcase mode.";
+        } else if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
             try {
                 // Validate file
                 $max_size = 5 * 1024 * 1024; // 5MB
@@ -318,6 +377,16 @@ try {
 					<?php endif; ?>
 
 					<h1>Personnel Profile Settings</h1>
+					
+					<?php if (defined('SHOWCASE_MODE') && SHOWCASE_MODE): ?>
+					<!-- Showcase Mode Notice -->
+					<div style="background: rgba(255, 165, 0, 0.15); border: 2px solid var(--orange); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+						<p style="color: var(--orange); margin: 0; text-align: center;">
+							<strong>🎭 SHOWCASE MODE</strong> - This page displays sample data for portfolio demonstration purposes. All profile management features are disabled.
+						</p>
+					</div>
+					<?php endif; ?>
+					
 					<h2><?php echo htmlspecialchars(($current_user['rank'] ? $current_user['rank'] . ' ' : '') . ($current_user['first_name'] ? $current_user['first_name'] . ' ' . $current_user['last_name'] : $current_user['username'])); ?></h2>
 					
 					<!-- Character Selection and Management -->
@@ -354,11 +423,15 @@ try {
 											</p>
 										</div>
 										<?php if (!$character['is_current_character']): ?>
+										<?php if (defined('SHOWCASE_MODE') && SHOWCASE_MODE): ?>
+											<button disabled style="background-color: #666; color: #999; border: none; padding: 0.5rem 1rem; border-radius: 3px; font-size: 0.8rem; cursor: not-allowed;">Switch (Disabled)</button>
+										<?php else: ?>
 										<form method="POST" style="margin: 0;">
 											<input type="hidden" name="action" value="switch_character">
 											<input type="hidden" name="character_id" value="<?php echo $character['id']; ?>">
 											<button type="submit" style="background-color: var(--blue); color: white; border: none; padding: 0.5rem 1rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">Switch</button>
 										</form>
+										<?php endif; ?>
 										<?php endif; ?>
 									</div>
 								</div>
@@ -441,6 +514,11 @@ try {
 					<?php if ($current_user['first_name']): ?>
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
 						<h3>Update Profile Image</h3>
+						<?php if (defined('SHOWCASE_MODE') && SHOWCASE_MODE): ?>
+							<div style="padding: 1rem; background: rgba(255,165,0,0.1); border: 1px solid var(--orange); border-radius: 5px;">
+								<p style="color: var(--orange); margin: 0;">Image upload is disabled in showcase mode.</p>
+							</div>
+						<?php else: ?>
 						<form method="POST" enctype="multipart/form-data" style="margin-top: 1rem;">
 							<input type="hidden" name="action" value="update_image">
 							<div class="form-group">
@@ -449,6 +527,7 @@ try {
 								<small class="help-text">Maximum file size: 5MB. Supported formats: JPEG, PNG, GIF, WebP</small>
 							</div>
 							<button type="submit" class="lcars-button" onclick="playSoundAndRedirect('audio2', '#')">Update Image</button>
+						<?php endif; ?>
 						</form>
 					</div>
 					<?php endif; ?>
