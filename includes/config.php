@@ -73,6 +73,10 @@ try {
 
 // Check if user is logged in (Steam only)
 function isLoggedIn() {
+    // In showcase mode, always return true
+    if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+        return true;
+    }
     return isset($_SESSION['user_id']) && isset($_SESSION['steamid']);
 }
 
@@ -222,6 +226,10 @@ function getUserDepartment() {
 
 // Update last_active timestamp for current character and user session
 function updateLastActive() {
+    // In showcase mode, do nothing
+    if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+        return;
+    }
     if (!isLoggedIn()) return;
     
     try {
@@ -262,6 +270,10 @@ function updateLastActive() {
 
 // Check if user has specific permission
 function hasPermission($required_department) {
+    // In showcase mode, always return true
+    if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+        return true;
+    }
     if (!isLoggedIn()) return false;
     
     $user_dept = getUserDepartment();
@@ -290,6 +302,10 @@ function hasPermission($required_department) {
 
 // Check if user can edit personnel files (Heads of departments, Command, Captain, Starfleet Auditor)
 function canEditPersonnelFiles() {
+    // In showcase mode, always return true
+    if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+        return true;
+    }
     if (!isLoggedIn()) return false;
     
     $user_dept = getUserDepartment();
@@ -457,6 +473,10 @@ function isUserInvisible($user_id) {
 
 // Redirect if not authorized
 function requirePermission($required_department) {
+    // In showcase mode, do nothing
+    if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
+        return;
+    }
     if (!hasPermission($required_department)) {
         header('Location: login.php');
         exit();
