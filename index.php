@@ -178,7 +178,7 @@ function loginbutton($buttonstyle = "square") {
 					
 					<div style="margin: 2rem 0;">
 						<h4>Ship Status: All Systems Nominal</h4>
-						<p class="go-big">This website now functions as a portfolio, serving solely as a showcase and product advertisement. For further information, please visit <a href="http://0161.org" style="color: var(--blue); text-decoration: underline;">0161.org</a></p>
+						<p class="go-big">This website now functions as a portfolio, serving solely as a showcase and product advertisement. For further information, please visit <a href="http://houseofpoe.co.uk/" style="color: var(--blue); text-decoration: underline;">The House of Poe</a></p>
 						<p class="go-big" style="margin-top: 1rem;">View the source code for this portfolio on <a href="https://github.com/aidanpoe/uss-serenity1" target="_blank" style="color: var(--gold); text-decoration: underline;">GitHub</a></p>
 						
 						<?php if (isLoggedIn()): ?>
@@ -266,7 +266,7 @@ function loginbutton($buttonstyle = "square") {
 								</div>
 								<div style="background: rgba(204, 68, 68, 0.2); padding: 1rem; border-radius: 10px; border: 2px solid var(--red);">
 									<h5 style="color: var(--red); margin: 0 0 0.5rem 0;">Rules of Play</h5>
-									<button onclick="window.open('http://0161.org/', '_blank')" class="lcars-quick-btn" style="background-color: var(--red); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
+									<button onclick="window.open('http://http://houseofpoe.co.uk//', '_blank')" class="lcars-quick-btn" style="background-color: var(--red); color: black; border: none; padding: 0.5rem 1rem; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease;">
 										ACCESS
 									</button>
 								</div>
