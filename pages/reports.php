@@ -113,7 +113,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Reports Overview</title>
+	<title>USS-VOYAGER - Reports Overview</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -223,7 +223,7 @@ try {
 				</div>
 				<main>
 					<h1>Department Reports Overview</h1>
-					<h2>USS-Serenity Status Summary</h2>
+					<h2>USS-VOYAGER Status Summary</h2>
 					
 					<?php showShowcaseNotice(); ?>
 					
@@ -381,7 +381,7 @@ try {
 					</div>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					LCARS Inspired Website Template by <a href="https://www.thelcars.com">www.TheLCARS.com</a>.
 				</footer> 
 			</div>

@@ -54,7 +54,7 @@ if (isset($_GET['login'])){
 					die("Authentication service unavailable. Please try again later.");
 				}
 				
-				// Check if user exists in USS Serenity database
+				// Check if user exists in USS Voyager database
 				$stmt = $pdo->prepare("
 					SELECT u.*, r.rank, r.first_name, r.last_name, r.department as roster_department, r.position, r.image_path 
 					FROM users u 

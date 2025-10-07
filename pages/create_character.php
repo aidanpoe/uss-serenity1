@@ -187,7 +187,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Create New Character</title>
+	<title>USS-VOYAGER - Create New Character</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -275,7 +275,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'create_character'
 				<div class="panel-2">CREATE<span class="hop">-CHAR</span></div>
 			</div>
 			<div class="right-frame-top">
-				<div class="banner">CREATE CHARACTER &#149; USS-SERENITY</div>
+				<div class="banner">CREATE CHARACTER &#149; USS-VOYAGER</div>
 				<div class="data-cascade-button-group">
 					<nav> 
 						<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>

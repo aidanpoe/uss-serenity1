@@ -124,7 +124,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Character Auditor Management - USS Serenity</title>
+    <title>Character Auditor Management - USS Voyager</title>
     <link rel="stylesheet" href="../assets/classic.css">
     <script src="../assets/lcars.js"></script>
 </head>

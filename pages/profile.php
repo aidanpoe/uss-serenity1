@@ -166,7 +166,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Personnel Profile</title>
+	<title>USS-VOYAGER - Personnel Profile</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -320,7 +320,7 @@ try {
 				<div class="panel-2">PROFILE<span class="hop">-MGMT</span></div>
 			</div>
 			<div class="right-frame-top">
-				<div class="banner">PERSONNEL PROFILE &#149; USS-SERENITY</div>
+				<div class="banner">PERSONNEL PROFILE &#149; USS-VOYAGER</div>
 				<div class="data-cascade-button-group">
 					<nav> 
 						<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>

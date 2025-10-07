@@ -1,7 +1,7 @@
 <?php
 require_once 'includes/config.php';
 
-echo "<h2>USS-Serenity Database Update Script</h2>";
+echo "<h2>USS-VOYAGER Database Update Script</h2>";
 echo "<p>This script will update your database with all the latest features and improvements.</p>";
 
 $updates_performed = [];

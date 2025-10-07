@@ -127,7 +127,7 @@ Add these to your server environment or script:
 ```bash
 export GDPR_CLEANUP_LOG_LEVEL="INFO"
 export GDPR_CLEANUP_DRY_RUN="false"
-export GDPR_CLEANUP_EMAIL_ALERTS="computer@uss-serenity.org"
+export GDPR_CLEANUP_EMAIL_ALERTS="computer@USS-VOYAGER.org"
 ```
 
 ### PHP Configuration in gdpr_cleanup.php
@@ -147,7 +147,7 @@ ini_set('error_log', __DIR__ . '/logs/gdpr_cleanup_errors.log');
 Add to gdpr_cleanup.php:
 ```php
 // Send completion email
-$to = 'computer@uss-serenity.org';
+$to = 'computer@USS-VOYAGER.org';
 $subject = 'GDPR Cleanup Completed - ' . date('Y-m-d');
 $message = "GDPR cleanup completed successfully at " . date('Y-m-d H:i:s') . "\n\n";
 $message .= "Records processed: $recordsProcessed\n";

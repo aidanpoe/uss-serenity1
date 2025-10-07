@@ -70,7 +70,7 @@ $award_categories = array_filter($award_categories, function($category) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>USS-Serenity 74714 - Rewards & Commendations</title>
+    <title>USS-VOYAGER 74656 - Rewards & Commendations</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../assets/classic.css">
     <style>
@@ -182,7 +182,7 @@ $award_categories = array_filter($award_categories, function($category) {
                 <div class="panel-2">74<span class="hop">-714000</span></div>
             </div>
             <div class="right-frame-top">
-                <div class="banner">USS-SERENITY &#149; REWARDS</div>
+                <div class="banner">USS-VOYAGER &#149; REWARDS</div>
                 <div class="data-cascade-button-group">
                     <div class="data-cascade-wrapper" id="default">
                         <div class="data-column">
@@ -261,7 +261,7 @@ $award_categories = array_filter($award_categories, function($category) {
                 </div>
                 <main>
                     <h1>🏅 Starfleet Rewards & Commendations</h1>
-                    <h2>USS-Serenity NCC-74714 &#149; Awards Database</h2>
+                    <h2>USS-VOYAGER NCC-74656 &#149; Awards Database</h2>
                     
                     <?php showShowcaseNotice(); ?>
                     
@@ -280,7 +280,7 @@ $award_categories = array_filter($award_categories, function($category) {
                     <div style="background: rgba(255, 215, 0, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid var(--gold); margin: 2rem 0; text-align: center;">
                         <h3 style="color: var(--gold); margin-bottom: 1rem;">ℹ️ About This System</h3>
                         <p style="color: var(--bluey); line-height: 1.6;">
-                            This database contains all awards and commendations available for crew members of the USS-Serenity. 
+                            This database contains all awards and commendations available for crew members of the USS-VOYAGER. 
                             Awards are granted by Command personnel in recognition of exceptional service, valor, and dedication to Starfleet principles.
                         </p>
                         <p style="color: var(--gold); font-weight: bold; margin-top: 1rem;">
@@ -320,7 +320,7 @@ $award_categories = array_filter($award_categories, function($category) {
                     <?php endif; ?>
                 </main>
                 <footer>
-                    USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+                    USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
                     Awards Database - Honoring Excellence in Service
                 </footer> 
             </div>

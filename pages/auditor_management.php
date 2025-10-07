@@ -93,7 +93,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Starfleet Auditor Management - USS Serenity</title>
+    <title>Starfleet Auditor Management - USS Voyager</title>
     <link rel="stylesheet" href="../assets/classic.css">
 </head>
 <body>
@@ -248,7 +248,7 @@ try {
 
     <footer>
         <div class="footer-content">
-            <p>&copy; 2024 USS Serenity - Star Trek Roleplay Community</p>
+            <p>&copy; 2024 USS Voyager - Star Trek Roleplay Community</p>
         </div>
     </footer>
 

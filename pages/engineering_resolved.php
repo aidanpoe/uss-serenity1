@@ -70,7 +70,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Resolved Engineering Faults</title>
+	<title>USS-VOYAGER - Resolved Engineering Faults</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -88,7 +88,7 @@ try {
 				<div class="panel-2">74<span class="hop">-714000</span></div>
 			</div>
 			<div class="right-frame-top">
-				<div class="banner">USS-SERENITY &#149; RESOLVED ENGINEERING FAULTS</div>
+				<div class="banner">USS-VOYAGER &#149; RESOLVED ENGINEERING FAULTS</div>
 				<div class="data-cascade-button-group">
 					<div class="data-cascade-wrapper" id="default">
 						<div class="data-column">
@@ -235,7 +235,7 @@ try {
 					</div>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					Engineering Archive System - Authorized Personnel Only			 		 
 				</footer> 
 			</div>

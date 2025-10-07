@@ -1,13 +1,13 @@
-# Simple .htaccess for USS-Serenity
+# Enhanced Security .htaccess for USS-VOYAGER
 # Compatible with most Apache servers
 
 # Hide sensitive file types
-<FilesMatch "\.(md|log|sql|conf|ini|bak|old|tmp)$">
+<FilesMatch "\.(md|log|sql|conf|ini|bak|old|tmp|env|git|gitignore|htaccess|htpasswd|json)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# Protect specific sensitive files
+# Protect specific sensitive files and directories
 <Files "config.php">
     Order allow,deny
     Deny from all
@@ -18,12 +18,111 @@
     Deny from all
 </Files>
 
-# Disable directory browsing
-Options -Indexes
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
 
-# Basic security headers (if mod_headers is available)
+<Files "composer.json">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "composer.lock">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Block access to includes directory
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^includes/ - [F,L]
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes -ExecCGI
+
+# Prevent access to hidden files and directories
+<IfModule mod_rewrite.c>
+    RewriteCond %{SCRIPT_FILENAME} -d [OR]
+    RewriteCond %{SCRIPT_FILENAME} -f
+    RewriteRule "(^|/)\." - [F]
+</IfModule>
+
+# Security headers (if mod_headers is available)
 <IfModule mod_headers.c>
-    Header always set X-Content-Type-Options nosniff
-    Header always set X-Frame-Options DENY
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Prevent clickjacking
+    Header always set X-Frame-Options "DENY"
+    
+    # XSS Protection
     Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Strict Transport Security (HSTS) - uncomment if using HTTPS
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    
+    # Remove server signature
+    Header unset Server
+    Header unset X-Powered-By
+    
+    # Content Security Policy - basic protection
+    Header always set Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; frame-ancestors 'none';"
+</IfModule>
+
+# Disable server signature
+ServerSignature Off
+
+# Limit request size to prevent DoS (adjust as needed)
+<IfModule mod_reqtimeout.c>
+    RequestReadTimeout header=20-40,MinRate=500 body=20-40,MinRate=500
+</IfModule>
+
+# Prevent SQL injection in URLs
+<IfModule mod_rewrite.c>
+    RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} base64_encode.*\(.*\) [NC,OR]
+    RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} (<|%3C).*iframe.*(>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} SELECT.*FROM [NC,OR]
+    RewriteCond %{QUERY_STRING} (union|select|insert|drop|delete|update|replace|truncate) [NC]
+    RewriteRule ^(.*)$ - [F,L]
+</IfModule>
+
+# Disable PHP execution in upload directories
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+
+# File upload security
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|cgi|pl|exe)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Allow only specific PHP files to execute
+<FilesMatch "^(index|database_admin|server_admin|image_compressor|gdpr_cleanup|setup_.*|update_.*|fix_.*|check_.*|add_.*|remove_.*|migrate_.*|cleanup_.*|command_simple|create_.*|enhanced_.*|force_.*|medical_.*|php_config_check|plesk_config_check|simple_.*|character_based_auditor_migration)\.php$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</FilesMatch>
+
+# Allow PHP files in pages, api, and steamauth directories
+<IfModule mod_rewrite.c>
+    RewriteRule ^(pages|api|steamauth)/.*\.php$ - [L]
 </IfModule>

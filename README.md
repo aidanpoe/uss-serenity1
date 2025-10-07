@@ -1,4 +1,4 @@
-# USS-Serenity NCC-74714 - LCARS Website
+# USS-VOYAGER NCC-74656 - LCARS Website
 
 A Star Trek LCARS-themed website for managing ship operations, crew roster, and departmental functions.
 
@@ -22,9 +22,9 @@ A Star Trek LCARS-themed website for managing ship operations, crew roster, and 
 First, ensure you have MySQL installed and running. Create the database and user:
 
 ```sql
-CREATE DATABASE serenity;
-CREATE USER 'serenity'@'localhost' IDENTIFIED BY 'Os~886go4';
-GRANT ALL PRIVILEGES ON serenity.* TO 'serenity'@'localhost';
+CREATE DATABASE voyager;
+CREATE USER 'voyager'@'localhost' IDENTIFIED BY 'Os~886go4';
+GRANT ALL PRIVILEGES ON voyager.* TO 'voyager'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
@@ -48,7 +48,7 @@ This will create all necessary tables and insert default users.
 ### 4. File Structure
 
 ```
-uss-serenity/
+USS-VOYAGER/
 ├── index.php                 # Home page
 ├── setup_database.php        # Database initialization
 ├── includes/

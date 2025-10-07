@@ -5,7 +5,7 @@ require_once 'includes/config.php';
 <!DOCTYPE html>
 <html>
 <head>
-    <title>USS-Serenity - Cargo Bay Foreign Key Fix</title>
+    <title>USS-VOYAGER - Cargo Bay Foreign Key Fix</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="stylesheet" type="text/css" href="assets/classic.css">
 </head>
@@ -17,7 +17,7 @@ require_once 'includes/config.php';
                 <div class="panel-2">FIX<span class="hop">-FK</span></div>
             </div>
             <div class="right-frame-top">
-                <div class="banner">USS-SERENITY &#149; CARGO BAY FOREIGN KEY FIX</div>
+                <div class="banner">USS-VOYAGER &#149; CARGO BAY FOREIGN KEY FIX</div>
             </div>
         </div>
         

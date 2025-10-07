@@ -1,4 +1,4 @@
-# USS Serenity Training Management System
+# USS Voyager Training Management System
 
 ## Overview
 The training system has been completely redesigned from a simple text document display to a comprehensive file management platform with enterprise-level features.

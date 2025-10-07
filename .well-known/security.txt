@@ -1,0 +1,18 @@
+Contact: computer@uss-voyager.org
+Expires: 2026-10-07T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://uss-voyager.org/.well-known/security.txt
+
+# USS-Voyager (NCC-74656) Security Contact
+# 
+# If you discover a security vulnerability, please report it via email.
+# We take all security reports seriously and will respond within 24 hours.
+#
+# Please include:
+# - Description of the vulnerability
+# - Steps to reproduce
+# - Potential impact
+# - Any suggested remediation
+#
+# Thank you for helping us maintain a secure system!
+# Live long and prosper! 🖖

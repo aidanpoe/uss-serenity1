@@ -85,7 +85,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Add Criminal Record</title>
+	<title>USS-VOYAGER - Add Criminal Record</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -368,7 +368,7 @@ try {
 					<div class="panel-9">DOCK<span class="hop">94</span></div>
 				</div>
 				<div>
-					<div class="panel-10">USS<span class="hop">SERENITY</span></div>
+					<div class="panel-10">USS<span class="hop">VOYAGER</span></div>
 				</div>
 			</div>
 			<div class="right-frame-bottom">

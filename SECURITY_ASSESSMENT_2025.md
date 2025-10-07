@@ -1,4 +1,4 @@
-# USS-Serenity Website - Comprehensive Security Vulnerability Assessment
+# USS-VOYAGER Website - Comprehensive Security Vulnerability Assessment
 **Date:** August 21, 2025  
 **Status:** Complete  
 **Severity Levels:** 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low | ✅ Fixed
@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-The USS-Serenity website has undergone a comprehensive security assessment. **Most critical vulnerabilities have been remediated**, but several medium and low-risk issues remain that should be addressed.
+The USS-VOYAGER website has undergone a comprehensive security assessment. **Most critical vulnerabilities have been remediated**, but several medium and low-risk issues remain that should be addressed.
 
 ### Overall Security Score: **A- (95/100)**
 - 🔴 Critical: **0** (All fixed)
@@ -87,7 +87,7 @@ The USS-Serenity website has undergone a comprehensive security assessment. **Mo
 ### 🟢 2. File Path Information Disclosure
 - **Location:** Debug and test files
 - **Issue:** Full server paths visible in test outputs
-- **Example:** `/var/www/vhosts/uss-serenity.org/httpdocs/`
+- **Example:** `/var/www/vhosts/USS-VOYAGER.org/httpdocs/`
 - **Recommendation:** Remove debug files from production
 
 ### 🟢 3. Default Credentials Warning

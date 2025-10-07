@@ -62,11 +62,11 @@ try {
                 'export_date' => date('Y-m-d H:i:s'),
                 'user_id' => $user_id,
                 'data' => $user_data,
-                'note' => 'This export contains your personal data from USS Serenity. Character data and roleplay activities are fictional and not considered personal data under GDPR.'
+                'note' => 'This export contains your personal data from USS Voyager. Character data and roleplay activities are fictional and not considered personal data under GDPR.'
             ];
             
             $json_data = json_encode($export_data, JSON_PRETTY_PRINT);
-            $filename = 'uss_serenity_data_export_' . $user_id . '_' . date('Y-m-d') . '.json';
+            $filename = 'uss_voyager_data_export_' . $user_id . '_' . date('Y-m-d') . '.json';
             
             // Set headers for download
             header('Content-Type: application/json');
@@ -193,7 +193,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Rights - USS Serenity</title>
+    <title>Data Rights - USS Voyager</title>
     <link rel="stylesheet" href="../assets/classic.css">
     <style>
         .rights-container {
@@ -376,7 +376,7 @@ try {
             <div style="background: rgba(255, 165, 0, 0.1); padding: 1rem; border-radius: 5px;">
                 <p><strong>Account Deactivation:</strong> Your account is currently <span style="color: var(--green);">ACTIVE</span></p>
                 <p>Contact an administrator to request account deactivation while preserving your data.</p>
-                <p><strong>Email:</strong> computer@uss-serenity.org</p>
+                <p><strong>Email:</strong> computer@USS-VOYAGER.org</p>
             </div>
         </div>
 
@@ -432,7 +432,7 @@ try {
             <h3 style="color: var(--red);">🗑️ Right to Erasure (Article 17) - DANGER ZONE</h3>
             <p><strong>⚠️ WARNING: This action cannot be undone!</strong></p>
             
-            <p>Permanently delete your account and personal data from USS Serenity.</p>
+            <p>Permanently delete your account and personal data from USS Voyager.</p>
             
             <h4>What happens when you delete your account:</h4>
             <ul>
@@ -477,8 +477,8 @@ try {
             <h3>📞 Contact Us</h3>
             <p>For any questions about your data rights or to request assistance:</p>
             <ul>
-                <li><strong>Privacy Email:</strong> computer@uss-serenity.org</li>
-                <li><strong>Data Protection Officer:</strong> computer@uss-serenity.org</li>
+                <li><strong>Privacy Email:</strong> computer@USS-VOYAGER.org</li>
+                <li><strong>Data Protection Officer:</strong> computer@USS-VOYAGER.org</li>
                 <li><strong>Response Time:</strong> Within 30 days as required by GDPR</li>
             </ul>
             
@@ -486,7 +486,7 @@ try {
         </div>
 
         <div style="text-align: center; margin: 2rem 0;">
-            <a href="../index.php" class="action-button">🏠 Return to USS Serenity</a>
+            <a href="../index.php" class="action-button">🏠 Return to USS Voyager</a>
             <a href="../privacy-policy.html" class="action-button">📋 View Privacy Policy</a>
         </div>
     </div>

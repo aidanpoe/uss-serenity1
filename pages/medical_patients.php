@@ -88,7 +88,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Medical Patient Search</title>
+	<title>USS-VOYAGER - Medical Patient Search</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -430,7 +430,7 @@ try {
 					</div>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					Medical Patient Database - Authorized Medical Personnel Only
 				</footer> 
 			</div>

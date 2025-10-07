@@ -1,7 +1,7 @@
-# USS Serenity Cargo Bay Management System
+# USS Voyager Cargo Bay Management System
 
 ## Overview
-The Cargo Bay Management System provides comprehensive inventory tracking and control for the USS Serenity. It manages storage areas for different departments with proper access controls and logging.
+The Cargo Bay Management System provides comprehensive inventory tracking and control for the USS Voyager. It manages storage areas for different departments with proper access controls and logging.
 
 ## Setup Instructions
 
@@ -65,7 +65,7 @@ This creates:
 ## User Interface
 
 ### 🎨 LCARS Design
-- **Authentic Styling**: Consistent with USS Serenity interface theme
+- **Authentic Styling**: Consistent with USS Voyager interface theme
 - **Department Colors**: Color-coded storage areas
 - **Responsive Design**: Works on all device sizes
 - **Audio Integration**: LCARS sound effects
@@ -212,4 +212,4 @@ assets/classic.css            # LCARS styling
 - Department budget tracking
 - Supply chain management features
 
-Your USS Serenity now has a comprehensive cargo bay management system that provides realistic inventory control while maintaining the authentic Star Trek LCARS experience!
+Your USS Voyager now has a comprehensive cargo bay management system that provides realistic inventory control while maintaining the authentic Star Trek LCARS experience!

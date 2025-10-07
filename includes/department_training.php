@@ -6,23 +6,35 @@ function handleDepartmentTraining($current_department) {
     global $pdo, $success, $error;
     
     if ($_POST && isset($_POST['action']) && $_POST['action'] === 'assign_training') {
-        // CSRF token check temporarily disabled
-        // if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
-        //     $error = "Invalid security token. Please try again.";
-        //     return;
-        // }
+        // CSRF token validation - SECURITY CRITICAL
+        if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+            $error = "Invalid security token. Please try again.";
+            return;
+        }
         
         try {
+            // Validate and sanitize input
+            $roster_id = filter_var($_POST['roster_id'], FILTER_VALIDATE_INT);
+            $module_id = filter_var($_POST['module_id'], FILTER_VALIDATE_INT);
+            
+            if (!$roster_id || !$module_id) {
+                $error = "Invalid input data.";
+                return;
+            }
+            
             // Check if assignment already exists
             $checkStmt = $pdo->prepare("
                 SELECT id FROM crew_competencies 
                 WHERE roster_id = ? AND module_id = ?
             ");
-            $checkStmt->execute([$_POST['roster_id'], $_POST['module_id']]);
+            $checkStmt->execute([$roster_id, $module_id]);
             
             if ($checkStmt->fetch()) {
                 $error = "This training is already assigned to the selected crew member.";
             } else {
+                // Sanitize the trained_by_name input
+                $trained_by_name = isset($_POST['trained_by_name']) ? sanitizeInput($_POST['trained_by_name']) : 'Unknown';
+                
                 $stmt = $pdo->prepare("
                     INSERT INTO crew_competencies 
                     (roster_id, module_id, assigned_by, assigned_date, status, notes) 
@@ -30,10 +42,10 @@ function handleDepartmentTraining($current_department) {
                 ");
                 
                 $stmt->execute([
-                    $_POST['roster_id'],
-                    $_POST['module_id'],
+                    $roster_id,
+                    $module_id,
                     $_SESSION['user_id'],
-                    "Training completed by " . $_POST['trained_by_name']
+                    "Training completed by " . $trained_by_name
                 ]);
                 
                 $success = "Training record added successfully!";

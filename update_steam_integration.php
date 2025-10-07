@@ -1,6 +1,6 @@
 <?php
 /**
- * USS Serenity Steam Integration Database Update Script
+ * USS Voyager Steam Integration Database Update Script
  * 
  * This script updates the users table to support Steam authentication
  * Run this once to add Steam ID column to the existing users table
@@ -9,7 +9,7 @@
 require 'includes/config.php';
 
 try {
-    echo "<h2>USS Serenity Steam Integration Database Update</h2>";
+    echo "<h2>USS Voyager Steam Integration Database Update</h2>";
     
     // Check if steam_id column already exists
     $checkColumn = $pdo->query("SHOW COLUMNS FROM users LIKE 'steam_id'");
@@ -38,7 +38,7 @@ try {
     }
     
     echo "<br><strong>Database update completed successfully!</strong><br>";
-    echo "<br>You can now use Steam authentication with your USS Serenity website.<br>";
+    echo "<br>You can now use Steam authentication with your USS Voyager website.<br>";
     echo "<br><strong>Next steps:</strong><br>";
     echo "1. Get a Steam API key from: <a href='https://steamcommunity.com/dev/apikey' target='_blank'>https://steamcommunity.com/dev/apikey</a><br>";
     echo "2. Edit steamauth/SteamConfig.php and add your API key and domain name<br>";

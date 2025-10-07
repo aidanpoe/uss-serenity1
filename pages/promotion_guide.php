@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Department Head Promotion Guide</title>
+	<title>USS-VOYAGER - Department Head Promotion Guide</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -165,7 +165,7 @@
 					</div>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					Department Head Promotion System - Authorized Personnel Only
 				</footer> 
 			</div>

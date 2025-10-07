@@ -19,12 +19,12 @@ function checkAndRunMigrations() {
         if (!$has_last_active) {
             // Auto-run the critical migration
             $pdo->exec("ALTER TABLE roster ADD COLUMN last_active TIMESTAMP NULL DEFAULT NULL");
-            error_log("USS Serenity: Auto-migrated last_active field");
+            error_log("USS Voyager: Auto-migrated last_active field");
         }
         
         return true;
     } catch (Exception $e) {
-        error_log("USS Serenity Migration Error: " . $e->getMessage());
+        error_log("USS Voyager Migration Error: " . $e->getMessage());
         return false;
     }
 }

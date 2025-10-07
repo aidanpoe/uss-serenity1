@@ -9,7 +9,7 @@ try {
         [
             'department' => 'MED/SCI',
             'title' => 'Emergency Medical Procedures',
-            'content' => "EMERGENCY MEDICAL PROCEDURES - USS SERENITY
+            'content' => "EMERGENCY MEDICAL PROCEDURES - USS Voyager
 
 1. MEDICAL EMERGENCIES
    - Immediate assessment using tricorder
@@ -75,7 +75,7 @@ Remember: In emergency situations, any crew member may need to perform basic fir
         [
             'department' => 'ENG/OPS',
             'title' => 'Warp Core Safety Procedures',
-            'content' => "WARP CORE SAFETY PROCEDURES - USS SERENITY
+            'content' => "WARP CORE SAFETY PROCEDURES - USS Voyager
 
 WARNING: Warp core operations require Level 3 engineering certification or higher.
 
@@ -242,7 +242,7 @@ REMEMBER: Phasers are defensive weapons. Use of force must be justified and prop
         [
             'department' => 'Command',
             'title' => 'Command Decision Matrix',
-            'content' => "COMMAND DECISION MATRIX - USS SERENITY
+            'content' => "COMMAND DECISION MATRIX - USS Voyager
 
 1. COMMAND AUTHORITY
    - Captain: Ultimate authority on all matters

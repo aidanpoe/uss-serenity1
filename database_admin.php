@@ -8,7 +8,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Captain') {
     }
 }
 
-echo "<h1>USS Serenity Database Management Tool</h1>";
+echo "<h1>USS Voyager Database Management Tool</h1>";
 echo "<p style='color: #orange;'>⚠️ Captain-level access required. Use with caution.</p>";
 
 try {

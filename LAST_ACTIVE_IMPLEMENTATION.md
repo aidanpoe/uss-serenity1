@@ -1,7 +1,7 @@
 # Last Active Feature Implementation Summary
 
 ## Overview
-Implemented a comprehensive "Last Active" tracking system for the USS Serenity roster that shows when each character was last active, supporting multiple characters per user.
+Implemented a comprehensive "Last Active" tracking system for the USS Voyager roster that shows when each character was last active, supporting multiple characters per user.
 
 ## Database Changes
 - Added `last_active` TIMESTAMP field to the `roster` table
@@ -143,4 +143,4 @@ FROM roster
 ORDER BY last_active DESC;
 ```
 
-This implementation provides a comprehensive activity tracking system that enhances the USS Serenity crew management experience while maintaining full compatibility with the existing LCARS-themed interface.
+This implementation provides a comprehensive activity tracking system that enhances the USS Voyager crew management experience while maintaining full compatibility with the existing LCARS-themed interface.

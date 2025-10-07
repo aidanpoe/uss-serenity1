@@ -476,7 +476,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>USS-Serenity 74714 - Cargo Bay Management</title>
+    <title>USS-VOYAGER 74656 - Cargo Bay Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="stylesheet" type="text/css" href="../assets/classic.css">
     <style>
@@ -868,7 +868,7 @@ try {
                 <div class="panel-2">CARGO<span class="hop">-BAY</span></div>
             </div>
             <div class="right-frame-top">
-                <div class="banner">USS-SERENITY &#149; CARGO BAY MANAGEMENT</div>
+                <div class="banner">USS-VOYAGER &#149; CARGO BAY MANAGEMENT</div>
                 <div class="data-cascade-button-group">
                     <nav> 
                         <button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>

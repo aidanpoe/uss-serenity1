@@ -1,7 +1,7 @@
 <?php
 require_once 'includes/config.php';
 
-echo "<h1>USS-Serenity Database Update - User Registration System</h1>";
+echo "<h1>USS-VOYAGER Database Update - User Registration System</h1>";
 echo "<style>body { font-family: Arial; margin: 20px; } .success { color: green; } .error { color: red; } .info { color: blue; }</style>";
 
 try {

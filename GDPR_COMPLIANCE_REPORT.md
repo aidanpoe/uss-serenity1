@@ -1,8 +1,8 @@
-# USS-Serenity GDPR Compliance Report
+# USS-VOYAGER GDPR Compliance Report
 ## Data Protection and Privacy Analysis Under UK GDPR
 
 **Report Date:** August 22, 2025  
-**Website:** USS-Serenity LCARS Roleplay System  
+**Website:** USS-VOYAGER LCARS Roleplay System  
 **Jurisdiction:** United Kingdom GDPR  
 **Report Type:** Comprehensive Data Usage Analysis  
 
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-The USS-Serenity website is a **Star Trek-themed roleplay platform** that collects and processes both **real user data** (for authentication and system operation) and **fictional roleplay data** (for in-character activities). This report analyzes data practices under UK GDPR requirements and provides recommendations for compliance.
+The USS-VOYAGER website is a **Star Trek-themed roleplay platform** that collects and processes both **real user data** (for authentication and system operation) and **fictional roleplay data** (for in-character activities). This report analyzes data practices under UK GDPR requirements and provides recommendations for compliance.
 
 **Key Finding:** The website processes legitimate user data for authentication and roleplay purposes, but requires **immediate attention** to GDPR compliance, particularly around consent, data retention policies, and user rights implementation.
 
@@ -104,7 +104,7 @@ $_SESSION['steam_realname'] = $content['response']['players'][0]['realname'];
 1. User clicks "Sign in through Steam"
 2. Redirected to Steam OpenID authentication
 3. Steam returns profile data
-4. User creates USS-Serenity account and character
+4. User creates USS-VOYAGER account and character
 5. Steam ID linked to local user account
 
 ### 3.2 Character Creation
@@ -395,7 +395,7 @@ training_files: training documents and access logs
 
 ## 14. Conclusion
 
-The USS-Serenity website demonstrates **good technical security practices** and **minimal data collection**, which are positive for GDPR compliance. However, the site **lacks fundamental user rights implementation and legal framework** required under UK GDPR.
+The USS-VOYAGER website demonstrates **good technical security practices** and **minimal data collection**, which are positive for GDPR compliance. However, the site **lacks fundamental user rights implementation and legal framework** required under UK GDPR.
 
 ### 14.1 Compliance Status
 - **Technical Security:** 🟢 Good
@@ -436,4 +436,4 @@ For GDPR compliance implementation:
 
 ---
 
-*This report provides guidance based on analysis of the USS-Serenity website code and GDPR requirements. Legal counsel should be consulted for specific compliance implementation.*
+*This report provides guidance based on analysis of the USS-VOYAGER website code and GDPR requirements. Legal counsel should be consulted for specific compliance implementation.*

@@ -79,7 +79,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Auditor Activity Log</title>
+	<title>USS-VOYAGER - Auditor Activity Log</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -376,7 +376,7 @@ try {
 					</div>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					Auditor Activity Log - Classified Access - Command/Auditor Only
 				</footer> 
 			</div>

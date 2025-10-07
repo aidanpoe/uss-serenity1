@@ -63,7 +63,7 @@ try {
         ['Christopher Pike Medal of Valor', 'Medal', 'Command', 'The single greatest medal any Commanding Officer can achieve. Awarded to those who have given their life, blood, sweat and tears for our Federation.', 'Character must have been in a commanding role (XO/CPT)', null, 1],
         ['The Star Cross Medal', 'Medal', null, 'Consistent excellence as a Starfleet officer above and beyond what is expected', null, null, 2],
         ['The Purple Heart Medal', 'Medal', null, 'Bravery and sacrifice in the line of duty', null, null, 3],
-        ['Medal of Honour', 'Medal', null, 'Incredible display of ability as a Starfleet officer on board the USS Serenity', null, null, 4],
+        ['Medal of Honour', 'Medal', null, 'Incredible display of ability as a Starfleet officer on board the USS Voyager', null, null, 4],
         ['Starfleet Expeditionary Medal', 'Medal', null, 'For Completing a 5 year exploration mission', null, null, 5],
         
         // Exploration & Diplomacy

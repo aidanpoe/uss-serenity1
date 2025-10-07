@@ -99,7 +99,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Activity Logs - USS Serenity Admin</title>
+    <title>User Activity Logs - USS Voyager Admin</title>
     <link rel="stylesheet" href="../assets/lcars.css">
     <style>
         .admin-container {

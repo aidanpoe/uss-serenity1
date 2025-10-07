@@ -88,7 +88,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Criminal Record: <?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?></title>
+	<title>USS-VOYAGER - Criminal Record: <?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?></title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -438,7 +438,7 @@ try {
 					</div>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					Criminal Records System - Classified Access - Security Clearance Required
 				</footer> 
 			</div>

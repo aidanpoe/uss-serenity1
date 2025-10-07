@@ -2,7 +2,7 @@
 // Setup script for Cargo Bay Management System
 require_once 'includes/config.php';
 
-echo "<h1>USS Serenity - Cargo Bay Database Setup</h1>";
+echo "<h1>USS Voyager - Cargo Bay Database Setup</h1>";
 
 try {
     // Create cargo_areas table

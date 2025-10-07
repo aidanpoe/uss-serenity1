@@ -225,7 +225,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'register') {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Create Account</title>
+	<title>USS-VOYAGER - Create Account</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -305,7 +305,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'register') {
 					
 					<?php if (!$success): ?>
 					<div style="background: rgba(0,0,0,0.7); padding: 2rem; border-radius: 15px; margin: 2rem 0; border: 2px solid var(--blue);">
-						<h3>Join the USS-Serenity Crew</h3>
+						<h3>Join the USS-VOYAGER Crew</h3>
 						<p style="color: var(--blue);"><em>Create your personal account and join a department (Command positions require Captain approval)</em></p>
 						
 						<form method="POST" action="" enctype="multipart/form-data">
@@ -412,7 +412,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'register') {
 					<?php endif; ?>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					Crew Registration System - Authorized Personnel Only
 				</footer> 
 			</div>

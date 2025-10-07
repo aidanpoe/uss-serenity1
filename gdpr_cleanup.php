@@ -180,6 +180,6 @@ try {
 if (isset($_SERVER['HTTP_HOST'])) {
     echo "<h2>GDPR Data Retention Cleanup Complete</h2>";
     echo "<p>Check server logs for detailed information.</p>";
-    echo "<p><a href='index.php'>Return to USS Serenity</a></p>";
+    echo "<p><a href='index.php'>Return to USS Voyager</a></p>";
 }
 ?>

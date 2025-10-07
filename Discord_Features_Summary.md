@@ -1,4 +1,4 @@
-# 🖥️ USS Serenity LCARS Website - Feature Overview
+# 🖥️ USS Voyager LCARS Website - Feature Overview
 
 ## 🎨 **Interface & Design**
 - Authentic Star Trek LCARS interface with department color coding

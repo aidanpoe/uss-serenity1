@@ -1,4 +1,4 @@
-# USS-Serenity Website - Updated Security Vulnerability Assessment
+# USS-VOYAGER Website - Updated Security Vulnerability Assessment
 **Date:** August 21, 2025  
 **Status:** Critical Issues Found  
 **Severity Levels:** 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low

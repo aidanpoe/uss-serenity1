@@ -130,7 +130,7 @@ $ranks = [
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Personnel File Editor</title>
+	<title>USS-VOYAGER - Personnel File Editor</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -230,7 +230,7 @@ $ranks = [
 				</div>
 				<main>
 					<h1>Personnel File Editor</h1>
-					<h2>USS-Serenity Crew Management System</h2>
+					<h2>USS-VOYAGER Crew Management System</h2>
 					
 					<?php showShowcaseNotice(); ?>
 					
@@ -357,7 +357,7 @@ $ranks = [
 					</div>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					LCARS Inspired Website Template by <a href="https://www.thelcars.com">www.TheLCARS.com</a>.
 				</footer> 
 			</div>

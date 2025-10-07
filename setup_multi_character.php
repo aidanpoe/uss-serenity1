@@ -4,7 +4,7 @@ require_once 'includes/config.php';
 try {
     $pdo = getConnection();
     
-    echo "<h1>USS Serenity Multi-Character System Setup</h1>";
+    echo "<h1>USS Voyager Multi-Character System Setup</h1>";
     echo "<p>Setting up database for multiple characters per Steam account...</p>";
     
     // Add active_character_id to users table to track which character is currently selected

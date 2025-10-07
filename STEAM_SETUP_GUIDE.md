@@ -1,6 +1,6 @@
-# USS Serenity Steam Authentication Integration
+# USS Voyager Steam Authentication Integration
 
-Your USS Serenity website now supports Steam authentication! Users can log in with their Steam accounts and link them to roster entries.
+Your USS Voyager website now supports Steam authentication! Users can log in with their Steam accounts and link them to roster entries.
 
 ## Setup Instructions
 
@@ -109,4 +109,4 @@ Database Scripts:
 - Traditional login methods have been disabled for enhanced security
 - Users must have valid Steam accounts to access the system
 
-Your USS Serenity website now has a streamlined Steam-only authentication system while maintaining the original LCARS design aesthetic!
+Your USS Voyager website now has a streamlined Steam-only authentication system while maintaining the original LCARS design aesthetic!

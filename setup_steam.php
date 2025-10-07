@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>USS-Serenity Steam Integration Setup</title>
+    <title>USS-VOYAGER Steam Integration Setup</title>
     <link rel="stylesheet" href="assets/classic.css">
 </head>
 <body>
     <div style="padding: 2rem; background: black; color: white; min-height: 100vh;">
-        <h1 style="color: var(--gold);">USS-Serenity Steam Integration Setup</h1>
+        <h1 style="color: var(--gold);">USS-VOYAGER Steam Integration Setup</h1>
         
         <?php
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['setup'])) {
             try {
                 // Database connection
                 $pdo = new PDO(
-                    "mysql:host=localhost;port=3306;dbname=serenity;charset=utf8mb4", 
-                    "serenity", 
+                    "mysql:host=localhost;port=3306;dbname=voyager;charset=utf8mb4", 
+                    "voyager", 
                     "Os~886go4",
                     [
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

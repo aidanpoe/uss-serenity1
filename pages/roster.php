@@ -237,7 +237,7 @@ $ranks = [
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Ship's Roster</title>
+	<title>USS-VOYAGER - Ship's Roster</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -531,7 +531,7 @@ $ranks = [
 				<div class="panel-2">CREW<span class="hop">-ROSTER</span></div>
 			</div>
 			<div class="right-frame-top">
-				<div class="banner">SHIP'S ROSTER &#149; USS-SERENITY</div>
+				<div class="banner">SHIP'S ROSTER &#149; USS-VOYAGER</div>
 				<div class="data-cascade-button-group">
 					<nav> 
 						<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>
@@ -575,7 +575,7 @@ $ranks = [
 				</div>
 				<main>
 					<h1>Ship's Roster</h1>
-					<h2>USS-Serenity NCC-74714</h2>
+					<h2>USS-VOYAGER NCC-74656</h2>
 					
 					<?php showShowcaseNotice(); ?>
 					
@@ -879,7 +879,7 @@ $ranks = [
 
 					<!-- Rank Structure Information -->
 					<div style="background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
-						<h3 style="text-align: center; color: var(--orange); margin-bottom: 2rem;">USS SERENITY RANK STRUCTURE</h3>
+						<h3 style="text-align: center; color: var(--orange); margin-bottom: 2rem;">USS Voyager RANK STRUCTURE</h3>
 						
 						<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
 							<!-- NCO Ranks -->
@@ -1142,7 +1142,7 @@ $ranks = [
 					</div>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					LCARS Inspired Website Template by <a href="https://www.thelcars.com">www.TheLCARS.com</a>.
 				</footer> 
 			</div>

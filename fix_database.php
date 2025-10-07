@@ -3,7 +3,7 @@ require_once 'includes/config.php';
 
 echo "<!DOCTYPE html>";
 echo "<html><head><title>Database Update</title></head><body>";
-echo "<h1>USS-Serenity Database Update</h1>";
+echo "<h1>USS-VOYAGER Database Update</h1>";
 echo "<style>body { font-family: Arial; margin: 20px; background: #000; color: #ff9900; } .success { color: #00ff00; } .error { color: #ff0000; } .info { color: #0099ff; }</style>";
 
 try {

@@ -130,7 +130,7 @@ function isEligibleForPosition($person, $position, $requirements, $rank_hierarch
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Command Structure Editor</title>
+	<title>USS-VOYAGER - Command Structure Editor</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -274,7 +274,7 @@ function isEligibleForPosition($person, $position, $requirements, $rank_hierarch
 				</div>
 				<main>
 					<h1>Command Structure Editor</h1>
-					<h2>USS-Serenity Chain of Command Management</h2>
+					<h2>USS-VOYAGER Chain of Command Management</h2>
 					
 					<?php if (isset($success)): ?>
 					<div style="background: rgba(85, 102, 255, 0.3); border: 2px solid var(--blue); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
@@ -469,7 +469,7 @@ function isEligibleForPosition($person, $position, $requirements, $rank_hierarch
 					</div>
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					LCARS Inspired Website Template by <a href="https://www.thelcars.com">www.TheLCARS.com</a>.
 				</footer> 
 			</div>

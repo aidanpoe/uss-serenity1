@@ -205,7 +205,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Training Assignment</title>
+	<title>USS-VOYAGER - Training Assignment</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -396,7 +396,7 @@ try {
 				<div class="panel-2">TRAINING<span class="hop">-ASSIGN</span></div>
 			</div>
 			<div class="right-frame-top">
-				<div class="banner">TRAINING ASSIGNMENT &#149; USS-SERENITY</div>
+				<div class="banner">TRAINING ASSIGNMENT &#149; USS-VOYAGER</div>
 				<div class="data-cascade-button-group">
 					<nav> 
 						<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>

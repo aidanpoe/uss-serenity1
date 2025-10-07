@@ -159,7 +159,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>USS-Serenity - Awards Management</title>
+    <title>USS-VOYAGER - Awards Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="format-detection" content="telephone=no">
     <meta name="format-detection" content="date=no">
@@ -640,7 +640,7 @@ try {
                 <div class="panel-2">AWARDS<span class="hop">-MANAGEMENT</span></div>
             </div>
             <div class="right-frame-top">
-                <div class="banner">STARFLEET AWARDS MANAGEMENT &#149; USS-SERENITY</div>
+                <div class="banner">STARFLEET AWARDS MANAGEMENT &#149; USS-VOYAGER</div>
                 <div class="data-cascade-button-group">
                     <nav> 
                         <button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>

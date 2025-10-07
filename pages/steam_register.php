@@ -153,7 +153,7 @@ if ($_POST) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steam Registration - USS Serenity</title>
+    <title>Steam Registration - USS Voyager</title>
     <link rel="stylesheet" href="../assets/classic.css">
     <style>
         .registration-container {
@@ -290,7 +290,7 @@ if ($_POST) {
 </head>
 <body>
     <div class="registration-container">
-        <h1 style="text-align: center; color: var(--blue); margin-bottom: 2rem;">Join the USS Serenity Crew</h1>
+        <h1 style="text-align: center; color: var(--blue); margin-bottom: 2rem;">Join the USS Voyager Crew</h1>
         
         <div class="steam-profile">
             <div class="steam-avatar">
@@ -303,7 +303,7 @@ if ($_POST) {
         </div>
         
         <div class="info">
-            <strong>Welcome to USS Serenity!</strong> Your Steam account has been verified. Please create your account and crew roster profile.
+            <strong>Welcome to USS Voyager!</strong> Your Steam account has been verified. Please create your account and crew roster profile.
         </div>
         
         <?php if (!empty($errors)): ?>
@@ -320,7 +320,7 @@ if ($_POST) {
             <div class="form-group">
                 <label for="username">Username *</label>
                 <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required>
-                <small style="color: var(--blue);">This will be your display name on USS Serenity systems.</small>
+                <small style="color: var(--blue);">This will be your display name on USS Voyager systems.</small>
             </div>
             
             <h3 style="color: var(--blue); margin: 2rem 0 1rem 0; border-bottom: 2px solid var(--blue); padding-bottom: 0.5rem;">Crew Roster Profile</h3>
@@ -409,7 +409,7 @@ if ($_POST) {
                         <span>
                             <strong>I consent to the collection and processing of my personal data</strong> as described in the 
                             <a href="../privacy-policy.html" target="_blank" style="color: var(--gold);">Privacy Policy</a>. 
-                            I understand this is necessary to provide the USS Serenity roleplay service.
+                            I understand this is necessary to provide the USS Voyager roleplay service.
                         </span>
                     </label>
                 </div>

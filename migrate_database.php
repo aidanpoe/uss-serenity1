@@ -1,13 +1,13 @@
 <?php
 /**
- * Database Migration Script for USS Serenity
+ * Database Migration Script for USS Voyager
  * Run this after uploading to production server
  * Safe to run multiple times
  */
 
 require_once 'includes/config.php';
 
-echo "<h2>USS Serenity Database Migration</h2>";
+echo "<h2>USS Voyager Database Migration</h2>";
 echo "<p>Checking and applying database updates...</p>";
 
 try {
@@ -108,7 +108,7 @@ try {
     if (empty($errors)) {
         echo "<div style='background: #1a4a2e; padding: 15px; border: 2px solid #4caf50; margin: 20px 0; text-align: center;'>";
         echo "<h3>🎉 Database Migration Completed Successfully!</h3>";
-        echo "<p>Your USS Serenity database is now up to date with all required fields.</p>";
+        echo "<p>Your USS Voyager database is now up to date with all required fields.</p>";
         echo "<p><strong>Last Active tracking is now fully operational!</strong></p>";
         echo "</div>";
         

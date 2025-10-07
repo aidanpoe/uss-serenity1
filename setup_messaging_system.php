@@ -9,7 +9,7 @@ if (!isLoggedIn()) {
 try {
     $pdo = getConnection();
     
-    echo "<h2>Setting up USS Serenity Messaging System...</h2>";
+    echo "<h2>Setting up USS Voyager Messaging System...</h2>";
     
     // Create crew_messages table
     $sql = "CREATE TABLE IF NOT EXISTS crew_messages (

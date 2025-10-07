@@ -95,7 +95,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>USS-Serenity 74714 - Command Center</title>
+    <title>USS-VOYAGER 74656 - Command Center</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../assets/classic.css">
 </head>

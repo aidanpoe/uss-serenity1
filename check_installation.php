@@ -1,5 +1,5 @@
 <?php
-echo "<h1>USS-Serenity LCARS Website Installation Check</h1>";
+echo "<h1>USS-VOYAGER LCARS Website Installation Check</h1>";
 echo "<style>body { font-family: Arial; margin: 20px; } .success { color: green; } .error { color: red; } .warning { color: orange; }</style>";
 
 echo "<h2>System Requirements Check</h2>";
@@ -87,5 +87,5 @@ echo "<li>Default login: Username = <strong>Poe</strong>, Password = <strong>Cla
 echo "</ol>";
 
 echo "<h2>Next Steps</h2>";
-echo "<p>Once all checks pass, visit <a href='index.php'>index.php</a> to access the USS-Serenity LCARS website!</p>";
+echo "<p>Once all checks pass, visit <a href='index.php'>index.php</a> to access the USS-VOYAGER LCARS website!</p>";
 ?>

@@ -60,8 +60,8 @@ if (isset($_GET['login'])){
 					// Database connection for Steam authentication
 					try {
 						$pdo = new PDO(
-							"mysql:host=localhost;port=3306;dbname=serenity;charset=utf8mb4", 
-							"serenity", 
+							"mysql:host=localhost;port=3306;dbname=voyager;charset=utf8mb4", 
+							"voyager", 
 							"Os~886go4",
 							[
 								PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -71,7 +71,7 @@ if (isset($_GET['login'])){
 						);
 						echo "<!-- Database connection successful -->\n";
 						
-						// Check if user exists in USS Serenity database
+						// Check if user exists in USS Voyager database
 						try {
 							$stmt = $pdo->prepare("SELECT u.*, r.rank, r.first_name, r.last_name, r.department, r.position, r.image_path 
 								FROM users u 

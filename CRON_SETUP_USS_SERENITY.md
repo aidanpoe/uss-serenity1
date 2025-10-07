@@ -1,6 +1,6 @@
-# USS Serenity GDPR Cleanup Cron Job Configuration
-# Server: uss-serenity.org
-# Path: /var/www/vhosts/uss-serenity.org
+# USS Voyager GDPR Cleanup Cron Job Configuration
+# Server: USS-VOYAGER.org
+# Path: /var/www/vhosts/USS-VOYAGER.org
 
 ## MANUAL CRON JOB SETUP
 
@@ -11,19 +11,19 @@ crontab -e
 
 ### 2. Add this line to run cleanup daily at 2:00 AM:
 ```bash
-0 2 * * * /usr/bin/php /var/www/vhosts/uss-serenity.org/httpdocs/gdpr_cleanup.php >> /var/www/vhosts/uss-serenity.org/logs/gdpr_cleanup.log 2>&1
+0 2 * * * /usr/bin/php /var/www/vhosts/USS-VOYAGER.org/httpdocs/gdpr_cleanup.php >> /var/www/vhosts/USS-VOYAGER.org/logs/gdpr_cleanup.log 2>&1
 ```
 
 ### 3. Alternative PHP paths (if /usr/bin/php doesn't work):
 ```bash
 # For Plesk with PHP 8.1:
-0 2 * * * /opt/plesk/php/8.1/bin/php /var/www/vhosts/uss-serenity.org/httpdocs/gdpr_cleanup.php >> /var/www/vhosts/uss-serenity.org/logs/gdpr_cleanup.log 2>&1
+0 2 * * * /opt/plesk/php/8.1/bin/php /var/www/vhosts/USS-VOYAGER.org/httpdocs/gdpr_cleanup.php >> /var/www/vhosts/USS-VOYAGER.org/logs/gdpr_cleanup.log 2>&1
 
 # For Plesk with PHP 8.2:
-0 2 * * * /opt/plesk/php/8.2/bin/php /var/www/vhosts/uss-serenity.org/httpdocs/gdpr_cleanup.php >> /var/www/vhosts/uss-serenity.org/logs/gdpr_cleanup.log 2>&1
+0 2 * * * /opt/plesk/php/8.2/bin/php /var/www/vhosts/USS-VOYAGER.org/httpdocs/gdpr_cleanup.php >> /var/www/vhosts/USS-VOYAGER.org/logs/gdpr_cleanup.log 2>&1
 
 # For cPanel:
-0 2 * * * /usr/local/bin/php /var/www/vhosts/uss-serenity.org/httpdocs/gdpr_cleanup.php >> /var/www/vhosts/uss-serenity.org/logs/gdpr_cleanup.log 2>&1
+0 2 * * * /usr/local/bin/php /var/www/vhosts/USS-VOYAGER.org/httpdocs/gdpr_cleanup.php >> /var/www/vhosts/USS-VOYAGER.org/logs/gdpr_cleanup.log 2>&1
 ```
 
 ## PLESK CONTROL PANEL SETUP
@@ -31,11 +31,11 @@ crontab -e
 ### If you're using Plesk:
 
 1. **Log into Plesk Control Panel**
-2. **Go to your domain (uss-serenity.org)**
+2. **Go to your domain (USS-VOYAGER.org)**
 3. **Click "Scheduled Tasks"**
 4. **Add New Task:**
    - **Command:** `/usr/bin/php` (or `/opt/plesk/php/8.1/bin/php`)
-   - **Arguments:** `/var/www/vhosts/uss-serenity.org/httpdocs/gdpr_cleanup.php`
+   - **Arguments:** `/var/www/vhosts/USS-VOYAGER.org/httpdocs/gdpr_cleanup.php`
    - **Schedule:** Daily
    - **Time:** 02:00 AM
    - **Notify:** Your email address (optional)
@@ -52,14 +52,14 @@ crontab -e
    - **Day:** *
    - **Month:** *
    - **Weekday:** *
-   - **Command:** `/usr/local/bin/php /var/www/vhosts/uss-serenity.org/httpdocs/gdpr_cleanup.php`
+   - **Command:** `/usr/local/bin/php /var/www/vhosts/USS-VOYAGER.org/httpdocs/gdpr_cleanup.php`
 
 ## TESTING
 
 ### Test the script manually first:
 ```bash
 # SSH into your server
-cd /var/www/vhosts/uss-serenity.org/httpdocs
+cd /var/www/vhosts/USS-VOYAGER.org/httpdocs
 
 # Test PHP path
 which php
@@ -74,14 +74,14 @@ echo $?
 
 ### Create log directory:
 ```bash
-mkdir -p /var/www/vhosts/uss-serenity.org/logs
-chmod 755 /var/www/vhosts/uss-serenity.org/logs
+mkdir -p /var/www/vhosts/USS-VOYAGER.org/logs
+chmod 755 /var/www/vhosts/USS-VOYAGER.org/logs
 ```
 
 ### Monitor the cron job:
 ```bash
 # View cron job logs
-tail -f /var/www/vhosts/uss-serenity.org/logs/gdpr_cleanup.log
+tail -f /var/www/vhosts/USS-VOYAGER.org/logs/gdpr_cleanup.log
 
 # Check if cron job is scheduled
 crontab -l
@@ -106,7 +106,7 @@ tail -f /var/log/cron
 
 1. **Permission denied:**
    ```bash
-   chmod +x /var/www/vhosts/uss-serenity.org/httpdocs/gdpr_cleanup.php
+   chmod +x /var/www/vhosts/USS-VOYAGER.org/httpdocs/gdpr_cleanup.php
    ```
 
 2. **Database connection failed:**
@@ -131,7 +131,7 @@ tail -f /var/log/cron
 ### Verification:
 After 24 hours, check:
 ```bash
-cat /var/www/vhosts/uss-serenity.org/logs/gdpr_cleanup.log
+cat /var/www/vhosts/USS-VOYAGER.org/logs/gdpr_cleanup.log
 ```
 
 You should see entries like:

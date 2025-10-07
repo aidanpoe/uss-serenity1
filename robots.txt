@@ -1,0 +1,47 @@
+# USS-Voyager NCC-74656 - Robots.txt
+# Prevent search engines from indexing sensitive areas
+
+User-agent: *
+
+# Disallow admin and sensitive pages
+Disallow: /includes/
+Disallow: /api/
+Disallow: /steamauth/
+Disallow: /pages/admin*.php
+Disallow: /pages/data_rights.php
+Disallow: /pages/personnel_edit.php
+Disallow: /pages/command_structure_edit.php
+Disallow: /pages/*_edit.php
+Disallow: /pages/*_management.php
+Disallow: /database_admin.php
+Disallow: /server_admin.php
+Disallow: /setup_*.php
+Disallow: /update_*.php
+Disallow: /fix_*.php
+Disallow: /check_*.php
+Disallow: /migrate_*.php
+Disallow: /gdpr_cleanup.php
+Disallow: /*.md$
+Disallow: /*.log$
+Disallow: /.env
+Disallow: /.git/
+Disallow: /uploads/
+
+# Allow public pages
+Allow: /index.php
+Allow: /pages/roster.php
+Allow: /pages/med_sci.php
+Allow: /pages/eng_ops.php
+Allow: /pages/sec_tac.php
+Allow: /pages/command.php
+Allow: /pages/reports.php
+Allow: /pages/rewards.php
+Allow: /pages/cargo_bay.php
+Allow: /pages/training.php
+Allow: /privacy-policy.html
+Allow: /terms-of-service.html
+Allow: /assets/
+Allow: /.well-known/
+
+# Sitemap (if you create one in the future)
+# Sitemap: https://uss-voyager.org/sitemap.xml

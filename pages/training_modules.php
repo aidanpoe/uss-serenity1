@@ -114,7 +114,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>USS-Serenity - Training Module Management</title>
+	<title>USS-VOYAGER - Training Module Management</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="format-detection" content="date=no">
@@ -302,7 +302,7 @@ try {
 				<div class="panel-2">TRAINING<span class="hop">-MGMT</span></div>
 			</div>
 			<div class="right-frame-top">
-				<div class="banner">TRAINING MODULE MANAGEMENT &#149; USS-SERENITY</div>
+				<div class="banner">TRAINING MODULE MANAGEMENT &#149; USS-VOYAGER</div>
 				<div class="data-cascade-button-group">
 					<nav> 
 						<button onclick="playSoundAndRedirect('audio2', '../index.php')">HOME</button>
@@ -562,7 +562,7 @@ try {
 					
 				</main>
 				<footer>
-					USS-Serenity NCC-74714 &copy; 2401 Starfleet Command<br>
+					USS-VOYAGER NCC-74656 &copy; 2401 Starfleet Command<br>
 					Training Management System - Command Access Only
 				</footer> 
 			</div>

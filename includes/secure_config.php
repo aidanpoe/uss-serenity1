@@ -21,12 +21,12 @@ if (file_exists(__DIR__ . '/../.env')) {
 define('DB_HOST', isset($_ENV['DB_HOST']) ? $_ENV['DB_HOST'] : 'localhost');
 define('DB_USERNAME', isset($_ENV['DB_USERNAME']) ? $_ENV['DB_USERNAME'] : 'mexico');
 define('DB_PASSWORD', isset($_ENV['DB_PASSWORD']) ? $_ENV['DB_PASSWORD'] : 'pakistan'); // Change this password!
-define('DB_NAME', isset($_ENV['DB_NAME']) ? $_ENV['DB_NAME'] : 'usss_serenity');
+define('DB_NAME', isset($_ENV['DB_NAME']) ? $_ENV['DB_NAME'] : 'usss_voyager');
 define('DB_PORT', isset($_ENV['DB_PORT']) ? $_ENV['DB_PORT'] : 3306);
 
 // Steam API configuration - Use environment variables in production  
 define('STEAM_API_KEY', isset($_ENV['STEAM_API_KEY']) ? $_ENV['STEAM_API_KEY'] : 'changemekeys'); // Change this key!
-define('STEAM_DOMAIN', isset($_ENV['STEAM_DOMAIN']) ? $_ENV['STEAM_DOMAIN'] : 'uss-serenity.org');
+define('STEAM_DOMAIN', isset($_ENV['STEAM_DOMAIN']) ? $_ENV['STEAM_DOMAIN'] : 'USS-VOYAGER.org');
 
 // Security settings
 define('SESSION_TIMEOUT', 3600); // 1 hour
