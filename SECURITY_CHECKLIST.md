@@ -255,9 +255,7 @@ If a security incident occurs:
 
 ## 🔐 Security Contact
 
-For security issues or vulnerability reports:
-- **Email:** computer@uss-voyager.org
-- **Priority:** High-priority issues addressed within 24 hours
+raise an issue, or vibe it to oblivion 
 
 ---
 
