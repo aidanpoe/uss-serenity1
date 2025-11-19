@@ -1052,15 +1052,9 @@ $ranks = [
 								default: echo 'crew-card'; break; // Default styling for unassigned
 							}
 						?>" data-department="<?php echo htmlspecialchars($crew_member['department'] ?? 'Unassigned'); ?>">
-							<?php if ($crew_member['image_path']): ?>
-								<?php 
-								$image_file_path = '../' . $crew_member['image_path'];
-								if (file_exists($image_file_path)): 
-								?>
-								<img src="../<?php echo htmlspecialchars($crew_member['image_path']); ?>" alt="<?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?>" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; border: 2px solid var(--bluey);">
-								<?php else: ?>
-								<div style="width: 80px; height: 80px; border-radius: 50%; background: #333; border: 2px solid var(--bluey); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; color: #666; font-size: 0.8rem;">No Photo</div>
-								<?php endif; ?>
+							<?php if (!empty($crew_member['image_path'])): ?>
+								<img src="../<?php echo htmlspecialchars($crew_member['image_path']); ?>" alt="<?php echo htmlspecialchars($crew_member['first_name'] . ' ' . $crew_member['last_name']); ?>" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; border: 2px solid var(--bluey);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+								<div style="width: 80px; height: 80px; border-radius: 50%; background: #333; border: 2px solid var(--bluey); margin-bottom: 0.5rem; display: none; align-items: center; justify-content: center; color: #666; font-size: 0.8rem;">No Photo</div>
 							<?php else: ?>
 							<div style="width: 80px; height: 80px; border-radius: 50%; background: #333; border: 2px solid var(--bluey); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; color: #666; font-size: 0.8rem;">No Photo</div>
 							<?php endif; ?>
