@@ -88,10 +88,10 @@ function isLoggedIn() {
 
 // Get current active character data
 function getCurrentCharacter() {
+    global $pdo;
     if (!isLoggedIn()) return null;
     
     try {
-        $pdo = getConnection();
         $stmt = $pdo->prepare("
             SELECT u.*, r.id as character_id, r.rank, r.first_name, r.last_name, r.species, 
                    r.department as roster_department, r.position, r.image_path, r.character_name,
@@ -109,13 +109,13 @@ function getCurrentCharacter() {
 
 // Get all characters for a user
 function getUserCharacters($user_id = null) {
+    global $pdo;
     if (!$user_id) {
         if (!isLoggedIn()) return [];
         $user_id = $_SESSION['user_id'];
     }
     
     try {
-        $pdo = getConnection();
         $stmt = $pdo->prepare("
             SELECT r.*, 
                    CASE WHEN u.active_character_id = r.id THEN 1 ELSE 0 END as is_current_character
@@ -133,10 +133,10 @@ function getUserCharacters($user_id = null) {
 
 // Switch active character
 function switchCharacter($character_id) {
+    global $pdo;
     if (!isLoggedIn()) return false;
     
     try {
-        $pdo = getConnection();
         
         // Verify the character belongs to the current user
         $stmt = $pdo->prepare("SELECT r.*, r.department as roster_department FROM roster r WHERE r.id = ? AND r.user_id = ? AND r.is_active = 1");
@@ -207,13 +207,13 @@ function switchCharacter($character_id) {
 
 // Check if user can create more characters (max 5)
 function canCreateCharacter($user_id = null) {
+    global $pdo;
     if (!$user_id) {
         if (!isLoggedIn()) return false;
         $user_id = $_SESSION['user_id'];
     }
     
     try {
-        $pdo = getConnection();
         $stmt = $pdo->prepare("SELECT COUNT(*) as character_count FROM roster WHERE user_id = ? AND is_active = 1");
         $stmt->execute([$user_id]);
         $result = $stmt->fetch();
@@ -232,6 +232,7 @@ function getUserDepartment() {
 
 // Update last_active timestamp for current character and user session
 function updateLastActive() {
+    global $pdo;
     // In showcase mode, do nothing
     if (defined('SHOWCASE_MODE') && SHOWCASE_MODE) {
         return;
@@ -239,7 +240,6 @@ function updateLastActive() {
     if (!isLoggedIn()) return;
     
     try {
-        $pdo = getConnection();
         
         // If we have a character_id, update the character's last_active
         if (isset($_SESSION['character_id']) && $_SESSION['character_id']) {
@@ -339,7 +339,7 @@ function canEditPersonnelFiles() {
     
     // Check if user is a department head by checking their position in roster
     try {
-        $pdo = getConnection();
+        global $pdo;
         $stmt = $pdo->prepare("SELECT position FROM roster r JOIN users u ON r.first_name = u.first_name AND r.last_name = u.last_name WHERE u.id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         $result = $stmt->fetch();
@@ -362,10 +362,10 @@ function canEditPersonnelFiles() {
 
 // Check if user is a specific department head
 function isDepartmentHead($department) {
+    global $pdo;
     if (!isLoggedIn()) return false;
     
     try {
-        $pdo = getConnection();
         $stmt = $pdo->prepare("SELECT position FROM roster WHERE id = ?");
         $stmt->execute([$_SESSION['character_id']]);
         $result = $stmt->fetch();
@@ -445,7 +445,7 @@ function isInvisibleUser() {
     
     // Check if user is manually marked as invisible
     try {
-        $pdo = getConnection();
+        global $pdo;
         $stmt = $pdo->prepare("SELECT is_invisible FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         $result = $stmt->fetch();
@@ -457,8 +457,8 @@ function isInvisibleUser() {
 
 // Check if a specific user ID is invisible
 function isUserInvisible($user_id) {
+    global $pdo;
     try {
-        $pdo = getConnection();
         $stmt = $pdo->prepare("SELECT department, is_invisible FROM users WHERE id = ?");
         $stmt->execute([$user_id]);
         $result = $stmt->fetch();
@@ -491,8 +491,8 @@ function requirePermission($required_department) {
 
 // Log auditor actions for accountability
 function logAuditorAction($character_id, $action_type, $table_name, $record_id, $additional_data = null) {
+    global $pdo;
     try {
-        $pdo = getConnection();
         
         // Check if audit trail table exists
         $stmt = $pdo->query("SHOW TABLES LIKE 'character_audit_trail'");
@@ -523,8 +523,8 @@ function logAuditorAction($character_id, $action_type, $table_name, $record_id, 
 
 // Get auditor activity log (viewable by Command and Starfleet Auditors)
 function getAuditorActivityLog($limit = 50) {
+    global $pdo;
     try {
-        $pdo = getConnection();
         
         // Check if audit trail table exists
         $stmt = $pdo->query("SHOW TABLES LIKE 'character_audit_trail'");
